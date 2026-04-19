@@ -1,0 +1,913 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 15">
+<meta name="Originator" content="Microsoft Word 15">
+<title>Informe Ejecutivo - PremiumBus</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  @page {
+    size: letter;
+    margin: 2.5cm 2.5cm 2.5cm 2.5cm;
+    mso-header-margin: 1cm;
+    mso-footer-margin: 1cm;
+  }
+  body {
+    font-family: 'Calibri', 'Segoe UI', sans-serif;
+    font-size: 11pt;
+    color: #333333;
+    line-height: 1.5;
+  }
+  h1 {
+    font-size: 22pt;
+    color: #1a3a6b;
+    text-align: center;
+    margin-top: 40pt;
+    margin-bottom: 6pt;
+    font-weight: bold;
+  }
+  h2 {
+    font-size: 16pt;
+    color: #1a3a6b;
+    border-bottom: 2px solid #2b5ea7;
+    padding-bottom: 4pt;
+    margin-top: 24pt;
+    margin-bottom: 10pt;
+    font-weight: bold;
+  }
+  h3 {
+    font-size: 13pt;
+    color: #2b5ea7;
+    margin-top: 16pt;
+    margin-bottom: 8pt;
+    font-weight: bold;
+  }
+  h4 {
+    font-size: 11pt;
+    color: #444;
+    margin-top: 12pt;
+    margin-bottom: 6pt;
+    font-weight: bold;
+  }
+  p {
+    text-align: justify;
+    margin-bottom: 8pt;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 10pt 0;
+    font-size: 10pt;
+  }
+  th {
+    background-color: #1a3a6b;
+    color: white;
+    padding: 8pt 10pt;
+    text-align: left;
+    font-weight: bold;
+    border: 1px solid #1a3a6b;
+  }
+  td {
+    padding: 6pt 10pt;
+    border: 1px solid #cccccc;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td {
+    background-color: #f0f4fa;
+  }
+  .cover-page {
+    text-align: center;
+    page-break-after: always;
+    padding-top: 120pt;
+  }
+  .cover-page .logo-text {
+    font-size: 36pt;
+    color: #1a3a6b;
+    font-weight: bold;
+    letter-spacing: 2pt;
+  }
+  .cover-page .subtitle {
+    font-size: 18pt;
+    color: #2b5ea7;
+    margin-top: 12pt;
+    font-weight: normal;
+  }
+  .cover-page .date-info {
+    font-size: 12pt;
+    color: #666;
+    margin-top: 30pt;
+  }
+  .cover-page .version {
+    font-size: 11pt;
+    color: #888;
+    margin-top: 8pt;
+  }
+  .cover-line {
+    width: 60%;
+    height: 3px;
+    background-color: #2b5ea7;
+    margin: 20pt auto;
+    border: none;
+  }
+  .status-completado { color: #10b981; font-weight: bold; }
+  .status-progreso { color: #f59e0b; font-weight: bold; }
+  .status-pendiente { color: #ef4444; font-weight: bold; }
+  .status-parcial { color: #6366f1; font-weight: bold; }
+  .highlight-box {
+    background-color: #f0f4fa;
+    border-left: 4px solid #2b5ea7;
+    padding: 10pt 14pt;
+    margin: 12pt 0;
+    font-size: 10pt;
+  }
+  .warning-box {
+    background-color: #fff7ed;
+    border-left: 4px solid #f59e0b;
+    padding: 10pt 14pt;
+    margin: 12pt 0;
+    font-size: 10pt;
+  }
+  ul { margin: 6pt 0 10pt 20pt; }
+  li { margin-bottom: 4pt; }
+  .footer-info {
+    font-size: 9pt;
+    color: #999;
+    text-align: center;
+    margin-top: 30pt;
+    border-top: 1px solid #ccc;
+    padding-top: 10pt;
+  }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover-page">
+  <p style="font-size:48pt; margin-bottom:10pt;">&#128652;</p>
+  <div class="logo-text">PremiumBus</div>
+  <hr class="cover-line">
+  <div class="subtitle">Informe Ejecutivo del Estado del Desarrollo</div>
+  <p style="font-size:13pt; color:#555; margin-top: 16pt; text-align: center;">
+    Sistema de Gesti&oacute;n de Compra de Boletos de Transporte<br>
+    San Luis Potos&iacute;, S.L.P., M&eacute;xico
+  </p>
+  <div class="date-info">
+    <strong>Fecha de emisi&oacute;n:</strong> 13 de Abril de 2026<br>
+    <strong>Elaborado por:</strong> Equipo de Desarrollo PremiumBus
+  </div>
+  <div class="version">
+    Versi&oacute;n del Sistema: 1.0 &nbsp;|&nbsp; Versi&oacute;n del Documento: 1.0<br>
+    Clasificaci&oacute;n: <strong>Confidencial &mdash; Uso del Cliente</strong>
+  </div>
+</div>
+
+<!-- TABLA DE CONTENIDOS -->
+<h2>Tabla de Contenidos</h2>
+<ol>
+  <li>Resumen Ejecutivo</li>
+  <li>Alcance del Proyecto</li>
+  <li>Estado de Avance General</li>
+  <li>M&oacute;dulo Frontend (Aplicaci&oacute;n Web / PWA)</li>
+  <li>M&oacute;dulo Backend (API REST / Base de Datos)</li>
+  <li>Funcionalidades Implementadas vs. Requerimientos SRS</li>
+  <li>Arquitectura del Sistema</li>
+  <li>Datos y Rutas Integradas</li>
+  <li>Riesgos y Observaciones</li>
+  <li>Actividades Pendientes</li>
+  <li>Cronograma Estimado para Cierre</li>
+  <li>Conclusiones y Recomendaciones</li>
+</ol>
+
+<div class="page-break"></div>
+
+<!-- 1. RESUMEN EJECUTIVO -->
+<h2>1. Resumen Ejecutivo</h2>
+
+<p>
+El presente documento tiene como objetivo informar al cliente sobre el estado actual del desarrollo del sistema <strong>PremiumBus</strong>, una aplicaci&oacute;n m&oacute;vil web progresiva (PWA) dise&ntilde;ada para la gesti&oacute;n integral de compra de boletos de transporte urbano en la ciudad de <strong>San Luis Potos&iacute;, S.L.P.</strong>
+</p>
+
+<p>
+A la fecha de elaboraci&oacute;n de este informe (<strong>13 de abril de 2026</strong>), el sistema se encuentra en una <strong>fase avanzada de desarrollo</strong>, con la mayor parte de los m&oacute;dulos funcionales completados y operativos. El avance general estimado del proyecto es del <strong>85%</strong>.
+</p>
+
+<table>
+  <tr>
+    <th>Indicador</th>
+    <th>Valor</th>
+  </tr>
+  <tr><td>Avance General</td><td><strong>85%</strong></td></tr>
+  <tr><td>M&oacute;dulos Completados</td><td>10 de 13</td></tr>
+  <tr><td>Pantallas Funcionales</td><td>6 de 6</td></tr>
+  <tr><td>Endpoints API</td><td>10 de 10</td></tr>
+  <tr><td>Rutas Integradas</td><td>30 rutas reales de SLP</td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>Punto clave:</strong> La aplicaci&oacute;n ya es funcional en modo demostraci&oacute;n (offline con localStorage) y cuenta con una API REST completa lista para conectarse a un servidor MySQL de producci&oacute;n. Se han integrado <strong>30 rutas reales</strong> de transporte urbano de San Luis Potos&iacute; con datos georeferenciados.
+</div>
+
+<!-- 2. ALCANCE -->
+<h2>2. Alcance del Proyecto</h2>
+
+<p>De acuerdo con el documento de Especificaci&oacute;n de Requerimientos de Software (SRS v1.0), el sistema PremiumBus contempla los siguientes m&oacute;dulos:</p>
+
+<table>
+  <tr>
+    <th>M&oacute;dulo</th>
+    <th>Descripci&oacute;n</th>
+    <th>Prioridad</th>
+  </tr>
+  <tr>
+    <td>Registro de Usuarios</td>
+    <td>Creaci&oacute;n de cuentas con nombre, correo y contrase&ntilde;a con validaciones</td>
+    <td>Alta</td>
+  </tr>
+  <tr>
+    <td>Inicio de Sesi&oacute;n</td>
+    <td>Autenticaci&oacute;n con credenciales, validaci&oacute;n contra BD</td>
+    <td>Alta</td>
+  </tr>
+  <tr>
+    <td>Consulta de Viajes</td>
+    <td>Listado de rutas disponibles con horarios, precios y disponibilidad</td>
+    <td>Alta</td>
+  </tr>
+  <tr>
+    <td>Visualizaci&oacute;n de Rutas (Mapa)</td>
+    <td>Integraci&oacute;n con mapas interactivos para visualizar rutas y paradas</td>
+    <td>Alta</td>
+  </tr>
+  <tr>
+    <td>Compra de Boletos</td>
+    <td>Selecci&oacute;n de asiento, confirmaci&oacute;n y registro de compra</td>
+    <td>Alta</td>
+  </tr>
+  <tr>
+    <td>Panel de Administrador</td>
+    <td>Gesti&oacute;n y supervisi&oacute;n de usuarios y compras</td>
+    <td>Media</td>
+  </tr>
+  <tr>
+    <td>PWA / Instalable</td>
+    <td>Aplicaci&oacute;n instalable en dispositivos m&oacute;viles como app nativa</td>
+    <td>Alta</td>
+  </tr>
+</table>
+
+<!-- 3. AVANCE GENERAL -->
+<h2>3. Estado de Avance General</h2>
+
+<table>
+  <tr>
+    <th>Componente</th>
+    <th>Avance</th>
+    <th>Estado</th>
+  </tr>
+  <tr>
+    <td>Frontend &mdash; Interfaz de Usuario (UI)</td>
+    <td>90%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>Frontend &mdash; Navegaci&oacute;n y Rutas SPA</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>Frontend &mdash; Sistema de Dise&ntilde;o (Tokens CSS)</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>Backend &mdash; API REST (PHP)</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>Backend &mdash; Base de Datos MySQL</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>M&oacute;dulo de Autenticaci&oacute;n</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>M&oacute;dulo de Viajes y Rutas</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>M&oacute;dulo de Compra de Boletos</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>Integraci&oacute;n de Mapas (Leaflet/OpenStreetMap)</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>PWA &mdash; Service Worker y Manifest</td>
+    <td>100%</td>
+    <td class="status-completado">Completado</td>
+  </tr>
+  <tr>
+    <td>Panel Administrativo</td>
+    <td>80%</td>
+    <td class="status-parcial">Parcial</td>
+  </tr>
+  <tr>
+    <td>Pruebas de Integraci&oacute;n</td>
+    <td>40%</td>
+    <td class="status-progreso">En Progreso</td>
+  </tr>
+  <tr>
+    <td>Despliegue a Producci&oacute;n</td>
+    <td>0%</td>
+    <td class="status-pendiente">Pendiente</td>
+  </tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 4. FRONTEND -->
+<h2>4. M&oacute;dulo Frontend (Aplicaci&oacute;n Web / PWA)</h2>
+
+<h3>4.1 Tecnolog&iacute;as Utilizadas</h3>
+<table>
+  <tr>
+    <th>Tecnolog&iacute;a</th>
+    <th>Versi&oacute;n / Detalle</th>
+    <th>Prop&oacute;sito</th>
+  </tr>
+  <tr>
+    <td>HTML5 / CSS3 / JavaScript (ES Modules)</td>
+    <td>Est&aacute;ndar actual</td>
+    <td>Estructura, estilos y l&oacute;gica de la aplicaci&oacute;n</td>
+  </tr>
+  <tr>
+    <td>Leaflet.js</td>
+    <td>v1.9.4</td>
+    <td>Mapas interactivos con OpenStreetMap</td>
+  </tr>
+  <tr>
+    <td>Google Fonts (Inter)</td>
+    <td>400&ndash;800 weights</td>
+    <td>Tipograf&iacute;a moderna y legible</td>
+  </tr>
+  <tr>
+    <td>Service Worker</td>
+    <td>Network-First Strategy</td>
+    <td>Funcionalidad PWA y cache offline</td>
+  </tr>
+</table>
+
+<h3>4.2 Pantallas Implementadas</h3>
+<p>Se han desarrollado las siguientes <strong>6 pantallas</strong> funcionales, cumpliendo con el requisito RF6 del SRS:</p>
+
+<table>
+  <tr>
+    <th>Pantalla</th>
+    <th>Archivo</th>
+    <th>Estado</th>
+    <th>Descripci&oacute;n</th>
+  </tr>
+  <tr>
+    <td>Login</td>
+    <td>LoginPage.js</td>
+    <td class="status-completado">Completado</td>
+    <td>Autenticaci&oacute;n con validaci&oacute;n de correo y contrase&ntilde;a. Enlace a registro.</td>
+  </tr>
+  <tr>
+    <td>Registro</td>
+    <td>RegisterPage.js</td>
+    <td class="status-completado">Completado</td>
+    <td>Formulario con validaci&oacute;n de nombre, correo &uacute;nico y contrase&ntilde;a con confirmaci&oacute;n.</td>
+  </tr>
+  <tr>
+    <td>Inicio (Home)</td>
+    <td>HomePage.js</td>
+    <td class="status-completado">Completado</td>
+    <td>Panel principal con accesos r&aacute;pidos a viajes, compras e historial.</td>
+  </tr>
+  <tr>
+    <td>Viajes</td>
+    <td>TripsPage.js</td>
+    <td class="status-completado">Completado</td>
+    <td>Listado de 30 rutas con mapa interactivo, paradas y disponibilidad en tiempo real.</td>
+  </tr>
+  <tr>
+    <td>Compra</td>
+    <td>PurchasePage.js</td>
+    <td class="status-completado">Completado</td>
+    <td>Selecci&oacute;n de viaje, asiento (mapa visual de asientos), confirmaci&oacute;n y comprobante.</td>
+  </tr>
+  <tr>
+    <td>Admin</td>
+    <td>AdminPage.js</td>
+    <td class="status-parcial">Parcial</td>
+    <td>Panel de administraci&oacute;n con visualizaci&oacute;n de usuarios y compras registradas.</td>
+  </tr>
+</table>
+
+<h3>4.3 Sistema de Dise&ntilde;o</h3>
+<p>Se implement&oacute; un sistema de dise&ntilde;o completo basado en <strong>tokens CSS</strong> (variables) que garantiza consistencia visual en toda la aplicaci&oacute;n:</p>
+<ul>
+  <li><strong>tokens.css</strong> &mdash; Paleta de colores, tipograf&iacute;a, espaciado, sombras y bordes</li>
+  <li><strong>global.css</strong> &mdash; Estilos base y reset del navegador</li>
+  <li><strong>components.css</strong> &mdash; Componentes reutilizables (botones, cards, formularios, toast notifications)</li>
+  <li><strong>pages.css</strong> &mdash; Estilos espec&iacute;ficos por pantalla</li>
+</ul>
+
+<h3>4.4 Componentes Reutilizables</h3>
+<table>
+  <tr>
+    <th>Componente</th>
+    <th>Archivo</th>
+    <th>Descripci&oacute;n</th>
+  </tr>
+  <tr>
+    <td>Navbar (Barra de navegaci&oacute;n)</td>
+    <td>Navbar.js</td>
+    <td>Barra inferior de navegaci&oacute;n con &iacute;conos para las pantallas principales</td>
+  </tr>
+  <tr>
+    <td>Toast (Notificaciones)</td>
+    <td>Toast.js</td>
+    <td>Sistema de notificaciones tipo toast para &eacute;xito, error e informaci&oacute;n</td>
+  </tr>
+  <tr>
+    <td>Icons (Librer&iacute;a de &iacute;conos)</td>
+    <td>Icons.js</td>
+    <td>&Iacute;conos SVG personalizados para toda la interfaz</td>
+  </tr>
+</table>
+
+<h3>4.5 Capacidades PWA</h3>
+<p>La aplicaci&oacute;n est&aacute; configurada como <strong>Progressive Web App (PWA)</strong>, lo que permite:</p>
+<ul>
+  <li>Instalaci&oacute;n en dispositivos m&oacute;viles desde el navegador (banner autom&aacute;tico)</li>
+  <li>Funcionamiento parcial sin conexi&oacute;n a internet (cache de recursos)</li>
+  <li>&Iacute;cono personalizado en la pantalla de inicio del dispositivo</li>
+  <li>Ejecuci&oacute;n en modo standalone (sin barra de navegador)</li>
+  <li>Orientaci&oacute;n fija en modo retrato</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- 5. BACKEND -->
+<h2>5. M&oacute;dulo Backend (API REST / Base de Datos)</h2>
+
+<h3>5.1 API REST &mdash; PHP</h3>
+<p>Se desarroll&oacute; una API REST completa en PHP que comunica la aplicaci&oacute;n frontend con la base de datos MySQL. La API implementa los siguientes <strong>10 endpoints</strong>:</p>
+
+<table>
+  <tr>
+    <th>M&eacute;todo</th>
+    <th>Endpoint</th>
+    <th>Descripci&oacute;n</th>
+    <th>Estado</th>
+  </tr>
+  <tr><td>POST</td><td>?action=register</td><td>Registrar nuevo usuario</td><td class="status-completado">OK</td></tr>
+  <tr><td>POST</td><td>?action=login</td><td>Autenticar usuario</td><td class="status-completado">OK</td></tr>
+  <tr><td>GET</td><td>?action=trips</td><td>Obtener todos los viajes activos</td><td class="status-completado">OK</td></tr>
+  <tr><td>GET</td><td>?action=trip&amp;id=X</td><td>Obtener viaje espec&iacute;fico por ID</td><td class="status-completado">OK</td></tr>
+  <tr><td>POST</td><td>?action=purchase</td><td>Registrar compra de boleto</td><td class="status-completado">OK</td></tr>
+  <tr><td>GET</td><td>?action=user_purchases</td><td>Compras de un usuario espec&iacute;fico</td><td class="status-completado">OK</td></tr>
+  <tr><td>GET</td><td>?action=all_purchases</td><td>Todas las compras (panel admin)</td><td class="status-completado">OK</td></tr>
+  <tr><td>GET</td><td>?action=all_users</td><td>Lista de usuarios registrados (admin)</td><td class="status-completado">OK</td></tr>
+  <tr><td>GET</td><td>?action=occupied_seats</td><td>Asientos ocupados por viaje</td><td class="status-completado">OK</td></tr>
+  <tr><td>GET</td><td>?action=health</td><td>Verificaci&oacute;n de salud del servidor</td><td class="status-completado">OK</td></tr>
+</table>
+
+<h3>5.2 Medidas de Seguridad Implementadas</h3>
+<ul>
+  <li><strong>Prepared Statements (PDO):</strong> Prevenci&oacute;n de inyecci&oacute;n SQL en todas las consultas</li>
+  <li><strong>Hashing de contrase&ntilde;as:</strong> Encriptaci&oacute;n SHA-256 para almacenamiento seguro</li>
+  <li><strong>Validaci&oacute;n de entrada:</strong> Verificaci&oacute;n de tipos, formatos y longitudes en servidor</li>
+  <li><strong>Headers CORS:</strong> Control de acceso entre or&iacute;genes configurado</li>
+  <li><strong>Unicidad de asientos:</strong> Restricci&oacute;n UNIQUE en base de datos para evitar doble reserva</li>
+</ul>
+
+<h3>5.3 Base de Datos MySQL</h3>
+<p>El esquema de base de datos contempla <strong>3 tablas</strong> principales con relaciones e &iacute;ndices optimizados:</p>
+
+<table>
+  <tr>
+    <th>Tabla</th>
+    <th>Campos Principales</th>
+    <th>Relaciones</th>
+  </tr>
+  <tr>
+    <td><strong>usuarios</strong></td>
+    <td>id, nombre, correo (UNIQUE), password, rol, created_at</td>
+    <td>PK: id &mdash; Referenciada por compras</td>
+  </tr>
+  <tr>
+    <td><strong>viajes</strong></td>
+    <td>id, nombre_ruta, origen, destino, coordenadas (lat/lng), paradas (JSON), fecha_salida, precio, asientos_totales, activo</td>
+    <td>PK: id &mdash; Referenciada por compras</td>
+  </tr>
+  <tr>
+    <td><strong>compras</strong></td>
+    <td>id, usuario_id (FK), viaje_id (FK), nombre_ruta, origen, destino, fecha, asiento, precio, fecha_compra</td>
+    <td>FK: usuario_id, viaje_id</td>
+  </tr>
+</table>
+
+<h3>5.4 Estrategia Dual (Online / Offline)</h3>
+<div class="highlight-box">
+  <strong>Arquitectura innovadora:</strong> El sistema implementa una estrategia de <strong>backend dual</strong>:
+  <ul>
+    <li><strong>Modo Online:</strong> Si el servidor PHP/MySQL est&aacute; disponible, la aplicaci&oacute;n se conecta autom&aacute;ticamente a la API REST.</li>
+    <li><strong>Modo Demo (Offline):</strong> Si el servidor no est&aacute; disponible, la aplicaci&oacute;n funciona completamente usando localStorage como capa de datos, con datos seed de 30 rutas precargadas.</li>
+  </ul>
+  Esta estrategia permite demostrar la aplicaci&oacute;n al cliente <strong>sin necesidad de un servidor activo</strong>.
+</div>
+
+<div class="page-break"></div>
+
+<!-- 6. FUNCIONALIDADES -->
+<h2>6. Funcionalidades Implementadas vs. Requerimientos SRS</h2>
+
+<table>
+  <tr>
+    <th>Req. SRS</th>
+    <th>Descripci&oacute;n</th>
+    <th>Estado</th>
+    <th>Observaciones</th>
+  </tr>
+  <tr>
+    <td>RF1</td>
+    <td>Registro de Usuario</td>
+    <td class="status-completado">Completado</td>
+    <td>Validaci&oacute;n de nombre, correo &uacute;nico y contrase&ntilde;a con confirmaci&oacute;n.</td>
+  </tr>
+  <tr>
+    <td>RF2</td>
+    <td>Inicio de Sesi&oacute;n</td>
+    <td class="status-completado">Completado</td>
+    <td>Autenticaci&oacute;n con credenciales contra BD. Redirecci&oacute;n autom&aacute;tica a Home.</td>
+  </tr>
+  <tr>
+    <td>RF3</td>
+    <td>Validaci&oacute;n y Autenticaci&oacute;n</td>
+    <td class="status-completado">Completado</td>
+    <td>Validaci&oacute;n de formato de correo, fortaleza de contrase&ntilde;a (min. 6 car.), unicidad. Route guards.</td>
+  </tr>
+  <tr>
+    <td>RF4</td>
+    <td>Consulta de Viajes</td>
+    <td class="status-completado">Completado</td>
+    <td>Listado de 30 rutas con destino, fecha, precio, disponibilidad y ruta en mapa interactivo.</td>
+  </tr>
+  <tr>
+    <td>RF5</td>
+    <td>Compra de Boletos</td>
+    <td class="status-completado">Completado</td>
+    <td>Selecci&oacute;n de destino, fecha y asiento con mapa visual. Generaci&oacute;n de comprobante.</td>
+  </tr>
+  <tr>
+    <td>RF6</td>
+    <td>Navegaci&oacute;n entre Pantallas</td>
+    <td class="status-completado">Completado</td>
+    <td>SPA con Router basado en hash. 6 pantallas con navegaci&oacute;n fluida y barra inferior.</td>
+  </tr>
+  <tr>
+    <td>RF7</td>
+    <td>Acceso Administrativo</td>
+    <td class="status-parcial">Parcial</td>
+    <td>Panel admin con visualizaci&oacute;n de usuarios y compras. Pendiente: edici&oacute;n/eliminaci&oacute;n.</td>
+  </tr>
+  <tr>
+    <td>RNF1</td>
+    <td>Usabilidad</td>
+    <td class="status-completado">Completado</td>
+    <td>Interfaz moderna e intuitiva con dise&ntilde;o responsive para m&oacute;viles.</td>
+  </tr>
+  <tr>
+    <td>RNF2</td>
+    <td>Rendimiento</td>
+    <td class="status-completado">Completado</td>
+    <td>Respuestas menores a 3 segundos. Cache de disponibilidad de API.</td>
+  </tr>
+  <tr>
+    <td>RNF3</td>
+    <td>Seguridad</td>
+    <td class="status-completado">Completado</td>
+    <td>Hashing SHA-256, PDO prepared statements, validaci&oacute;n de entrada.</td>
+  </tr>
+  <tr>
+    <td>RNF4</td>
+    <td>Disponibilidad</td>
+    <td class="status-parcial">Parcial</td>
+    <td>PWA offline funcional. Servidor de producci&oacute;n pendiente.</td>
+  </tr>
+  <tr>
+    <td>RNF5</td>
+    <td>Compatibilidad</td>
+    <td class="status-completado">Completado</td>
+    <td>PWA compatible con navegadores modernos en Android e iOS.</td>
+  </tr>
+  <tr>
+    <td>RNF6</td>
+    <td>Mantenibilidad</td>
+    <td class="status-completado">Completado</td>
+    <td>C&oacute;digo modular con separaci&oacute;n de responsabilidades. Archivos auto-documentados con JSDoc.</td>
+  </tr>
+</table>
+
+<!-- 7. ARQUITECTURA -->
+<h2>7. Arquitectura del Sistema</h2>
+
+<h3>7.1 Arquitectura General</h3>
+<p>El sistema sigue una arquitectura <strong>cliente-servidor</strong> de tres capas:</p>
+
+<table>
+  <tr>
+    <th>Capa</th>
+    <th>Tecnolog&iacute;a</th>
+    <th>Responsabilidad</th>
+  </tr>
+  <tr>
+    <td><strong>Presentaci&oacute;n</strong> (Frontend)</td>
+    <td>HTML5, CSS3, JavaScript ES Modules</td>
+    <td>Interfaz de usuario, navegaci&oacute;n SPA, renderizado de vistas</td>
+  </tr>
+  <tr>
+    <td><strong>L&oacute;gica de Negocio</strong> (Backend)</td>
+    <td>PHP 7.4+, API REST</td>
+    <td>Validaciones, autenticaci&oacute;n, procesamiento de compras</td>
+  </tr>
+  <tr>
+    <td><strong>Datos</strong> (Persistencia)</td>
+    <td>MySQL 5.7+ / localStorage (fallback)</td>
+    <td>Almacenamiento de usuarios, viajes y compras</td>
+  </tr>
+</table>
+
+<h3>7.2 Estructura de Archivos del Proyecto</h3>
+<table>
+  <tr>
+    <th>Directorio / Archivo</th>
+    <th>Descripci&oacute;n</th>
+  </tr>
+  <tr><td><strong>index.html</strong></td><td>Punto de entrada de la aplicaci&oacute;n</td></tr>
+  <tr><td><strong>manifest.json</strong></td><td>Configuraci&oacute;n PWA (nombre, &iacute;conos, tema)</td></tr>
+  <tr><td><strong>sw.js</strong></td><td>Service Worker &mdash; Cache y funcionamiento offline</td></tr>
+  <tr><td><strong>src/main.js</strong></td><td>Inicializaci&oacute;n de la app, registro de rutas y route guards</td></tr>
+  <tr><td><strong>src/pages/</strong></td><td>6 p&aacute;ginas: Login, Register, Home, Trips, Purchase, Admin</td></tr>
+  <tr><td><strong>src/components/</strong></td><td>3 componentes: Navbar, Toast, Icons</td></tr>
+  <tr><td><strong>src/services/</strong></td><td>5 servicios: ApiClient, AuthService, DataService, MapService, Router</td></tr>
+  <tr><td><strong>src/styles/</strong></td><td>4 hojas de estilo: tokens, global, components, pages</td></tr>
+  <tr><td><strong>api/index.php</strong></td><td>API REST centralizada con 10 endpoints</td></tr>
+  <tr><td><strong>api/config.php</strong></td><td>Configuraci&oacute;n de conexi&oacute;n a BD y helpers</td></tr>
+  <tr><td><strong>api/setup.sql</strong></td><td>Script de creaci&oacute;n de BD con 30 rutas precargadas</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 8. RUTAS -->
+<h2>8. Datos y Rutas Integradas</h2>
+
+<p>Se han integrado <strong>30 rutas reales</strong> de transporte urbano de San Luis Potos&iacute;, cada una con datos georeferenciados (latitud/longitud), paradas intermedias y precios reales.</p>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Nombre de Ruta</th>
+    <th>Origen</th>
+    <th>Destino</th>
+    <th>Precio</th>
+  </tr>
+  <tr><td>1</td><td>Ruta 1 - Saucito</td><td>Col. Saucito</td><td>Centro Hist&oacute;rico</td><td>$12.50</td></tr>
+  <tr><td>2</td><td>Ruta 2 - Circuito</td><td>Col. Morales</td><td>Hospital Central</td><td>$12.50</td></tr>
+  <tr><td>3</td><td>Ruta 3 - Soledad</td><td>Fracc. Puerta Real</td><td>Zona Universitaria</td><td>$12.50</td></tr>
+  <tr><td>4</td><td>Ruta 4 - Sat&eacute;lite</td><td>Ciudad Sat&eacute;lite</td><td>Tercera Chica</td><td>$12.50</td></tr>
+  <tr><td>5</td><td>Ruta 5 - Prados</td><td>Fracc. Los Prados</td><td>Centro Hist&oacute;rico</td><td>$12.50</td></tr>
+  <tr><td>6</td><td>Ruta 7 - Tangamanga</td><td>Alameda Central</td><td>Plaza Tangamanga</td><td>$12.50</td></tr>
+  <tr><td>7</td><td>Ruta 8 - Industrial</td><td>Zona Industrial</td><td>Col. Lomas</td><td>$12.50</td></tr>
+  <tr><td>8</td><td>Ruta 9 - La Pila</td><td>Mercado Rep&uacute;blica</td><td>La Pila</td><td>$15.00</td></tr>
+  <tr><td>9</td><td>Ruta 10 - Z. Industrial</td><td>Ciudad Sat&eacute;lite</td><td>Zona Industrial</td><td>$14.00</td></tr>
+  <tr><td>10</td><td>Ruta 12 - UASLP</td><td>Centro Hist&oacute;rico</td><td>UASLP Zona Universitaria</td><td>$12.50</td></tr>
+  <tr><td>11</td><td>Ruta 14 - Jacarandas</td><td>Fracc. Jacarandas</td><td>Centro Hist&oacute;rico</td><td>$12.50</td></tr>
+  <tr><td>12</td><td>Ruta 15 - Dami&aacute;n Carmona</td><td>Dami&aacute;n Carmona</td><td>Tierra Blanca</td><td>$12.50</td></tr>
+  <tr><td>13</td><td>Ruta 16 - Soledad</td><td>Terminal Terrestre</td><td>Soledad de G.S.</td><td>$14.00</td></tr>
+  <tr><td>14</td><td>Ruta 18 - Las &Aacute;guilas</td><td>Col. Las &Aacute;guilas</td><td>Zona Industrial</td><td>$14.00</td></tr>
+  <tr><td>15</td><td>Ruta 20 - Pedregal</td><td>Fracc. Pedregal</td><td>Centro Hist&oacute;rico</td><td>$12.50</td></tr>
+  <tr><td>16</td><td>Ruta 22 - Progreso</td><td>Col. Progreso</td><td>Centro Hist&oacute;rico</td><td>$12.50</td></tr>
+  <tr><td>17</td><td>Ruta 25 - Sendero</td><td>Av. Universidad</td><td>Plaza Sendero</td><td>$14.00</td></tr>
+  <tr><td>18</td><td>Ruta 26 - Tercera Grande</td><td>Tercera Grande</td><td>Centro</td><td>$12.50</td></tr>
+  <tr><td>19</td><td>Ruta 28 - Hda. Bravo</td><td>Hacienda de Bravo</td><td>Centro Soledad</td><td>$12.50</td></tr>
+  <tr><td>20</td><td>Ruta 30 - Aviaci&oacute;n</td><td>Calzada de Guadalupe</td><td>Industrial Aviaci&oacute;n</td><td>$14.00</td></tr>
+  <tr><td>21</td><td>Ruta 33 - Santiago</td><td>Col. Santiago</td><td>Centro Hist&oacute;rico</td><td>$12.50</td></tr>
+  <tr><td>22</td><td>Ruta 35 - Matehuala</td><td>Col. Matehuala</td><td>Centro</td><td>$12.50</td></tr>
+  <tr><td>23</td><td>Ruta 40 - Villa de Pozos</td><td>Villa de Pozos</td><td>Centro</td><td>$16.00</td></tr>
+  <tr><td>24</td><td>Ruta 42 - Bocas</td><td>Col. Bocas</td><td>Terminal Terrestre</td><td>$18.00</td></tr>
+  <tr><td>25</td><td>MetroRed L1</td><td>Estaci&oacute;n Central</td><td>Terminal Norte</td><td>$12.50</td></tr>
+  <tr><td>26</td><td>MetroRed L2</td><td>Estaci&oacute;n Central</td><td>Terminal Sur</td><td>$12.50</td></tr>
+  <tr><td>27</td><td>MetroRed L3</td><td>Estaci&oacute;n Central</td><td>Zona Industrial</td><td>$12.50</td></tr>
+  <tr><td>28</td><td>Ruta 50 - Lomas del Sur</td><td>Lomas del Sur</td><td>Centro</td><td>$14.00</td></tr>
+  <tr><td>29</td><td>Ruta 55 - R. Pav&oacute;n</td><td>Rancho Pav&oacute;n</td><td>Centro</td><td>$14.00</td></tr>
+  <tr><td>30</td><td>Ruta 60 - Ecosistema</td><td>Fracc. Ecosistema</td><td>Centro</td><td>$14.00</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 9. RIESGOS -->
+<h2>9. Riesgos y Observaciones</h2>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Riesgo / Observaci&oacute;n</th>
+    <th>Impacto</th>
+    <th>Mitigaci&oacute;n</th>
+  </tr>
+  <tr>
+    <td>R-01</td>
+    <td>El servidor de producci&oacute;n (hosting PHP/MySQL) a&uacute;n no ha sido configurado</td>
+    <td>Alto</td>
+    <td>Se requiere contratar un servicio de hosting que soporte PHP 7.4+ y MySQL 5.7+.</td>
+  </tr>
+  <tr>
+    <td>R-02</td>
+    <td>SHA-256 es menos seguro que bcrypt para hashing de contrase&ntilde;as</td>
+    <td>Medio</td>
+    <td>Se recomienda migrar a password_hash() de PHP con algoritmo BCRYPT antes del despliegue.</td>
+  </tr>
+  <tr>
+    <td>R-03</td>
+    <td>No se ha implementado HTTPS en el entorno de desarrollo</td>
+    <td>Medio</td>
+    <td>El hosting de producci&oacute;n debe incluir certificado SSL/TLS.</td>
+  </tr>
+  <tr>
+    <td>R-04</td>
+    <td>El panel administrativo tiene funcionalidad limitada</td>
+    <td>Bajo</td>
+    <td>Las funciones de edici&oacute;n y eliminaci&oacute;n se agregar&aacute;n en el siguiente sprint.</td>
+  </tr>
+  <tr>
+    <td>R-05</td>
+    <td>No hay sistema de pagos integrado (pasarela de pagos)</td>
+    <td>Medio</td>
+    <td>Se sugiere evaluar la integraci&oacute;n con Mercado Pago, OpenPay o Stripe.</td>
+  </tr>
+  <tr>
+    <td>R-06</td>
+    <td>Las pruebas de integraci&oacute;n con servidor real est&aacute;n pendientes</td>
+    <td>Medio</td>
+    <td>Se ejecutar&aacute;n pruebas end-to-end una vez configurado el hosting.</td>
+  </tr>
+</table>
+
+<!-- 10. PENDIENTES -->
+<h2>10. Actividades Pendientes</h2>
+
+<table>
+  <tr>
+    <th>Prioridad</th>
+    <th>Actividad</th>
+    <th>Estimaci&oacute;n</th>
+    <th>Dependencia</th>
+  </tr>
+  <tr>
+    <td class="status-pendiente">Alta</td>
+    <td>Configuraci&oacute;n de servidor de producci&oacute;n (hosting PHP + MySQL)</td>
+    <td>1&ndash;2 d&iacute;as</td>
+    <td>Contrataci&oacute;n de hosting</td>
+  </tr>
+  <tr>
+    <td class="status-pendiente">Alta</td>
+    <td>Despliegue del sistema a producci&oacute;n</td>
+    <td>1 d&iacute;a</td>
+    <td>Hosting configurado</td>
+  </tr>
+  <tr>
+    <td class="status-pendiente">Alta</td>
+    <td>Configuraci&oacute;n de certificado SSL (HTTPS)</td>
+    <td>1 d&iacute;a</td>
+    <td>Hosting configurado</td>
+  </tr>
+  <tr>
+    <td class="status-progreso">Media</td>
+    <td>Completar funciones CRUD del panel administrativo</td>
+    <td>2&ndash;3 d&iacute;as</td>
+    <td>Ninguna</td>
+  </tr>
+  <tr>
+    <td class="status-progreso">Media</td>
+    <td>Migrar hashing de contrase&ntilde;as a bcrypt</td>
+    <td>1 d&iacute;a</td>
+    <td>Ninguna</td>
+  </tr>
+  <tr>
+    <td class="status-progreso">Media</td>
+    <td>Pruebas de integraci&oacute;n completas (API + Frontend)</td>
+    <td>2 d&iacute;as</td>
+    <td>Servidor de producci&oacute;n</td>
+  </tr>
+  <tr>
+    <td class="status-parcial">Baja</td>
+    <td>Evaluaci&oacute;n e integraci&oacute;n de pasarela de pagos</td>
+    <td>3&ndash;5 d&iacute;as</td>
+    <td>Requerimiento del cliente</td>
+  </tr>
+  <tr>
+    <td class="status-parcial">Baja</td>
+    <td>Generaci&oacute;n de &iacute;conos PWA finales (192px y 512px)</td>
+    <td>1 d&iacute;a</td>
+    <td>Dise&ntilde;o aprobado</td>
+  </tr>
+</table>
+
+<!-- 11. CRONOGRAMA -->
+<h2>11. Cronograma Estimado para Cierre</h2>
+
+<table>
+  <tr>
+    <th>Semana</th>
+    <th>Actividades</th>
+    <th>Entregable</th>
+  </tr>
+  <tr>
+    <td>Semana 1<br>(14&ndash;18 Abr)</td>
+    <td>Configuraci&oacute;n de hosting, despliegue a producci&oacute;n, configuraci&oacute;n SSL/HTTPS, pruebas de conectividad API-MySQL</td>
+    <td>Sistema desplegado en servidor de producci&oacute;n</td>
+  </tr>
+  <tr>
+    <td>Semana 2<br>(21&ndash;25 Abr)</td>
+    <td>Completar panel administrativo (CRUD completo), migraci&oacute;n de hashing a bcrypt, pruebas funcionales end-to-end</td>
+    <td>Panel admin completo + mejoras de seguridad</td>
+  </tr>
+  <tr>
+    <td>Semana 3<br>(28 Abr &ndash; 2 May)</td>
+    <td>Pruebas de aceptaci&oacute;n del usuario (UAT), correcci&oacute;n de defectos, documentaci&oacute;n final del usuario</td>
+    <td>Sistema validado + documentaci&oacute;n</td>
+  </tr>
+  <tr>
+    <td>Semana 4<br>(5&ndash;9 May)</td>
+    <td>Entrega formal del sistema, capacitaci&oacute;n al cliente, inicio de per&iacute;odo de soporte</td>
+    <td>Entrega final del proyecto</td>
+  </tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 12. CONCLUSIONES -->
+<h2>12. Conclusiones y Recomendaciones</h2>
+
+<h3>12.1 Conclusiones</h3>
+<p>
+El desarrollo del sistema <strong>PremiumBus</strong> se encuentra en un estado avanzado con un <strong>85% de avance general</strong>. Los m&oacute;dulos fundamentales del sistema &mdash; autenticaci&oacute;n, consulta de viajes, visualizaci&oacute;n de mapas y compra de boletos &mdash; est&aacute;n <strong>completamente funcionales</strong> y han sido probados satisfactoriamente en modo demostraci&oacute;n.
+</p>
+<p>
+La arquitectura implementada es <strong>s&oacute;lida, modular y escalable</strong>, siguiendo principios de separaci&oacute;n de responsabilidades (SoC) y permitiendo f&aacute;cil mantenimiento futuro. La capacidad de funcionar tanto con backend MySQL como con localStorage (modo demo) demuestra la robustez del dise&ntilde;o.
+</p>
+<p>
+Se han integrado <strong>30 rutas reales de transporte</strong> de San Luis Potos&iacute; con datos georeferenciados reales, lo cual aporta valor significativo a la experiencia del usuario.
+</p>
+
+<h3>12.2 Recomendaciones</h3>
+<ol>
+  <li><strong>Priorizar la contrataci&oacute;n del hosting</strong> para proceder con el despliegue a producci&oacute;n lo antes posible.</li>
+  <li><strong>Realizar pruebas de aceptaci&oacute;n de usuario (UAT)</strong> una vez desplegado el sistema para validar los flujos completos.</li>
+  <li><strong>Evaluar la integraci&oacute;n de una pasarela de pagos</strong> si se requiere procesamiento real de transacciones monetarias.</li>
+  <li><strong>Mejorar la seguridad de contrase&ntilde;as</strong> migrando de SHA-256 a bcrypt antes de la salida a producci&oacute;n.</li>
+  <li><strong>Considerar una fase 2</strong> del proyecto para funcionalidades avanzadas como: notificaciones push, historial detallado de viajes, sistema de calificaciones y seguimiento GPS en tiempo real.</li>
+</ol>
+
+<div class="warning-box">
+  <strong>Acci&oacute;n requerida del cliente:</strong> Para continuar con el despliegue a producci&oacute;n, se requiere que el cliente defina y proporcione el servicio de hosting web (PHP + MySQL) donde se alojar&aacute; el sistema.
+</div>
+
+<br>
+<br>
+
+<hr style="border: 2px solid #1a3a6b; margin-top: 40pt;">
+
+<div class="footer-info">
+  <p>
+    <strong>PremiumBus &mdash; Informe Ejecutivo del Estado del Desarrollo</strong><br>
+    Versi&oacute;n 1.0 | 13 de Abril de 2026<br>
+    Documento confidencial &mdash; Uso exclusivo del cliente<br>
+    &copy; 2026 Equipo de Desarrollo PremiumBus &mdash; San Luis Potos&iacute;, S.L.P., M&eacute;xico
+  </p>
+</div>
+
+</body>
+</html>
