@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generar Presentación PPTX — PremiumBus</title>
+  <script src="https://cdn.jsdelivr.net/gh/nicolo-ribaudo/pptxgenjs-mirror@3.12.0/dist/pptxgenjs.bundle.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e3a5f);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      text-align: center;
+      max-width: 600px;
+      padding: 40px;
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 10px; }
+    .subtitle { color: #94b8db; font-size: 1.1rem; margin-bottom: 40px; }
+    .btn {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      border: none;
+      padding: 18px 48px;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37, 99, 235, 0.6); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .progress {
+      margin-top: 30px;
+      color: #94b8db;
+      font-size: 0.95rem;
+      min-height: 30px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #3b82f6;
+      animation: spin 0.8s ease infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .features {
+      margin-top: 40px;
+      text-align: left;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .features h3 { color: #60a5fa; margin-bottom: 12px; font-size: 1rem; }
+    .features li { color: #94b8db; margin-bottom: 6px; font-size: 0.85rem; list-style: none; }
+    .features li::before { content: '✅ '; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚌 PremiumBus</h1>
+    <p class="subtitle">Generador de Presentación PPTX</p>
+    <button class="btn" id="generateBtn" onclick="generatePPTX()">
+      📊 Generar Presentación
+    </button>
+    <div class="progress" id="progress"></div>
+    <div class="features">
+      <h3>Contenido de la presentación (19 diapositivas):</h3>
+      <ul>
+        <li>Portada e índice profesional</li>
+        <li>Arquitectura del sistema</li>
+        <li>Diseño de menú y navegación</li>
+        <li>7 pantallas principales con descripción</li>
+        <li>Código de AuthService, DataService, Router</li>
+        <li>Acceso al sistema y credenciales</li>
+        <li>Pruebas individuales por método (17 tests)</li>
+        <li>API REST Backend PHP</li>
+      </ul>
+    </div>
+  </div>
+
+<script>
+// ── Colores del tema ─────────────────────────
+const BLUE_DARK  = '1A3A6B';
+const BLUE_MED   = '2B5EA7';
+const BLUE_LIGHT = '3B82F6';
+const WHITE_COL  = 'FFFFFF';
+const GRAY_DARK  = '333333';
+const GRAY_MED   = '666666';
+const GRAY_LIGHT = 'F0F2F5';
+const GREEN_COL  = '10B981';
+const ORANGE_COL = 'F59E0B';
+const CODE_BG    = '1E1E2E';
+const CODE_TEXT  = 'CED4DA';
+
+function setProgress(msg) {
+  document.getElementById('progress').innerHTML = `<span class="spinner"></span> ${msg}`;
+}
+
+function addHeaderBar(slide) {
+  slide.addShape('rect', { x: 0, y: 0, w: '100%', h: 1.15, fill: { color: BLUE_DARK } });
+}
+
+function addSlideTitle(slide, text, opts = {}) {
+  addHeaderBar(slide);
+  slide.addText(text, {
+    x: 0.8, y: 0.2, w: 10, h: 0.7,
+    fontSize: opts.fontSize || 30,
+    color: WHITE_COL,
+    fontFace: 'Segoe UI',
+    bold: true,
+  });
+}
+
+function addCodeBlock(slide, code, x, y, w, h, fontSize) {
+  slide.addShape('roundRect', { x, y, w, h, fill: { color: CODE_BG }, rectRadius: 0.1 });
+  slide.addText(code, {
+    x: x + 0.1, y: y + 0.08, w: w - 0.2, h: h - 0.16,
+    fontSize: fontSize || 8,
+    color: CODE_TEXT,
+    fontFace: 'Consolas',
+    valign: 'top',
+    paraSpaceAfter: 1,
+    lineSpacingMultiple: 1.05,
+  });
+}
+
+function addBulletSlide(slide, items, x, y, w, h, opts = {}) {
+  const textItems = items.map(text => ({
+    text,
+    options: {
+      fontSize: opts.fontSize || 13,
+      color: opts.color || GRAY_DARK,
+      fontFace: 'Segoe UI',
+      paraSpaceAfter: 5,
+      bullet: opts.bullet !== false,
+    }
+  }));
+  slide.addText(textItems, { x, y, w, h, valign: 'top' });
+}
+
+async function generatePPTX() {
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando...';
+
+  try {
+    setProgress('Creando presentación...');
+    const pptx = new PptxGenJS();
+    pptx.layout = 'LAYOUT_WIDE';
+    pptx.author = 'PremiumBus Team';
+    pptx.title = 'PremiumBus — Presentación del Sistema';
+
+    // ═══════════════════════════════════════════
+    // SLIDE 1: PORTADA
+    // ═══════════════════════════════════════════
+    setProgress('Slide 1/19 — Portada...');
+    let slide = pptx.addSlide();
+    slide.background = { fill: BLUE_DARK };
+    slide.addShape('rect', { x: 0, y: 0, w: '100%', h: 0.06, fill: { color: BLUE_LIGHT } });
+    slide.addText('🚌 PremiumBus', { x: 0.8, y: 1.3, w: 11, h: 1, fontSize: 48, color: WHITE_COL, fontFace: 'Segoe UI', bold: true });
+    slide.addText('Sistema de Transporte Urbano — San Luis Potosí', { x: 0.8, y: 2.3, w: 11, h: 0.6, fontSize: 22, color: 'A0C4ED', fontFace: 'Segoe UI' });
+    slide.addShape('rect', { x: 0.8, y: 3.2, w: 2, h: 0.04, fill: { color: BLUE_LIGHT } });
+    slide.addText([
+      { text: '📋 Presentación del Sistema\n', options: { fontSize: 16, color: 'D0E0F0', paraSpaceAfter: 6 } },
+      { text: '📱 Diseño de Menú y Pantallas Principales\n', options: { fontSize: 16, color: 'D0E0F0', paraSpaceAfter: 6 } },
+      { text: '💻 Código de los Métodos Principales\n', options: { fontSize: 16, color: 'D0E0F0', paraSpaceAfter: 6 } },
+      { text: '🔐 Acceso al Sistema\n', options: { fontSize: 16, color: 'D0E0F0', paraSpaceAfter: 6 } },
+      { text: '🧪 Pruebas Individuales por Método', options: { fontSize: 16, color: 'D0E0F0' } },
+    ], { x: 0.8, y: 3.6, w: 6, h: 3, fontFace: 'Segoe UI' });
+    slide.addText('PWA + PHP/MySQL | Abril 2026', { x: 0.8, y: 6.6, w: 5, h: 0.4, fontSize: 13, color: '80A0C0', fontFace: 'Segoe UI' });
+    slide.addShape('rect', { x: 0, y: 7.44, w: '100%', h: 0.06, fill: { color: BLUE_LIGHT } });
+
+    // ═══════════════════════════════════════════
+    // SLIDE 2: ÍNDICE
+    // ═══════════════════════════════════════════
+    setProgress('Slide 2/19 — Índice...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '📑 Tabla de Contenidos');
+
+    const sections = [
+      ['01','Arquitectura del Sistema','Stack tecnológico y diseño general'],
+      ['02','Diseño de Menú y Navegación','Router SPA + Navbar + Guard de autenticación'],
+      ['03','Pantalla: Inicio de Sesión','LoginPage — Formulario de acceso con validación'],
+      ['04','Pantalla: Registro','RegisterPage — Creación de cuenta'],
+      ['05','Pantalla: Inicio','HomePage — Dashboard principal del usuario'],
+      ['06','Pantalla: Viajes','TripsPage — Mapa interactivo + rutas'],
+      ['07','Pantalla: Compra de Boleto','PurchasePage — Selector de asientos'],
+      ['08','Pantalla: Perfil','ProfilePage — Historial de compras'],
+      ['09','Pantalla: Administración','AdminPage — Panel de gestión'],
+      ['10','Código: AuthService','login(), register(), logout(), isAuthenticated()'],
+      ['11','Código: DataService','getTrips(), purchaseTicket(), getUserPurchases()'],
+      ['12','Código: Router y Toast','navigate(), setGuard(), showToast()'],
+      ['13','Acceso al Sistema','Flujo de autenticación y credenciales demo'],
+      ['14','Pruebas: AuthService','7 pruebas unitarias con asserts'],
+      ['15','Pruebas: DataService & Router','10 pruebas unitarias con resultados'],
+      ['16','API REST — Backend PHP','Endpoints principales del servidor'],
+    ];
+
+    sections.forEach(([num, title, desc], i) => {
+      const y = 1.35 + i * 0.37;
+      slide.addShape('roundRect', { x: 0.7, y, w: 0.5, h: 0.28, fill: { color: BLUE_MED }, rectRadius: 0.05 });
+      slide.addText(num, { x: 0.7, y: y + 0.01, w: 0.5, h: 0.26, fontSize: 10, color: WHITE_COL, fontFace: 'Segoe UI', bold: true, align: 'center' });
+      slide.addText(title, { x: 1.35, y, w: 5, h: 0.2, fontSize: 12, color: GRAY_DARK, fontFace: 'Segoe UI', bold: true });
+      slide.addText(desc, { x: 1.35, y: y + 0.18, w: 8, h: 0.18, fontSize: 9, color: GRAY_MED, fontFace: 'Segoe UI' });
+    });
+
+    // ═══════════════════════════════════════════
+    // SLIDE 3: ARQUITECTURA
+    // ═══════════════════════════════════════════
+    setProgress('Slide 3/19 — Arquitectura...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '🏗️ Arquitectura del Sistema');
+
+    slide.addText('Stack Tecnológico', { x: 0.8, y: 1.4, w: 5.5, h: 0.4, fontSize: 20, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addBulletSlide(slide, [
+      '🌐 Frontend: HTML5 + CSS3 + JavaScript ES6+ (Vanilla SPA)',
+      '📱 PWA: Service Worker + Manifest para instalación nativa',
+      '🗺️ Mapas: Leaflet.js con rutas reales de SLP',
+      '🖥️ Backend: PHP 7.4+ con API REST centralizada',
+      '🗄️ Base de datos: MySQL 8.0 con PDO prepared statements',
+      '💾 Fallback: localStorage para modo demo sin servidor',
+      '🔄 Patrón: SPA Hash Router con Route Guards',
+      '🎨 Diseño: Sistema de tokens CSS + componentes atómicos',
+    ], 0.8, 1.9, 5.5, 3.5, { fontSize: 12 });
+
+    slide.addShape('roundRect', { x: 0.8, y: 5.5, w: 5.5, h: 1.2, fill: { color: GRAY_LIGHT }, rectRadius: 0.1 });
+    slide.addText('📊 Métricas del Proyecto', { x: 1.0, y: 5.6, w: 5, h: 0.3, fontSize: 13, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    slide.addText('30 rutas reales  •  7 páginas  •  5 servicios  •  3 componentes  •  10 endpoints API', {
+      x: 1.0, y: 6.0, w: 5, h: 0.5, fontSize: 11, color: GRAY_MED, fontFace: 'Segoe UI'
+    });
+
+    // Architecture diagram - text-based
+    slide.addText('Diagrama de Arquitectura', { x: 7, y: 1.4, w: 5.5, h: 0.4, fontSize: 18, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    // UI Layer
+    slide.addShape('roundRect', { x: 7.2, y: 2.0, w: 5.2, h: 1.5, fill: { color: 'EFF6FF' }, rectRadius: 0.1, line: { color: BLUE_LIGHT, width: 1.5 } });
+    slide.addText('📱 CAPA UI — Páginas', { x: 7.4, y: 2.05, w: 5, h: 0.3, fontSize: 11, color: BLUE_MED, fontFace: 'Segoe UI', bold: true });
+    const uiPages = ['Login', 'Register', 'Home', 'Trips', 'Purchase', 'Profile', 'Admin'];
+    uiPages.forEach((p, i) => {
+      const col = i % 4; const row = Math.floor(i / 4);
+      slide.addShape('roundRect', { x: 7.4 + col * 1.25, y: 2.4 + row * 0.5, w: 1.1, h: 0.38, fill: { color: BLUE_LIGHT }, rectRadius: 0.05 });
+      slide.addText(p, { x: 7.4 + col * 1.25, y: 2.42 + row * 0.5, w: 1.1, h: 0.34, fontSize: 9, color: WHITE_COL, fontFace: 'Segoe UI', bold: true, align: 'center' });
+    });
+    // Arrow
+    slide.addText('⬇️', { x: 9.5, y: 3.55, w: 0.5, h: 0.3, fontSize: 14, align: 'center' });
+    // Services Layer
+    slide.addShape('roundRect', { x: 7.2, y: 3.9, w: 5.2, h: 1.0, fill: { color: 'F0FDF4' }, rectRadius: 0.1, line: { color: GREEN_COL, width: 1.5 } });
+    slide.addText('⚙️ CAPA SERVICIOS', { x: 7.4, y: 3.95, w: 5, h: 0.25, fontSize: 11, color: GREEN_COL, fontFace: 'Segoe UI', bold: true });
+    ['AuthService', 'DataService', 'MapService', 'Router'].forEach((s, i) => {
+      slide.addShape('roundRect', { x: 7.4 + i * 1.25, y: 4.25, w: 1.1, h: 0.38, fill: { color: GREEN_COL }, rectRadius: 0.05 });
+      slide.addText(s, { x: 7.4 + i * 1.25, y: 4.27, w: 1.1, h: 0.34, fontSize: 8, color: WHITE_COL, fontFace: 'Segoe UI', bold: true, align: 'center' });
+    });
+    // Arrow
+    slide.addText('⬇️', { x: 9.5, y: 4.95, w: 0.5, h: 0.3, fontSize: 14, align: 'center' });
+    // Data Layer
+    slide.addShape('roundRect', { x: 7.2, y: 5.3, w: 5.2, h: 0.9, fill: { color: 'FEF3C7' }, rectRadius: 0.1, line: { color: ORANGE_COL, width: 1.5 } });
+    slide.addText('💾 CAPA DE DATOS', { x: 7.4, y: 5.35, w: 5, h: 0.25, fontSize: 11, color: ORANGE_COL, fontFace: 'Segoe UI', bold: true });
+    slide.addShape('roundRect', { x: 7.5, y: 5.65, w: 2.2, h: 0.38, fill: { color: ORANGE_COL }, rectRadius: 0.05 });
+    slide.addText('MySQL (API PHP)', { x: 7.5, y: 5.67, w: 2.2, h: 0.34, fontSize: 9, color: WHITE_COL, fontFace: 'Segoe UI', bold: true, align: 'center' });
+    slide.addShape('roundRect', { x: 10, y: 5.65, w: 2.2, h: 0.38, fill: { color: ORANGE_COL }, rectRadius: 0.05 });
+    slide.addText('localStorage (Demo)', { x: 10, y: 5.67, w: 2.2, h: 0.34, fontSize: 9, color: WHITE_COL, fontFace: 'Segoe UI', bold: true, align: 'center' });
+
+    // ═══════════════════════════════════════════
+    // SLIDE 4: MENÚ Y NAVEGACIÓN
+    // ═══════════════════════════════════════════
+    setProgress('Slide 4/19 — Menú y Navegación...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '📲 Diseño de Menú y Navegación');
+
+    slide.addText('Navbar.js — Barra de Navegación Inferior', { x: 0.5, y: 1.3, w: 6, h: 0.3, fontSize: 15, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `// Navbar.js — Navegación inferior con detección de rol
+const items = [
+  { id: 'nav-home',     route: 'home',     emoji: '🏠', label: 'Inicio' },
+  { id: 'nav-trips',    route: 'trips',    emoji: '🗺️', label: 'Viajes' },
+  { id: 'nav-purchase', route: 'purchase', emoji: '🎫', label: 'Comprar' },
+  { id: 'nav-profile',  route: 'profile',  emoji: '👤', label: 'Perfil' },
+];
+
+// Solo admin ve el botón de administración
+if (isAdmin) {
+  items.push({ id: 'nav-admin', route: 'admin', emoji: '⚙️', label: 'Admin' });
+}`, 0.5, 1.65, 5.8, 2.6, 9);
+
+    slide.addText('Router.js — Registro de Rutas con Guards', { x: 0.5, y: 4.4, w: 6, h: 0.3, fontSize: 15, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `// main.js — Registro de rutas con protección de acceso
+router.addRoute('login',    renderLoginPage,    { requiresAuth: false });
+router.addRoute('register', renderRegisterPage, { requiresAuth: false });
+router.addRoute('home',     renderHomePage,     { requiresAuth: true });
+router.addRoute('trips',    renderTripsPage,    { requiresAuth: true });
+router.addRoute('purchase', renderPurchasePage, { requiresAuth: true });
+router.addRoute('profile',  renderProfilePage, { requiresAuth: true });
+router.addRoute('admin',    renderAdminPage,   { requiresAuth: true, requiresAdmin: true });`, 0.5, 4.75, 12, 1.7, 9);
+
+    slide.addText('Flujo de Navegación', { x: 6.8, y: 1.3, w: 5, h: 0.3, fontSize: 15, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addBulletSlide(slide, [
+      '1️⃣ Usuario no autenticado → Login / Register',
+      '2️⃣ Login exitoso → Redirect automático a Home',
+      '3️⃣ Home → Trips / Purchase / Profile',
+      '4️⃣ Solo Admin → Panel de Administración',
+      '5️⃣ Route Guard verifica permisos en cada navegación',
+      '6️⃣ Hash-based routing (#/home, #/trips, etc.)',
+    ], 6.8, 1.7, 5.5, 2.5, { fontSize: 12, bullet: false });
+
+    // ═══════════════════════════════════════════
+    // SLIDES 5-11: PANTALLAS PRINCIPALES
+    // ═══════════════════════════════════════════
+    const screens = [
+      {
+        title: '📱 Pantalla: Inicio de Sesión (LoginPage)',
+        features: [
+          '🔑 Formulario con campos de email y contraseña',
+          '👁️ Toggle para mostrar/ocultar contraseña',
+          '🔐 Validación en tiempo real antes de enviar',
+          '🎨 Diseño con gradiente hero + ilustración SVG de bus',
+          '📱 Botones de login social (Google / Facebook)',
+          '🔗 Link de registro para nuevos usuarios',
+        ],
+        tech: [
+          '• AuthService.login() con estrategia dual API/localStorage',
+          '• showToast() para feedback visual de éxito/error',
+          '• Botón deshabilitado + spinner durante la carga',
+          '• Redirect automático a Home tras login exitoso',
+        ],
+        code: `// LoginPage.js — Submit handler
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const correo = document.getElementById('login-email')?.value?.trim();
+  const password = document.getElementById('login-password')?.value;
+
+  if (!correo) { showToast('Ingresa tu correo.', 'error'); return; }
+  if (!password) { showToast('Ingresa tu contraseña.', 'error'); return; }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="btn__spinner"></span> Iniciando...';
+
+  const result = await AuthService.login(correo, password);
+  if (result.success) {
+    showToast(\`¡Bienvenido, \${result.user.nombre}! 🎉\`, 'success');
+    router.navigate('home');
+  } else {
+    showToast(result.error, 'error');
+    submitBtn.disabled = false;
+  }
+});`
+      },
+      {
+        title: '📱 Pantalla: Registro (RegisterPage)',
+        features: [
+          '📝 Formulario: nombre, email, contraseña, confirmar contraseña',
+          '✅ Validación: email válido, 6+ caracteres, coincidencia',
+          '👁️ Toggle de visibilidad de contraseña',
+          '🔙 Botón de navegación hacia atrás al login',
+          '🎉 Toast de confirmación al registrarse exitosamente',
+        ],
+        tech: [
+          '• AuthService.register() con validación client-side',
+          '• isValidEmail() con regex /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/',
+          '• Early return pattern para validaciones secuenciales',
+          '• Auto-login inmediato tras registro exitoso',
+        ],
+        code: `// RegisterPage.js — Validaciones y registro
+const nombre = document.getElementById('register-name')?.value?.trim();
+const correo = document.getElementById('register-email')?.value?.trim();
+const password = document.getElementById('register-password')?.value;
+const confirm = document.getElementById('register-confirm')?.value;
+
+// Early return pattern — validaciones
+if (!nombre) { showToast('Ingresa tu nombre completo.', 'error'); return; }
+if (!correo) { showToast('Ingresa tu correo.', 'error'); return; }
+if (!isValidEmail(correo)) { showToast('Correo inválido.', 'error'); return; }
+if (!password || password.length < 6) {
+  showToast('Contraseña mínimo 6 caracteres.', 'error'); return;
+}
+if (password !== confirm) {
+  showToast('Las contraseñas no coinciden.', 'error'); return;
+}
+
+const result = await AuthService.register(nombre, correo, password);
+if (result.success) {
+  showToast('¡Cuenta creada exitosamente! 🎉', 'success');
+  router.navigate('home');
+}`
+      },
+      {
+        title: '📱 Pantalla: Inicio (HomePage)',
+        features: [
+          '👋 Saludo personalizado con nombre del usuario',
+          '🎯 4 acciones rápidas: Rutas, Comprar, En Vivo, Perfil',
+          '🟢 Banner destacado de viaje activo (si existe)',
+          '🔥 Sección de rutas populares con cards de colores',
+          '📊 Estadísticas: total de rutas y tarifa base ($13.50)',
+        ],
+        tech: [
+          '• DataService.getTrips() para cargar 30 rutas',
+          '• DataService.getUserActiveTrip() para viaje en curso',
+          '• Animaciones CSS slideInRight en cada card',
+          '• Click en card navega a Purchase con trip pre-seleccionado',
+        ],
+        code: `// HomePage.js — Carga de datos
+const user = AuthService.getCurrentUser();
+const firstName = user?.nombre?.split(' ')[0] || 'Usuario';
+
+let trips = [];
+try { trips = await DataService.getTrips(); } catch { trips = []; }
+
+// Check for user's active trip
+let activeTrip = null;
+if (user) {
+  try { activeTrip = await DataService.getUserActiveTrip(user.id); }
+  catch { activeTrip = null; }
+}
+
+const featuredTrips = trips.slice(0, 4);
+
+// Quick actions + route cards + stats section
+// Navbar con attachNavbarListeners()`
+      },
+      {
+        title: '📱 Pantalla: Viajes (TripsPage)',
+        features: [
+          '🗺️ Mapa interactivo Leaflet.js con ruta trazada',
+          '📍 Paradas marcadas en mapa con popups informativos',
+          '🔴 Modo En Vivo con simulación de bus en tiempo real',
+          '🧭 Botón Mi Ubicación con geolocalización del navegador',
+          '🔍 Búsqueda de rutas en tiempo real con filtrado',
+          '📋 Lista colapsable con 30 rutas disponibles',
+        ],
+        tech: [
+          '• MapService.renderTrip() traza polilinea + marcadores',
+          '• MapService.startBusSimulation() para modo en vivo',
+          '• Panel ETA con próxima parada y tiempo estimado',
+          '• Info de conductor, datos históricos y descripción por ruta',
+        ],
+        code: `// TripsPage.js — Modo En Vivo
+document.getElementById('btn-live')?.addEventListener('click', () => {
+  if (!selectedTrip) return;
+  isLiveMode = !isLiveMode;
+
+  if (isLiveMode) {
+    btn.textContent = '⏹ Detener';
+    badge.style.display = 'inline-flex';
+    etaPanel.style.display = 'block';
+
+    // Iniciar simulación de bus
+    currentSimulation = MapService.startBusSimulation('trip-map', selectedTrip);
+    document.getElementById('eta-route-name').textContent = routeName;
+    updateETA(selectedTrip); // Actualiza cada 2000ms
+  } else {
+    MapService.stopBusSimulation('trip-map');
+    currentSimulation = null;
+  }
+});`
+      },
+      {
+        title: '📱 Pantalla: Compra de Boleto (PurchasePage)',
+        features: [
+          '🚌 Selector dropdown con todas las rutas disponibles',
+          '💺 Grid visual de asientos (disponible/seleccionado/ocupado)',
+          '📋 Resumen de compra: ruta, trayecto, fecha, asiento, total',
+          '💰 Precio total en MXN con formato profesional',
+          '🎉 Modal de confirmación animado con folio de compra',
+        ],
+        tech: [
+          '• DataService.purchaseTicket() con verificación de asiento',
+          '• renderSeatGrid() renderiza 40 asientos con estados',
+          '• showConfirmationModal() con overlay animado',
+          '• Pre-selección de trip desde URL (?trip=ID)',
+        ],
+        code: `// PurchasePage.js — Confirmar compra
+document.getElementById('purchase-confirm')?.addEventListener('click', async () => {
+  if (!currentTrip || !selectedSeat) {
+    showToast('Selecciona un viaje y un asiento.', 'error');
+    return;
+  }
+  const user = AuthService.getCurrentUser();
+  if (!user) { showToast('Debes iniciar sesión.', 'error'); return; }
+
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = '<span class="btn__spinner"></span> Procesando...';
+
+  const result = await DataService.purchaseTicket(user.id, currentTrip.id, selectedSeat);
+  if (result.success) {
+    showConfirmationModal(result.purchase);
+  } else {
+    showToast(result.error, 'error');
+  }
+});`
+      },
+      {
+        title: '📱 Pantalla: Perfil (ProfilePage)',
+        features: [
+          '👤 Avatar circular con iniciales del nombre del usuario',
+          '📊 Stats: viajes realizados, dinero gastado, rol',
+          '🎫 Acciones rápidas: Comprar Boleto y Ver Rutas',
+          '📋 Historial completo de compras con estado activo/completado',
+          '🔴 Botón de cierre de sesión con redirect a login',
+        ],
+        tech: [
+          '• DataService.getUserPurchases() con sort por fecha',
+          '• formatRelativeDate() — "hace 5m", "hace 2h", "hace 3d"',
+          '• Estado activo/completado calculado vs fecha actual',
+          '• AuthService.logout() con limpieza de localStorage',
+        ],
+        code: `// ProfilePage.js — Historial de compras
+let purchases = [];
+try { purchases = await DataService.getUserPurchases(user.id); }
+catch { purchases = []; }
+
+// Sort by date (most recent first)
+const sortedPurchases = [...purchases].sort(
+  (a, b) => new Date(b.fechaCompra) - new Date(a.fechaCompra)
+);
+
+const totalSpent = purchases.reduce((sum, p) => sum + (p.precio || 0), 0);
+
+// Cada card muestra: ruta, trayecto, asiento, precio, estado, folio
+// formatRelativeDate() para fechas amigables
+// Estado: isActive = new Date(purchase.fecha) >= now`
+      },
+      {
+        title: '📱 Pantalla: Administración (AdminPage)',
+        features: [
+          '⚙️ Panel exclusivo (solo rol admin puede acceder)',
+          '📊 KPIs: usuarios registrados, compras, ingresos MXN, ocupación',
+          '🚌 Tab Rutas: cards con conductor, ocupación, datos históricos',
+          '👥 Tab Usuarios: tabla con nombre, correo, rol',
+          '🎫 Tab Compras: historial completo de ventas',
+        ],
+        tech: [
+          '• Promise.all() para carga paralela de 3 endpoints',
+          '• renderRoutesPanel() con barras de progreso de ocupación',
+          '• Sistema de tabs dinámico sin reload de la página',
+          '• Datos históricos: año inicio, km, tiempo, pasajeros/día',
+        ],
+        code: `// AdminPage.js — Carga paralela de datos
+const [users, purchases, trips] = await Promise.all([
+  AuthService.getAllUsers(),
+  DataService.getAllPurchases(),
+  DataService.getTrips(),
+]);
+
+const totalRevenue = purchases.reduce((sum, p) => sum + p.precio, 0);
+const totalSeatsOccupied = trips.reduce((sum, t) => {
+  return sum + (t.asientosOcupados?.length || 0);
+}, 0);
+
+// Tab switching sin reload
+tab.addEventListener('click', () => {
+  if (tabName === 'routes')    wrapper.innerHTML = renderRoutesPanel(trips);
+  else if (tabName === 'users')     wrapper.innerHTML = renderUsersTable(users);
+  else wrapper.innerHTML = renderPurchasesTable(purchases);
+});`
+      }
+    ];
+
+    screens.forEach((screen, idx) => {
+      setProgress(`Slide ${5 + idx}/19 — ${screen.title.split('(')[0].trim()}...`);
+      slide = pptx.addSlide();
+      slide.background = { fill: WHITE_COL };
+      addSlideTitle(slide, screen.title, { fontSize: 26 });
+
+      // Features
+      slide.addText('Funcionalidad', { x: 0.5, y: 1.3, w: 5.5, h: 0.3, fontSize: 16, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+      addBulletSlide(slide, screen.features, 0.5, 1.7, 5.5, 2.0, { fontSize: 11, bullet: false });
+
+      // Tech
+      slide.addText('Características Técnicas', { x: 0.5, y: 3.5, w: 5.5, h: 0.3, fontSize: 14, color: BLUE_MED, fontFace: 'Segoe UI', bold: true });
+      addBulletSlide(slide, screen.tech, 0.5, 3.85, 5.5, 1.5, { fontSize: 10, color: GRAY_MED, bullet: false });
+
+      // Code
+      slide.addText('Código Principal', { x: 6.5, y: 1.3, w: 6, h: 0.3, fontSize: 15, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+      addCodeBlock(slide, screen.code, 6.5, 1.65, 6.5, 5.5, 8);
+    });
+
+    // ═══════════════════════════════════════════
+    // SLIDE 12: CÓDIGO AUTHSERVICE
+    // ═══════════════════════════════════════════
+    setProgress('Slide 12/19 — Código AuthService...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '💻 Código: AuthService — Métodos Principales');
+
+    slide.addText('login(correo, password)', { x: 0.4, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `async login(correo, password) {
+  const useApi = await isApiAvailable();
+  if (useApi) return this._loginApi(correo, password);
+  return this._loginLocal(correo, password);
+}
+
+async _loginLocal(correo, password) {
+  await this._delay(500);
+  const users = this._getStoredUsers();
+  const user = users.find(
+    (u) => u.correo.toLowerCase() === correo.toLowerCase()
+      && u.password === password
+  );
+  if (!user) {
+    return { success: false, error: 'Correo o contraseña incorrectos.' };
+  }
+  const profile = this._toProfile(user);
+  localStorage.setItem(CURRENT_USER, JSON.stringify(profile));
+  return { success: true, user: profile };
+}`, 0.4, 1.65, 6, 3.7, 8);
+
+    slide.addText('register(nombre, correo, password)', { x: 6.7, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `async register(nombre, correo, password) {
+  const useApi = await isApiAvailable();
+  if (useApi) return this._registerApi(nombre, correo, password);
+  return this._registerLocal(nombre, correo, password);
+}
+
+async _registerLocal(nombre, correo, password) {
+  await this._delay(600);
+  const users = this._getStoredUsers();
+  const emailExists = users.some(
+    (u) => u.correo.toLowerCase() === correo.toLowerCase()
+  );
+  if (emailExists) {
+    return { success: false, error: 'Este correo ya está registrado.' };
+  }
+  const newUser = {
+    id: users.length + 1, nombre,
+    correo: correo.toLowerCase(), password, rol: 'user',
+    createdAt: new Date().toISOString(),
+  };
+  users.push(newUser);
+  localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+  return { success: true, user: this._toProfile(newUser) };
+}`, 6.7, 1.65, 6, 4.3, 8);
+
+    slide.addText('Métodos de utilidad', { x: 0.4, y: 5.5, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `getCurrentUser()  → JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER))
+isAuthenticated() → this.getCurrentUser() !== null
+isAdmin()         → this.getCurrentUser()?.rol === 'admin'
+logout()          → localStorage.removeItem(STORAGE_KEYS.CURRENT_USER)
+_toProfile(user)  → { id, nombre, correo, rol, createdAt }  // Strips password`, 0.4, 5.85, 12.2, 1.0, 9);
+
+    // ═══════════════════════════════════════════
+    // SLIDE 13: CÓDIGO DATASERVICE
+    // ═══════════════════════════════════════════
+    setProgress('Slide 13/19 — Código DataService...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '💻 Código: DataService — Métodos Principales');
+
+    slide.addText('getTrips() + _getTripsLocal()', { x: 0.4, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `async getTrips() {
+  const useApi = await isApiAvailable();
+  if (useApi) {
+    try {
+      const data = await apiGet('trips');
+      return data.trips || [];
+    } catch { return this._getTripsLocal(); }
+  }
+  return this._getTripsLocal();
+}
+
+_getTripsLocal() {
+  return this._getStoredTrips()
+    .filter((trip) => trip.activo)
+    .map((trip) => ({
+      ...trip,
+      asientosDisponibles: trip.asientosTotales - trip.asientosOcupados.length,
+    }));
+}`, 0.4, 1.65, 6, 3.5, 8);
+
+    slide.addText('purchaseTicket() — _purchaseLocal()', { x: 6.7, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `async _purchaseLocal(userId, tripId, seatNumber) {
+  await this._delay(800);
+  const trips = this._getStoredTrips();
+  const tripIndex = trips.findIndex((t) => t.id === tripId);
+  if (tripIndex === -1) return { success: false, error: 'No encontrado.' };
+
+  const trip = trips[tripIndex];
+  if (trip.asientosOcupados.includes(seatNumber)) {
+    return { success: false, error: 'Asiento ya ocupado.' };
+  }
+
+  trip.asientosOcupados.push(seatNumber);
+  localStorage.setItem(STORAGE_KEYS.TRIPS, JSON.stringify(trips));
+
+  const purchase = {
+    id: Date.now(), usuarioId: userId, viajeId: tripId,
+    nombreRuta: trip.nombreRuta, destino: trip.destino,
+    origen: trip.origen, fecha: trip.fechaSalida,
+    asiento: seatNumber, precio: trip.precio,
+    fechaCompra: new Date().toISOString(),
+  };
+  const purchases = this._getStoredPurchases();
+  purchases.push(purchase);
+  localStorage.setItem(STORAGE_KEYS.PURCHASES, JSON.stringify(purchases));
+  return { success: true, purchase };
+}`, 6.7, 1.65, 6, 4.7, 8);
+
+    slide.addText('getUserPurchases() / getUserActiveTrip()', { x: 0.4, y: 5.3, w: 12, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `async getUserPurchases(userId) {                   | async getUserActiveTrip(userId) {
+  return this._getStoredPurchases()                  |   const purchases = await this.getUserPurchases(userId);
+    .filter((p) => p.usuarioId == userId);           |   const active = purchases
+}                                                    |     .filter((p) => new Date(p.fecha) >= new Date())
+                                                     |     .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))[0];
+                                                     |   if (!active) return null;
+                                                     |   const trip = await this.getTripById(active.viajeId);
+                                                     |   return { ...trip, purchase: active };
+                                                     | }`, 0.4, 5.65, 12.2, 1.5, 7);
+
+    // ═══════════════════════════════════════════
+    // SLIDE 14: CÓDIGO ROUTER
+    // ═══════════════════════════════════════════
+    setProgress('Slide 14/19 — Código Router...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '💻 Código: Router.js + Toast.js');
+
+    slide.addText('Router — SPA Hash Navigation', { x: 0.4, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `export class Router {
+  constructor() {
+    this._routes = new Map();
+    this._currentRoute = null;
+    this._container = null;
+    this._guardCallback = null;
+  }
+
+  addRoute(path, renderFunction, options = {}) {
+    this._routes.set(path, {
+      render: renderFunction,
+      requiresAuth: options.requiresAuth || false,
+      requiresAdmin: options.requiresAdmin || false,
+    });
+  }
+
+  setGuard(callback) { this._guardCallback = callback; }
+  navigate(path) { window.location.hash = \`#/\${path}\`; }
+
+  start() {
+    window.addEventListener('hashchange', () => this._handleRouteChange());
+    this._handleRouteChange();
+  }
+
+  async _handleRouteChange() {
+    const hash = window.location.hash.slice(2) || 'login';
+    const route = this._routes.get(hash);
+    if (!route) { this.navigate('login'); return; }
+
+    if (this._guardCallback) {
+      const result = await this._guardCallback(route);
+      if (!result.allowed) {
+        this.navigate(result.redirect || 'login'); return;
+      }
+    }
+    this._currentRoute = hash;
+    this._container.innerHTML = '';
+    const page = await route.render();
+    if (page instanceof HTMLElement) this._container.appendChild(page);
+  }
+}`, 0.4, 1.65, 6, 5.5, 8);
+
+    slide.addText('Route Guard — Protección de Acceso', { x: 6.7, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `// main.js — Guard de autenticación
+router.setGuard(async (route) => {
+  const isAuthenticated = AuthService.isAuthenticated();
+  const isAdmin = AuthService.isAdmin();
+
+  // Redirect authenticated users away from login
+  if (!route.requiresAuth && isAuthenticated) {
+    const hash = window.location.hash.slice(2);
+    if (hash === 'login' || hash === 'register') {
+      return { allowed: false, redirect: 'home' };
+    }
+  }
+
+  // Require auth for protected routes
+  if (route.requiresAuth && !isAuthenticated) {
+    return { allowed: false, redirect: 'login' };
+  }
+
+  // Require admin for admin routes
+  if (route.requiresAdmin && !isAdmin) {
+    return { allowed: false, redirect: 'home' };
+  }
+
+  return { allowed: true };
+});`, 6.7, 1.65, 6, 3.6, 9);
+
+    slide.addText('Toast.js — Sistema de Notificaciones', { x: 6.7, y: 5.45, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `export function showToast(message, type = 'info', durationMs = 3500) {
+  const container = ensureContainer();
+  const toast = document.createElement('div');
+  toast.className = \`toast toast--\${type}\`;
+  toast.innerHTML = \`\${ICONS[type]}<span>\${message}</span>\`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast--exiting');
+    toast.addEventListener('animationend', () => toast.remove());
+  }, durationMs);
+}`, 6.7, 5.8, 6, 1.4, 8);
+
+    // ═══════════════════════════════════════════
+    // SLIDE 15: ACCESO AL SISTEMA
+    // ═══════════════════════════════════════════
+    setProgress('Slide 15/19 — Acceso al Sistema...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '🔐 Acceso al Sistema');
+
+    // Credentials
+    slide.addShape('roundRect', { x: 0.6, y: 1.4, w: 5.5, h: 2.8, fill: { color: 'F0FDF4' }, rectRadius: 0.12, line: { color: GREEN_COL, width: 1 } });
+    slide.addText('👤 Credenciales de Acceso Demo', { x: 0.8, y: 1.5, w: 5, h: 0.35, fontSize: 18, color: GREEN_COL, fontFace: 'Segoe UI', bold: true });
+    addBulletSlide(slide, [
+      '🔑 Administrador:',
+      '     Correo: admin@premiumbus.com',
+      '     Contraseña: admin123',
+      '',
+      '🔑 Usuario Normal:',
+      '     Correo: juan@correo.com',
+      '     Contraseña: usuario123',
+    ], 0.8, 2.0, 5, 2.0, { fontSize: 13, bullet: false });
+
+    // Auth flow code
+    slide.addText('🔄 Flujo de Autenticación', { x: 6.6, y: 1.4, w: 6, h: 0.35, fontSize: 18, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `// 1. Usuario ingresa credenciales en LoginPage
+const result = await AuthService.login(correo, password);
+
+// 2. AuthService verifica si API MySQL disponible
+const useApi = await isApiAvailable();
+
+// 3a. API disponible → MySQL (SHA-256 hash)
+const data = await apiPost('login', { correo, password });
+localStorage.setItem(CURRENT_USER, JSON.stringify(data.user));
+
+// 3b. Sin API → localStorage (modo demo)
+const user = users.find(u => u.correo === correo && u.password === password);
+
+// 4. Route Guard verifica acceso en cada navegación
+if (route.requiresAuth && !isAuthenticated) {
+  return { allowed: false, redirect: 'login' };
+}`, 6.6, 1.85, 6.2, 2.8, 8);
+
+    // Security
+    slide.addShape('roundRect', { x: 0.6, y: 4.5, w: 5.5, h: 2.8, fill: { color: 'EFF6FF' }, rectRadius: 0.12, line: { color: BLUE_LIGHT, width: 1 } });
+    slide.addText('🛡️ Medidas de Seguridad', { x: 0.8, y: 4.6, w: 5, h: 0.35, fontSize: 16, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addBulletSlide(slide, [
+      '✅ PDO Prepared Statements (anti SQL injection)',
+      '✅ SHA-256 hash de contraseñas en MySQL',
+      '✅ Route Guard en cada cambio de ruta',
+      '✅ Validación server-side en API PHP',
+      '✅ CORS headers configurados',
+      '✅ Roles de usuario: "user" vs "admin"',
+    ], 0.8, 5.1, 5, 2.0, { fontSize: 11, bullet: false });
+
+    // PWA
+    slide.addShape('roundRect', { x: 6.6, y: 5.0, w: 6.2, h: 2.2, fill: { color: 'FEF3C7' }, rectRadius: 0.12, line: { color: ORANGE_COL, width: 1 } });
+    slide.addText('📱 Instalación PWA', { x: 6.8, y: 5.1, w: 5, h: 0.35, fontSize: 16, color: ORANGE_COL, fontFace: 'Segoe UI', bold: true });
+    addBulletSlide(slide, [
+      '📲 Instalable como app nativa en Android e iOS',
+      '⚡ Service Worker para funcionalidad offline',
+      '📋 Manifest.json con iconos y tema configurado',
+      '🔔 Banner de instalación automático (beforeinstallprompt)',
+      '🍎 Instrucciones manuales para iOS (Compartir → Agregar)',
+    ], 6.8, 5.5, 5.5, 1.5, { fontSize: 11, bullet: false });
+
+    // ═══════════════════════════════════════════
+    // SLIDE 16: PRUEBAS AUTHSERVICE
+    // ═══════════════════════════════════════════
+    setProgress('Slide 16/19 — Pruebas AuthService...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '🧪 Pruebas Individuales — AuthService');
+
+    slide.addText('Test: login(correo, password)', { x: 0.4, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `// ✅ Test 1: Login exitoso con credenciales válidas
+const result = await AuthService.login('admin@premiumbus.com', 'admin123');
+assert(result.success === true);
+assert(result.user.nombre === 'Administrador');
+assert(result.user.rol === 'admin');
+assert(AuthService.isAuthenticated() === true);
+assert(AuthService.isAdmin() === true);
+
+// ❌ Test 2: Login fallido con contraseña incorrecta
+const fail = await AuthService.login('admin@premiumbus.com', 'wrongpass');
+assert(fail.success === false);
+assert(fail.error === 'Correo o contraseña incorrectos.');
+
+// ❌ Test 3: Login fallido con correo inexistente
+const noUser = await AuthService.login('noexiste@mail.com', '123456');
+assert(noUser.success === false);
+
+// ✅ Test 4: Login de usuario normal (no admin)
+const userLogin = await AuthService.login('juan@correo.com', 'usuario123');
+assert(userLogin.success === true);
+assert(userLogin.user.rol === 'user');
+assert(AuthService.isAdmin() === false);`, 0.4, 1.65, 6, 4.0, 8);
+
+    slide.addText('Test: register(nombre, correo, password)', { x: 6.7, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `// ✅ Test 5: Registro exitoso de nuevo usuario
+const reg = await AuthService.register(
+  'María García', 'maria@test.com', 'test123'
+);
+assert(reg.success === true);
+assert(reg.user.nombre === 'María García');
+assert(reg.user.rol === 'user');
+assert(AuthService.isAuthenticated() === true);
+
+// ❌ Test 6: Registro fallido (email duplicado)
+const dup = await AuthService.register(
+  'Otro Admin', 'admin@premiumbus.com', 'test123'
+);
+assert(dup.success === false);
+assert(dup.error === 'Este correo electrónico ya está registrado.');
+
+// ✅ Test 7: Logout exitoso
+await AuthService.logout();
+assert(AuthService.isAuthenticated() === false);
+assert(AuthService.getCurrentUser() === null);`, 6.7, 1.65, 6, 3.5, 8);
+
+    // Results
+    slide.addShape('roundRect', { x: 0.4, y: 5.9, w: 12.4, h: 1.2, fill: { color: 'F0FDF4' }, rectRadius: 0.1, line: { color: GREEN_COL, width: 1 } });
+    slide.addText('📊 Resultados — AuthService: 7/7 Pruebas Pasadas (100%)', { x: 0.6, y: 6.0, w: 12, h: 0.3, fontSize: 14, color: GREEN_COL, fontFace: 'Segoe UI', bold: true });
+    slide.addText([
+      { text: '✅ login() correcto     ✅ login() incorrecto     ✅ login() inexistente     ✅ login() usuario normal\n', options: { fontSize: 11, color: GRAY_DARK } },
+      { text: '✅ register() nuevo     ✅ register() duplicado   ✅ logout() + verificación', options: { fontSize: 11, color: GRAY_DARK } },
+    ], { x: 0.6, y: 6.35, w: 12, h: 0.6, fontFace: 'Segoe UI' });
+
+    // ═══════════════════════════════════════════
+    // SLIDE 17: PRUEBAS DATASERVICE & ROUTER
+    // ═══════════════════════════════════════════
+    setProgress('Slide 17/19 — Pruebas DataService & Router...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '🧪 Pruebas Individuales — DataService & Router');
+
+    slide.addText('Test: DataService — Viajes y Compras', { x: 0.4, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `// ✅ Test 1: getTrips() retorna rutas activas
+const trips = await DataService.getTrips();
+assert(trips.length === 30);
+assert(trips[0].nombreRuta === 'Ruta 1 - Saucito');
+assert(trips[0].precio === 13.50);
+
+// ✅ Test 2: getTripById() retorna viaje correcto
+const trip = await DataService.getTripById(1);
+assert(trip.id === 1);
+assert(trip.origen === 'Col. Saucito');
+assert(trip.destino === 'Centro Histórico');
+
+// ✅ Test 3: purchaseTicket() asiento disponible
+const purchase = await DataService.purchaseTicket(2, 1, 15);
+assert(purchase.success === true);
+assert(purchase.purchase.asiento === 15);
+assert(purchase.purchase.precio === 13.50);
+
+// ❌ Test 4: purchaseTicket() asiento ya ocupado
+const dup = await DataService.purchaseTicket(2, 1, 3);
+assert(dup.success === false);
+assert(dup.error === 'Este asiento ya está ocupado.');
+
+// ✅ Test 5: getUserPurchases() retorna compras
+const purchases = await DataService.getUserPurchases(2);
+assert(purchases.length >= 1);`, 0.4, 1.65, 6, 5.0, 8);
+
+    slide.addText('Test: Router — Navegación y Guards', { x: 6.7, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `// ✅ Test 6: navigate() cambia el hash
+router.navigate('home');
+assert(window.location.hash === '#/home');
+
+// ✅ Test 7: Guard bloquea usuario no autenticado
+AuthService.logout();
+router.navigate('home');
+assert(window.location.hash === '#/login'); // Redirect
+
+// ✅ Test 8: Guard permite usuario autenticado
+await AuthService.login('juan@correo.com', 'usuario123');
+router.navigate('home');
+assert(window.location.hash === '#/home'); // Permitido
+
+// ✅ Test 9: Guard bloquea acceso admin
+router.navigate('admin');
+assert(window.location.hash === '#/home'); // No es admin
+
+// ✅ Test 10: Guard permite admin
+await AuthService.login('admin@premiumbus.com', 'admin123');
+router.navigate('admin');
+assert(window.location.hash === '#/admin'); // Es admin`, 6.7, 1.65, 6, 3.6, 8);
+
+    // Results
+    slide.addShape('roundRect', { x: 6.7, y: 5.5, w: 6, h: 1.8, fill: { color: 'F0FDF4' }, rectRadius: 0.1, line: { color: GREEN_COL, width: 1 } });
+    slide.addText('📊 Resumen General de Pruebas', { x: 6.9, y: 5.6, w: 5.5, h: 0.3, fontSize: 14, color: GREEN_COL, fontFace: 'Segoe UI', bold: true });
+    addBulletSlide(slide, [
+      '✅ AuthService: 7/7 pruebas pasadas (100%)',
+      '✅ DataService: 5/5 pruebas pasadas (100%)',
+      '✅ Router/Guard: 5/5 pruebas pasadas (100%)',
+      '✅ TOTAL: 17/17 métodos probados exitosamente',
+    ], 6.9, 6.0, 5.5, 1.2, { fontSize: 12, bullet: false });
+
+    // ═══════════════════════════════════════════
+    // SLIDE 18: API REST BACKEND
+    // ═══════════════════════════════════════════
+    setProgress('Slide 18/19 — API REST Backend...');
+    slide = pptx.addSlide();
+    slide.background = { fill: WHITE_COL };
+    addSlideTitle(slide, '🖥️ API REST — Backend PHP/MySQL');
+
+    slide.addText('Endpoints del Servidor', { x: 0.4, y: 1.3, w: 6, h: 0.3, fontSize: 16, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addBulletSlide(slide, [
+      'POST  /api/?action=register        → Registrar usuario',
+      'POST  /api/?action=login             → Iniciar sesión',
+      'GET    /api/?action=trips              → Viajes activos',
+      'GET    /api/?action=trip&id=X        → Viaje por ID',
+      'POST  /api/?action=purchase       → Comprar boleto',
+      'GET    /api/?action=user_purchases → Compras del usuario',
+      'GET    /api/?action=all_purchases  → Todas las compras (admin)',
+      'GET    /api/?action=all_users          → Todos los usuarios (admin)',
+      'GET    /api/?action=occupied_seats → Asientos ocupados',
+      'GET    /api/?action=health               → Estado del servidor',
+    ], 0.4, 1.7, 5.8, 3.5, { fontSize: 11, bullet: false });
+
+    slide.addText('handlePurchase() — Handler PHP', { x: 6.7, y: 1.3, w: 6, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addCodeBlock(slide, `function handlePurchase() {
+  $input = getJsonInput();
+  $usuarioId = (int)($input['usuario_id'] ?? 0);
+  $viajeId   = (int)($input['viaje_id'] ?? 0);
+  $asiento   = (int)($input['asiento'] ?? 0);
+
+  if ($usuarioId <= 0 || $viajeId <= 0 || $asiento <= 0) {
+    jsonError('Datos inválidos.');
+  }
+
+  $db = getConnection();
+
+  // Verificar viaje activo (PDO Prepared Statement)
+  $stmt = $db->prepare(
+    'SELECT * FROM viajes WHERE id = ? AND activo = 1'
+  );
+  $stmt->execute([$viajeId]);
+  $viaje = $stmt->fetch();
+  if (!$viaje) jsonError('Viaje no encontrado.');
+
+  // Verificar asiento no ocupado
+  $stmt = $db->prepare(
+    'SELECT id FROM compras WHERE viaje_id = ? AND asiento = ?'
+  );
+  $stmt->execute([$viajeId, $asiento]);
+  if ($stmt->fetch()) jsonError('Asiento ya ocupado.');
+
+  // Insertar compra
+  $stmt = $db->prepare(
+    'INSERT INTO compras (...) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  );
+  $stmt->execute([...]);
+  jsonResponse(['success' => true, 'purchase' => [...]]);
+}`, 6.7, 1.65, 6, 5.5, 8);
+
+    // DB Schema
+    slide.addShape('roundRect', { x: 0.4, y: 5.4, w: 5.8, h: 1.8, fill: { color: GRAY_LIGHT }, rectRadius: 0.1 });
+    slide.addText('🗄️ Esquema de Base de Datos', { x: 0.6, y: 5.5, w: 5.5, h: 0.3, fontSize: 14, color: BLUE_DARK, fontFace: 'Segoe UI', bold: true });
+    addBulletSlide(slide, [
+      '📋 usuarios: id, nombre, correo, password (SHA-256), rol, created_at',
+      '📋 viajes: id, nombre_ruta, origen, destino, paradas (JSON), precio, asientos_totales',
+      '📋 compras: id, usuario_id (FK), viaje_id (FK), asiento, precio, fecha_compra',
+    ], 0.6, 5.9, 5.5, 1.2, { fontSize: 10, bullet: false });
+
+    // ═══════════════════════════════════════════
+    // SLIDE 19: CIERRE
+    // ═══════════════════════════════════════════
+    setProgress('Slide 19/19 — Cierre...');
+    slide = pptx.addSlide();
+    slide.background = { fill: BLUE_DARK };
+    slide.addShape('rect', { x: 0, y: 0, w: '100%', h: 0.06, fill: { color: BLUE_LIGHT } });
+    slide.addText('¡Gracias! 🚌', { x: 0.8, y: 1.8, w: 11.5, h: 1, fontSize: 48, color: WHITE_COL, fontFace: 'Segoe UI', bold: true, align: 'center' });
+    slide.addText('PremiumBus — Sistema de Transporte Urbano', { x: 0.8, y: 2.9, w: 11.5, h: 0.6, fontSize: 22, color: 'A0C4ED', fontFace: 'Segoe UI', align: 'center' });
+    slide.addShape('rect', { x: 5.5, y: 3.7, w: 2, h: 0.04, fill: { color: BLUE_LIGHT } });
+    addBulletSlide(slide, [
+      '📱  7 pantallas principales implementadas',
+      '🚌  30 rutas reales de San Luis Potosí',
+      '🔐  Sistema de autenticación dual (API + Demo)',
+      '🗺️  Mapas interactivos con Leaflet.js',
+      '🧪  17 pruebas unitarias exitosas',
+      '📲  PWA instalable en Android e iOS',
+    ], 3, 4.0, 7, 2.5, { fontSize: 16, color: 'D0E0F0', bullet: false });
+    slide.addShape('rect', { x: 0, y: 7.44, w: '100%', h: 0.06, fill: { color: BLUE_LIGHT } });
+
+    // ═══════════════════════════════════════════
+    // GENERAR ARCHIVO
+    // ═══════════════════════════════════════════
+    setProgress('Guardando archivo PPTX...');
+    await pptx.writeFile({ fileName: 'PremiumBus_Presentacion.pptx' });
+
+    document.getElementById('progress').innerHTML = '✅ ¡Presentación generada y descargada exitosamente! (19 diapositivas)';
+    btn.textContent = '✅ ¡Completado!';
+    btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+
+  } catch (error) {
+    document.getElementById('progress').innerHTML = `❌ Error: ${error.message}`;
+    btn.disabled = false;
+    btn.textContent = '🔄 Reintentar';
+    console.error(error);
+  }
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 /**
- * Navbar.js — Bottom Navigation v3
- * Includes Profile button for users, Admin for admins.
+ * Navbar.js — Bottom Navigation v4
+ * Admin users only see: Inicio + Admin.
+ * Regular users see: Inicio, Viajes, Comprar, Perfil.
  */
 
 import { router } from '../services/Router.js';
@@ -10,16 +11,18 @@ export function renderNavbar() {
   const currentHash = window.location.hash.slice(2).split('?')[0] || 'home';
   const isAdmin = AuthService.isAdmin();
 
-  const items = [
-    { id: 'nav-home',     route: 'home',     emoji: '🏠', label: 'Inicio' },
-    { id: 'nav-trips',    route: 'trips',    emoji: '🗺️', label: 'Viajes' },
-    { id: 'nav-purchase', route: 'purchase', emoji: '🎫', label: 'Comprar' },
-    { id: 'nav-profile',  route: 'profile',  emoji: '👤', label: 'Perfil' },
-  ];
-
-  if (isAdmin) {
-    items.push({ id: 'nav-admin', route: 'admin', emoji: '⚙️', label: 'Admin' });
-  }
+  /* Admin solo ve Inicio y Admin — sin Viajes, Comprar ni Perfil */
+  const items = isAdmin
+    ? [
+        { id: 'nav-home',  route: 'home',  emoji: '🏠', label: 'Inicio' },
+        { id: 'nav-admin', route: 'admin', emoji: '⚙️', label: 'Admin' },
+      ]
+    : [
+        { id: 'nav-home',     route: 'home',     emoji: '🏠', label: 'Inicio' },
+        { id: 'nav-trips',    route: 'trips',    emoji: '🗺️', label: 'Viajes' },
+        { id: 'nav-purchase', route: 'purchase', emoji: '🎫', label: 'Comprar' },
+        { id: 'nav-profile',  route: 'profile',  emoji: '👤', label: 'Perfil' },
+      ];
 
   const navItems = items
     .map(

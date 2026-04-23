@@ -18,6 +18,7 @@
  */
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/oauth_config.php';
 
 setCorsHeaders();
 
@@ -52,6 +53,15 @@ try {
             break;
         case 'occupied_seats':
             handleGetOccupiedSeats();
+            break;
+        case 'google_login':
+            handleGoogleLogin();
+            break;
+        case 'facebook_login':
+            handleFacebookLogin();
+            break;
+        case 'reset_password':
+            handleResetPassword();
             break;
         case 'health':
             jsonResponse(['status' => 'ok', 'version' => API_VERSION]);
@@ -438,4 +448,205 @@ function handleGetAllUsers() {
     }
 
     jsonResponse(['success' => true, 'users' => $users]);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// HANDLERS — OAuth Social Login
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/**
+ * POST /api/?action=google_login
+ * Body: { credential } — Google ID token from Google Identity Services
+ * Verifies the token with Google, creates/logs in the user.
+ */
+function handleGoogleLogin() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        jsonError('Método no permitido.', 405);
+    }
+
+    $input = getJsonInput();
+    $credential = $input['credential'] ?? '';
+
+    if (empty($credential)) {
+        jsonError('Token de Google no proporcionado.');
+    }
+
+    // Verify the Google ID token via Google's tokeninfo endpoint
+    $verifyUrl = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . urlencode($credential);
+    $response = @file_get_contents($verifyUrl);
+
+    if ($response === false) {
+        jsonError('No se pudo verificar el token de Google.');
+    }
+
+    $payload = json_decode($response, true);
+
+    if (!$payload || !isset($payload['email'])) {
+        jsonError('Token de Google inválido.');
+    }
+
+    // Verify the token was issued for our app
+    if (isset($payload['aud']) && $payload['aud'] !== GOOGLE_CLIENT_ID) {
+        // Allow in development (when client ID is placeholder)
+        if (GOOGLE_CLIENT_ID !== 'TU_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
+            jsonError('Token no corresponde a esta aplicación.');
+        }
+    }
+
+    $email = strtolower($payload['email']);
+    $nombre = $payload['name'] ?? $payload['email'];
+    $picture = $payload['picture'] ?? '';
+
+    // Find or create user
+    $db = getConnection();
+    $stmt = $db->prepare('SELECT id, nombre, correo, rol, created_at FROM usuarios WHERE correo = ?');
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        // Create new user with a random password (social login users don't need one)
+        $randomPassword = hash('sha256', bin2hex(random_bytes(16)));
+        $stmt = $db->prepare(
+            'INSERT INTO usuarios (nombre, correo, password, rol, auth_provider) VALUES (?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([$nombre, $email, $randomPassword, 'user', 'google']);
+
+        $user = [
+            'id' => (int)$db->lastInsertId(),
+            'nombre' => $nombre,
+            'correo' => $email,
+            'rol' => 'user',
+            'created_at' => date('c'),
+        ];
+    }
+
+    jsonResponse([
+        'success' => true,
+        'user' => [
+            'id'        => (int)$user['id'],
+            'nombre'    => $user['nombre'],
+            'correo'    => $user['correo'],
+            'rol'       => $user['rol'],
+            'createdAt' => $user['created_at'],
+            'authProvider' => 'google',
+            'picture'   => $picture,
+        ],
+    ]);
+}
+
+/**
+ * POST /api/?action=facebook_login
+ * Body: { accessToken, userID } — Facebook access token from Facebook Login SDK
+ * Verifies the token with Facebook Graph API, creates/logs in the user.
+ */
+function handleFacebookLogin() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        jsonError('Método no permitido.', 405);
+    }
+
+    $input = getJsonInput();
+    $accessToken = $input['accessToken'] ?? '';
+
+    if (empty($accessToken)) {
+        jsonError('Token de Facebook no proporcionado.');
+    }
+
+    // Verify token and get user info from Facebook Graph API
+    $graphUrl = 'https://graph.facebook.com/me?fields=id,name,email,picture.type(large)&access_token=' . urlencode($accessToken);
+    $response = @file_get_contents($graphUrl);
+
+    if ($response === false) {
+        jsonError('No se pudo verificar el token de Facebook.');
+    }
+
+    $fbUser = json_decode($response, true);
+
+    if (!$fbUser || isset($fbUser['error'])) {
+        jsonError('Token de Facebook inválido: ' . ($fbUser['error']['message'] ?? 'error desconocido'));
+    }
+
+    $email = strtolower($fbUser['email'] ?? '');
+    $nombre = $fbUser['name'] ?? 'Usuario Facebook';
+    $picture = $fbUser['picture']['data']['url'] ?? '';
+
+    if (empty($email)) {
+        jsonError('No se pudo obtener el correo de Facebook. Asegúrate de haber otorgado permiso de email.');
+    }
+
+    // Find or create user
+    $db = getConnection();
+    $stmt = $db->prepare('SELECT id, nombre, correo, rol, created_at FROM usuarios WHERE correo = ?');
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        $randomPassword = hash('sha256', bin2hex(random_bytes(16)));
+        $stmt = $db->prepare(
+            'INSERT INTO usuarios (nombre, correo, password, rol, auth_provider) VALUES (?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([$nombre, $email, $randomPassword, 'user', 'facebook']);
+
+        $user = [
+            'id' => (int)$db->lastInsertId(),
+            'nombre' => $nombre,
+            'correo' => $email,
+            'rol' => 'user',
+            'created_at' => date('c'),
+        ];
+    }
+
+    jsonResponse([
+        'success' => true,
+        'user' => [
+            'id'        => (int)$user['id'],
+            'nombre'    => $user['nombre'],
+            'correo'    => $user['correo'],
+            'rol'       => $user['rol'],
+            'createdAt' => $user['created_at'],
+            'authProvider' => 'facebook',
+            'picture'   => $picture,
+        ],
+    ]);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// HANDLERS — Password Reset
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/**
+ * POST /api/?action=reset_password
+ * Body: { correo, new_password }
+ */
+function handleResetPassword() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        jsonError('Método no permitido.', 405);
+    }
+
+    $input = getJsonInput();
+    $correo = trim($input['correo'] ?? '');
+    $newPassword = $input['new_password'] ?? '';
+
+    if (empty($correo) || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+        jsonError('Ingresa un correo electrónico válido.');
+    }
+    if (empty($newPassword) || strlen($newPassword) < 6) {
+        jsonError('La nueva contraseña debe tener al menos 6 caracteres.');
+    }
+
+    $db = getConnection();
+    $stmt = $db->prepare('SELECT id FROM usuarios WHERE correo = ?');
+    $stmt->execute([strtolower($correo)]);
+
+    if (!$stmt->fetch()) {
+        jsonError('No existe una cuenta con ese correo electrónico.');
+    }
+
+    $hashedPassword = hash('sha256', $newPassword);
+    $stmt = $db->prepare('UPDATE usuarios SET password = ? WHERE correo = ?');
+    $stmt->execute([$hashedPassword, strtolower($correo)]);
+
+    jsonResponse([
+        'success' => true,
+        'message' => 'Contraseña actualizada exitosamente.',
+    ]);
 }

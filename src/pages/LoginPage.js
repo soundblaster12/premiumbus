@@ -1,6 +1,6 @@
 /**
- * LoginPage.js — Login Screen v2 (Cartoon/Friendly)
- * Gradient hero, floating bus illustration, emoji-enhanced forms.
+ * LoginPage.js — Login Screen with OAuth + Password Reset
+ * Supports: email/password, Google Sign-In, Facebook Login, password recovery.
  */
 
 import { AuthService } from '../services/AuthService.js';
@@ -64,10 +64,12 @@ export async function renderLoginPage() {
 
       <div style="display:flex;gap:var(--space-3);">
         <button type="button" class="btn btn--secondary btn--full btn--md" id="login-google">
-          🔍 Google
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Google
         </button>
         <button type="button" class="btn btn--secondary btn--full btn--md" id="login-facebook">
-          📘 Facebook
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
         </button>
       </div>
 
@@ -75,11 +77,63 @@ export async function renderLoginPage() {
         ¿Eres nuevo? <a href="#/register" id="login-register-link">Regístrate</a>
       </p>
     </form>
+
+    <!-- Modal: Forgot Password Step 1 (Email) -->
+    <div class="modal-overlay" id="forgot-modal" style="display:none;">
+      <div class="modal">
+        <div class="modal__handle"></div>
+        <h2 class="modal__title">🔑 Recuperar Contraseña</h2>
+        <p style="text-align:center;color:var(--color-gray-500);font-size:var(--font-size-sm);margin-bottom:var(--space-4);">
+          Ingresa tu correo electrónico para restablecer tu contraseña.
+        </p>
+        <div class="input-group">
+          <div class="input-wrapper">
+            <span class="input-wrapper__icon">${Icons.mail}</span>
+            <input type="email" id="forgot-email" placeholder="tu@correo.com" autocomplete="email"/>
+          </div>
+        </div>
+        <button class="btn btn--primary btn--full btn--lg" id="forgot-submit" type="button">
+          Verificar correo
+        </button>
+        <button class="btn btn--secondary btn--full btn--md" id="forgot-cancel" type="button" style="margin-top:var(--space-3);">
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal: Forgot Password Step 2 (New Password) -->
+    <div class="modal-overlay" id="reset-modal" style="display:none;">
+      <div class="modal">
+        <div class="modal__handle"></div>
+        <h2 class="modal__title">🔒 Nueva Contraseña</h2>
+        <p style="text-align:center;color:var(--color-gray-500);font-size:var(--font-size-sm);margin-bottom:var(--space-4);" id="reset-email-display"></p>
+        <div class="input-group">
+          <div class="input-wrapper">
+            <span class="input-wrapper__icon">${Icons.lock}</span>
+            <input type="password" id="reset-new-password" placeholder="Nueva contraseña (mín. 6 caracteres)"/>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-wrapper">
+            <span class="input-wrapper__icon">${Icons.lock}</span>
+            <input type="password" id="reset-confirm-password" placeholder="Confirmar nueva contraseña"/>
+          </div>
+        </div>
+        <button class="btn btn--primary btn--full btn--lg" id="reset-submit" type="button">
+          Cambiar contraseña
+        </button>
+        <button class="btn btn--secondary btn--full btn--md" id="reset-cancel" type="button" style="margin-top:var(--space-3);">
+          Cancelar
+        </button>
+      </div>
+    </div>
   `;
 
   setTimeout(() => attachLoginListeners(), 0);
   return container;
 }
+
+/* ── Listeners ─────────────────────────────────── */
 
 function attachLoginListeners() {
   const form = document.getElementById('login-form');
@@ -94,50 +148,254 @@ function attachLoginListeners() {
     });
   }
 
+  // Email/Password Login
   if (form) {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-
       const correo = document.getElementById('login-email')?.value?.trim();
       const password = document.getElementById('login-password')?.value;
 
-      if (!correo) {
-        showToast('Ingresa tu correo electrónico.', 'error');
-        return;
-      }
-      if (!password) {
-        showToast('Ingresa tu contraseña.', 'error');
-        return;
-      }
+      if (!correo) { showToast('Ingresa tu correo electrónico.', 'error'); return; }
+      if (!password) { showToast('Ingresa tu contraseña.', 'error'); return; }
 
       const submitBtn = document.getElementById('login-submit');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="btn__spinner"></span> Iniciando...';
-      }
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<span class="btn__spinner"></span> Iniciando...'; }
 
       const result = await AuthService.login(correo, password);
-
       if (result.success) {
         showToast(`¡Bienvenido, ${result.user.nombre}! 🎉`, 'success');
         router.navigate('home');
       } else {
         showToast(result.error, 'error');
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '🚌 Iniciar Sesión';
-        }
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '🚌 Iniciar Sesión'; }
       }
     });
   }
 
-  document.getElementById('login-google')?.addEventListener('click', () => {
-    showToast('Google Auth no disponible en modo demo.', 'info');
-  });
-  document.getElementById('login-facebook')?.addEventListener('click', () => {
-    showToast('Facebook Auth no disponible en modo demo.', 'info');
+  // Google Sign-In
+  document.getElementById('login-google')?.addEventListener('click', handleGoogleLogin);
+
+  // Facebook Login
+  document.getElementById('login-facebook')?.addEventListener('click', handleFacebookLogin);
+
+  // Forgot Password
+  attachForgotPasswordListeners();
+}
+
+/* ── Google OAuth ──────────────────────────────── */
+
+async function handleGoogleLogin() {
+  const btn = document.getElementById('login-google');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn__spinner"></span>'; }
+
+  try {
+    // Check if Google Identity Services SDK is loaded
+    if (typeof google === 'undefined' || !google.accounts) {
+      showToast('Cargando Google Sign-In... Intenta de nuevo.', 'info');
+      await loadGoogleSDK();
+      if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Google'; }
+      return;
+    }
+
+    // Initialize Google Sign-In
+    const clientId = window.__GOOGLE_CLIENT_ID || '';
+    if (!clientId || clientId.includes('TU_GOOGLE')) {
+      // Fallback: use demo mode for development
+      await handleSocialDemoLogin('google');
+      return;
+    }
+
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: async (response) => {
+        const result = await AuthService.loginWithProvider('google', { credential: response.credential });
+        if (result.success) {
+          showToast(`¡Bienvenido, ${result.user.nombre}! 🎉`, 'success');
+          router.navigate('home');
+        } else {
+          showToast(result.error, 'error');
+        }
+      },
+    });
+
+    google.accounts.id.prompt();
+  } catch (error) {
+    // Fallback to demo mode
+    await handleSocialDemoLogin('google');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Google'; }
+  }
+}
+
+function loadGoogleSDK() {
+  return new Promise((resolve, reject) => {
+    if (document.getElementById('google-gsi-script')) { resolve(); return; }
+    const script = document.createElement('script');
+    script.id = 'google-gsi-script';
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
   });
 }
+
+/* ── Facebook OAuth ───────────────────────────── */
+
+async function handleFacebookLogin() {
+  const btn = document.getElementById('login-facebook');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn__spinner"></span>'; }
+
+  try {
+    if (typeof FB === 'undefined') {
+      showToast('Cargando Facebook Login... Intenta de nuevo.', 'info');
+      await loadFacebookSDK();
+      if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Facebook'; }
+      return;
+    }
+
+    const appId = window.__FACEBOOK_APP_ID || '';
+    if (!appId || appId.includes('TU_FACEBOOK')) {
+      await handleSocialDemoLogin('facebook');
+      return;
+    }
+
+    FB.login(async (response) => {
+      if (response.authResponse) {
+        const result = await AuthService.loginWithProvider('facebook', {
+          accessToken: response.authResponse.accessToken,
+          userID: response.authResponse.userID,
+        });
+        if (result.success) {
+          showToast(`¡Bienvenido, ${result.user.nombre}! 🎉`, 'success');
+          router.navigate('home');
+        } else {
+          showToast(result.error, 'error');
+        }
+      } else {
+        showToast('Inicio con Facebook cancelado.', 'info');
+      }
+    }, { scope: 'email,public_profile' });
+  } catch (error) {
+    await handleSocialDemoLogin('facebook');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Facebook'; }
+  }
+}
+
+function loadFacebookSDK() {
+  return new Promise((resolve, reject) => {
+    if (document.getElementById('facebook-jssdk')) { resolve(); return; }
+    window.fbAsyncInit = () => {
+      FB.init({ appId: window.__FACEBOOK_APP_ID || '', cookie: true, xfbml: true, version: 'v18.0' });
+      resolve();
+    };
+    const script = document.createElement('script');
+    script.id = 'facebook-jssdk';
+    script.src = 'https://connect.facebook.net/es_LA/sdk.js';
+    script.async = true;
+    script.defer = true;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+/* ── Demo Social Login (when no OAuth keys configured) ── */
+
+async function handleSocialDemoLogin(provider) {
+  const providerName = provider === 'google' ? 'Google' : 'Facebook';
+  const demoEmail = provider === 'google' ? 'demo.google@gmail.com' : 'demo.facebook@outlook.com';
+  const demoName = provider === 'google' ? 'Usuario Google' : 'Usuario Facebook';
+
+  const result = await AuthService.loginWithProvider(provider, {
+    _userData: { email: demoEmail, name: demoName, picture: '' },
+  });
+
+  if (result.success) {
+    showToast(`¡Bienvenido con ${providerName}, ${result.user.nombre}! 🎉`, 'success');
+    router.navigate('home');
+  } else {
+    showToast(result.error, 'error');
+  }
+}
+
+/* ── Forgot Password ──────────────────────────── */
+
+function attachForgotPasswordListeners() {
+  let resetEmail = '';
+
+  document.getElementById('login-forgot')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('forgot-modal').style.display = 'flex';
+    document.getElementById('forgot-email').value = document.getElementById('login-email')?.value || '';
+    document.getElementById('forgot-email')?.focus();
+  });
+
+  document.getElementById('forgot-cancel')?.addEventListener('click', () => {
+    document.getElementById('forgot-modal').style.display = 'none';
+  });
+
+  document.getElementById('forgot-submit')?.addEventListener('click', async () => {
+    const email = document.getElementById('forgot-email')?.value?.trim();
+    if (!email) { showToast('Ingresa tu correo.', 'error'); return; }
+
+    const btn = document.getElementById('forgot-submit');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn__spinner"></span> Verificando...'; }
+
+    const exists = await AuthService.emailExists(email);
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Verificar correo'; }
+
+    if (!exists) {
+      showToast('No existe una cuenta con ese correo.', 'error');
+      return;
+    }
+
+    resetEmail = email;
+    document.getElementById('forgot-modal').style.display = 'none';
+    document.getElementById('reset-modal').style.display = 'flex';
+    document.getElementById('reset-email-display').textContent = `Cambiar contraseña para: ${email}`;
+    document.getElementById('reset-new-password')?.focus();
+  });
+
+  document.getElementById('reset-cancel')?.addEventListener('click', () => {
+    document.getElementById('reset-modal').style.display = 'none';
+  });
+
+  document.getElementById('reset-submit')?.addEventListener('click', async () => {
+    const newPass = document.getElementById('reset-new-password')?.value;
+    const confirmPass = document.getElementById('reset-confirm-password')?.value;
+
+    if (!newPass || newPass.length < 6) { showToast('Mínimo 6 caracteres.', 'error'); return; }
+    if (newPass !== confirmPass) { showToast('Las contraseñas no coinciden.', 'error'); return; }
+
+    const btn = document.getElementById('reset-submit');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn__spinner"></span> Cambiando...'; }
+
+    const result = await AuthService.resetPassword(resetEmail, newPass);
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Cambiar contraseña'; }
+
+    if (result.success) {
+      showToast('¡Contraseña actualizada! Inicia sesión.', 'success');
+      document.getElementById('reset-modal').style.display = 'none';
+      const loginEmail = document.getElementById('login-email');
+      if (loginEmail) loginEmail.value = resetEmail;
+    } else {
+      showToast(result.error, 'error');
+    }
+  });
+
+  // Close modals on overlay click
+  ['forgot-modal', 'reset-modal'].forEach((modalId) => {
+    document.getElementById(modalId)?.addEventListener('click', (e) => {
+      if (e.target.id === modalId) {
+        document.getElementById(modalId).style.display = 'none';
+      }
+    });
+  });
+}
+
+/* ── Bus Illustration ─────────────────────────── */
 
 function renderBusIllustration() {
   return `

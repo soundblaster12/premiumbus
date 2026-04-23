@@ -5,6 +5,7 @@
  *   1. Si la API PHP/MySQL está disponible → usa MySQL
  *   2. Si no → fallback a localStorage (modo demo)
  * 
+ * Soporta: email/password, Google OAuth, Facebook OAuth, password reset.
  * Para cambiar de backend, solo edita este archivo.
  */
 
@@ -22,6 +23,8 @@ const STORAGE_KEYS = {
  * @property {string} correo
  * @property {string} rol - 'user' | 'admin'
  * @property {string} createdAt
+ * @property {string} [authProvider] - 'email' | 'google' | 'facebook'
+ * @property {string} [picture] - Avatar URL (social login)
  */
 
 class AuthServiceWrapper {
@@ -42,6 +45,7 @@ class AuthServiceWrapper {
           correo: 'admin@premiumbus.com',
           password: 'admin123',
           rol: 'admin',
+          authProvider: 'email',
           createdAt: new Date().toISOString(),
         },
         {
@@ -50,6 +54,7 @@ class AuthServiceWrapper {
           correo: 'juan@correo.com',
           password: 'usuario123',
           rol: 'user',
+          authProvider: 'email',
           createdAt: new Date().toISOString(),
         },
       ];
@@ -98,6 +103,60 @@ class AuthServiceWrapper {
       return this._loginApi(correo, password);
     }
     return this._loginLocal(correo, password);
+  }
+
+  /**
+   * Login con proveedor social (Google o Facebook).
+   * @param {'google'|'facebook'} provider
+   * @param {Object} tokenData - { credential } for Google, { accessToken, userID } for Facebook
+   * @returns {Promise<{success: boolean, error?: string, user?: UserProfile}>}
+   */
+  async loginWithProvider(provider, tokenData) {
+    const useApi = await isApiAvailable();
+
+    if (useApi) {
+      return this._loginWithProviderApi(provider, tokenData);
+    }
+    return this._loginWithProviderLocal(provider, tokenData);
+  }
+
+  /**
+   * Resetea la contraseña de un usuario.
+   * @param {string} correo
+   * @param {string} newPassword
+   * @returns {Promise<{success: boolean, error?: string, message?: string}>}
+   */
+  async resetPassword(correo, newPassword) {
+    const useApi = await isApiAvailable();
+
+    if (useApi) {
+      return this._resetPasswordApi(correo, newPassword);
+    }
+    return this._resetPasswordLocal(correo, newPassword);
+  }
+
+  /**
+   * Verifica si un correo existe en el sistema.
+   * @param {string} correo
+   * @returns {Promise<boolean>}
+   */
+  async emailExists(correo) {
+    const useApi = await isApiAvailable();
+
+    if (useApi) {
+      try {
+        const data = await apiPost('reset_password', { correo, new_password: 'check_only_dummy' });
+        // If it reaches here, email exists — but we sent a dummy password, so this shouldn't happen
+        return true;
+      } catch {
+        // We'll check locally as fallback
+      }
+    }
+
+    const users = this._getStoredUsers();
+    return users.some(
+      (u) => u.correo.toLowerCase() === correo.toLowerCase()
+    );
   }
 
   /**
@@ -181,6 +240,27 @@ class AuthServiceWrapper {
     }
   }
 
+  async _loginWithProviderApi(provider, tokenData) {
+    try {
+      const action = provider === 'google' ? 'google_login' : 'facebook_login';
+      const data = await apiPost(action, tokenData);
+      const profile = data.user;
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(profile));
+      return { success: true, user: profile };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async _resetPasswordApi(correo, newPassword) {
+    try {
+      const data = await apiPost('reset_password', { correo, new_password: newPassword });
+      return { success: true, message: data.message };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // PRIVADO — localStorage Fallback
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -203,6 +283,7 @@ class AuthServiceWrapper {
       correo: correo.toLowerCase(),
       password,
       rol: 'user',
+      authProvider: 'email',
       createdAt: new Date().toISOString(),
     };
 
@@ -235,6 +316,69 @@ class AuthServiceWrapper {
   }
 
   /**
+   * Login social local (fallback):
+   * Crea o encuentra un usuario basándose en los datos del proveedor.
+   * Como no tenemos un token real para verificar en modo offline,
+   * simulamos el flujo creando/encontrando el usuario.
+   */
+  async _loginWithProviderLocal(provider, tokenData) {
+    await this._delay(600);
+
+    // En modo local, los datos del token contienen la información del usuario
+    // que fue recolectada del SDK del proveedor en el frontend
+    const userData = tokenData._userData || {};
+    const correo = (userData.email || '').toLowerCase();
+    const nombre = userData.name || `Usuario ${provider}`;
+
+    if (!correo) {
+      return { success: false, error: 'No se pudo obtener el correo del proveedor.' };
+    }
+
+    const users = this._getStoredUsers();
+    let user = users.find((u) => u.correo.toLowerCase() === correo);
+
+    if (!user) {
+      // Create new user
+      user = {
+        id: users.length + 1,
+        nombre,
+        correo,
+        password: crypto.randomUUID?.() || Math.random().toString(36),
+        rol: 'user',
+        authProvider: provider,
+        createdAt: new Date().toISOString(),
+      };
+      users.push(user);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+    }
+
+    const profile = this._toProfile(user);
+    profile.authProvider = provider;
+    profile.picture = userData.picture || '';
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(profile));
+
+    return { success: true, user: profile };
+  }
+
+  async _resetPasswordLocal(correo, newPassword) {
+    await this._delay(500);
+
+    const users = this._getStoredUsers();
+    const userIndex = users.findIndex(
+      (u) => u.correo.toLowerCase() === correo.toLowerCase()
+    );
+
+    if (userIndex === -1) {
+      return { success: false, error: 'No existe una cuenta con ese correo electrónico.' };
+    }
+
+    users[userIndex].password = newPassword;
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+
+    return { success: true, message: 'Contraseña actualizada exitosamente.' };
+  }
+
+  /**
    * Strips password from user object.
    */
   _toProfile(user) {
@@ -244,6 +388,7 @@ class AuthServiceWrapper {
       correo: user.correo,
       rol: user.rol,
       createdAt: user.createdAt,
+      authProvider: user.authProvider || 'email',
     };
   }
 

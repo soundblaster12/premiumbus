@@ -1,0 +1,501 @@
+/* ══════════════════════════════════════════════════════
+   android.css — Material Design 3 Override for Android
+   Only applies when body has class "android-native".
+   Transforms the PWA into a native-looking Android app.
+   ══════════════════════════════════════════════════════ */
+
+/* ── Typography: Roboto instead of Inter ────────── */
+.android-native {
+  font-family: 'Roboto', -apple-system, sans-serif !important;
+  --font-family-base: 'Roboto', -apple-system, sans-serif;
+}
+
+/* ── Border Radius: Material uses 12-16dp ───────── */
+.android-native {
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+}
+
+/* ── Shadows: Material elevation ────────────────── */
+.android-native {
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+  --shadow-md:   0 3px 6px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
+  --shadow-lg:   0 6px 12px rgba(0,0,0,0.12), 0 4px 6px rgba(0,0,0,0.08);
+  --shadow-xl:   0 12px 24px rgba(0,0,0,0.15);
+}
+
+/* ── Transitions: Material uses standard easing ─── */
+.android-native {
+  --transition-fast: 0.1s ease-in-out;
+  --transition-base: 0.2s ease-in-out;
+  --transition-slow: 0.3s ease-in-out;
+  --transition-bounce: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── App Container: Full width, no shadow frame ─── */
+.android-native #app {
+  box-shadow: none;
+  max-width: 100%;
+}
+
+/* ── Scrollbar: Native (no custom) ──────────────── */
+.android-native ::-webkit-scrollbar { display: none; }
+.android-native { scrollbar-width: none; }
+
+/* ══════════════════════════════════════════════════════
+   STATUS BAR (Simulated)
+   ══════════════════════════════════════════════════════ */
+
+.android-native .android-status-bar {
+  height: 24px;
+  background: var(--color-primary-800);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+/* ══════════════════════════════════════════════════════
+   BOTTOM NAVIGATION — Material 3 Style
+   ══════════════════════════════════════════════════════ */
+
+.android-native .navbar {
+  background: var(--color-white);
+  border-top: none;
+  box-shadow: 0 -1px 3px rgba(0,0,0,0.08);
+  height: 64px;
+  max-width: 100%;
+  padding-bottom: 0;
+}
+
+.android-native .navbar__item {
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-gray-500);
+  border-radius: 0;
+  padding: 8px 0;
+  position: relative;
+  min-width: 64px;
+}
+
+.android-native .navbar__item--active {
+  color: var(--color-primary-600);
+  font-weight: 600;
+}
+
+/* Material 3 pill indicator */
+.android-native .navbar__item--active::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 28px;
+  background: var(--color-primary-100);
+  border-radius: 14px;
+  z-index: -1;
+}
+
+.android-native .navbar__item .emoji-nav {
+  font-size: 22px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════════
+   BUTTONS — Material Filled / Outlined
+   ══════════════════════════════════════════════════════ */
+
+.android-native .btn {
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.android-native .btn:active {
+  transform: none;
+  opacity: 0.85;
+}
+
+.android-native .btn--primary {
+  background: var(--color-primary-500);
+  box-shadow: var(--shadow-sm);
+}
+
+.android-native .btn--primary:hover {
+  box-shadow: var(--shadow-md);
+  transform: none;
+}
+
+.android-native .btn--secondary {
+  background: transparent;
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-primary-600);
+}
+
+/* Ripple effect */
+.android-native .btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.android-native .btn:active::after {
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════════════════════
+   INPUT — Material Outlined TextField
+   ══════════════════════════════════════════════════════ */
+
+.android-native .input-wrapper {
+  border: 1px solid var(--color-gray-300);
+  border-radius: 4px;
+  background: transparent;
+  padding: 0 12px;
+}
+
+.android-native .input-wrapper:focus-within {
+  border-color: var(--color-primary-500);
+  border-width: 2px;
+  box-shadow: none;
+  background: transparent;
+}
+
+.android-native .input-wrapper input {
+  padding: 14px 8px;
+  font-size: 16px;
+}
+
+/* ══════════════════════════════════════════════════════
+   CARDS — Material surfaces
+   ══════════════════════════════════════════════════════ */
+
+.android-native .trip-card {
+  border-radius: 12px;
+  border-left: 4px solid var(--color-primary-400);
+  box-shadow: var(--shadow-sm);
+  margin: 0 16px 8px;
+  padding: 16px;
+}
+
+.android-native .trip-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: none;
+}
+
+.android-native .trip-card:active {
+  transform: none;
+  background: var(--color-gray-50);
+}
+
+.android-native .stat-card {
+  border-radius: 12px;
+  border: 1px solid var(--color-gray-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.android-native .stat-card:hover {
+  transform: none;
+  box-shadow: var(--shadow-md);
+}
+
+.android-native .quick-action {
+  border-radius: 16px;
+}
+
+.android-native .quick-action:hover {
+  transform: none;
+}
+
+.android-native .quick-action:active {
+  transform: none;
+  opacity: 0.8;
+}
+
+.android-native .quick-action__icon {
+  border-radius: 12px;
+}
+
+/* ══════════════════════════════════════════════════════
+   PAGE HEADERS — Material App Bar style
+   ══════════════════════════════════════════════════════ */
+
+.android-native .login-page__hero,
+.android-native .home-page__header,
+.android-native .register-page__header,
+.android-native .trips-page__header,
+.android-native .purchase-page__header,
+.android-native .profile-page__header,
+.android-native .admin-page__header {
+  border-radius: 0;
+}
+
+.android-native .login-page__hero {
+  padding: 32px 24px 24px;
+}
+
+.android-native .home-page__header {
+  padding: 24px 16px 20px;
+}
+
+.android-native .login-page__title {
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.android-native .home-page__user-name {
+  font-size: 24px;
+  font-weight: 400;
+}
+
+/* ══════════════════════════════════════════════════════
+   TOAST → SNACKBAR (Material)
+   ══════════════════════════════════════════════════════ */
+
+.android-native .toast {
+  bottom: 80px;
+  top: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 4px;
+  max-width: calc(100% - 32px);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+  animation: snackbarIn 0.2s ease-in-out;
+}
+
+.android-native .toast--success {
+  background: #323232;
+  color: white;
+}
+
+.android-native .toast--error {
+  background: #d32f2f;
+  color: white;
+}
+
+.android-native .toast--info {
+  background: #323232;
+  color: white;
+}
+
+.android-native .toast--exiting {
+  animation: snackbarOut 0.2s ease-in-out forwards;
+}
+
+/* ══════════════════════════════════════════════════════
+   MODALS — Material Bottom Sheet
+   ══════════════════════════════════════════════════════ */
+
+.android-native .modal-overlay {
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: none;
+}
+
+.android-native .modal {
+  border-radius: 16px 16px 0 0;
+  padding: 24px 16px 32px;
+  animation: slideInUp 0.25s ease-in-out;
+}
+
+.android-native .modal__handle {
+  width: 32px;
+  height: 4px;
+  background: var(--color-gray-400);
+}
+
+/* ══════════════════════════════════════════════════════
+   DRIVER CARDS (Android)
+   ══════════════════════════════════════════════════════ */
+
+.android-native .driver-card {
+  border-radius: 12px;
+  border-left-width: 3px;
+}
+
+.android-native .driver-card:hover {
+  transform: none;
+}
+
+/* ══════════════════════════════════════════════════════
+   ACTIVE TRIP BANNER (Android)
+   ══════════════════════════════════════════════════════ */
+
+.android-native .active-trip-banner {
+  border-radius: 12px;
+}
+
+.android-native .active-trip-banner:hover {
+  transform: none;
+}
+
+/* ══════════════════════════════════════════════════════
+   ADMIN CARDS (Android)
+   ══════════════════════════════════════════════════════ */
+
+.android-native .admin-route-card {
+  border-radius: 12px;
+}
+
+.android-native .admin-route-card:hover {
+  transform: none;
+}
+
+/* ══════════════════════════════════════════════════════
+   SEAT SELECTOR (Android)
+   ══════════════════════════════════════════════════════ */
+
+.android-native .seat-selector {
+  border-radius: 12px;
+}
+
+.android-native .seat-selector__seat {
+  border-radius: 8px;
+}
+
+.android-native .seat-selector__seat:hover:not(:disabled) {
+  transform: none;
+  background: var(--color-primary-100);
+}
+
+/* ══════════════════════════════════════════════════════
+   PROFILE (Android)
+   ══════════════════════════════════════════════════════ */
+
+.android-native .profile-page__avatar {
+  animation: none;
+}
+
+.android-native .purchase-history-card {
+  border-radius: 12px;
+}
+
+.android-native .purchase-history-card:hover {
+  transform: none;
+}
+
+/* ══════════════════════════════════════════════════════
+   ANIMATIONS — Material Standard
+   ══════════════════════════════════════════════════════ */
+
+@keyframes snackbarIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes snackbarOut {
+  to { opacity: 0; transform: translateX(-50%) translateY(16px); }
+}
+
+/* Disable bouncy/cartoon animations on Android */
+.android-native .emoji-icon {
+  animation: none;
+}
+
+.android-native .login-page__illustration {
+  animation: none;
+}
+
+.android-native .home-page__header::before {
+  animation: none;
+}
+
+.android-native .active-trip-banner__badge {
+  animation: none;
+}
+
+/* Page transition: simple fade */
+.android-native .page {
+  animation: androidFadeIn 0.2s ease-in-out;
+}
+
+@keyframes androidFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════════
+   MISC — Android polish
+   ══════════════════════════════════════════════════════ */
+
+/* Background: solid white, no gradients */
+.android-native body,
+body.android-native {
+  background: #fafafa;
+}
+
+/* Login divider */
+.android-native .login-page__divider {
+  font-size: 12px;
+  color: var(--color-gray-500);
+}
+
+/* Forgot password link */
+.android-native .login-page__forgot a {
+  font-size: 12px;
+}
+
+/* Badge */
+.android-native .badge {
+  border-radius: 4px;
+}
+
+/* Section header */
+.android-native .section-header__title {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Admin tabs — Material segmented button */
+.android-native .admin-page__tab {
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.android-native .admin-page__tab--active {
+  background: var(--color-primary-500);
+  box-shadow: none;
+}
+
+/* Data table */
+.android-native .data-table {
+  font-size: 14px;
+}
+
+/* Register back button */
+.android-native .register-page__back {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Search input */
+.android-native .search-input {
+  border-radius: 28px;
+  padding: 12px 16px;
+}

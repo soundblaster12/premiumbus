@@ -1,25 +1,69 @@
 /**
- * sw.js — Service Worker para PremiumBus PWA v2
+ * sw.js — Service Worker para PremiumBus PWA v3
  * 
- * Cachea los archivos esenciales para funcionamiento offline
- * y permite instalar la app en el teléfono.
+ * Pre-cachea todos los archivos esenciales para funcionar offline
+ * completo en Android e iOS. Estrategia: Cache First + Network Update.
  */
 
-const CACHE_NAME = 'premiumbus-v2';
+const CACHE_NAME = 'premiumbus-v3';
 
-// CDN Resources que no cacheamos (necesitan internet)
-const NETWORK_ONLY = [
-  'tile.openstreetmap.org',
-  'unpkg.com/leaflet',
-  'fonts.googleapis.com',
-  'fonts.gstatic.com',
+/** Archivos que se pre-cachean al instalar el SW */
+const PRECACHE_ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './src/main.js',
+  './src/styles/tokens.css',
+  './src/styles/global.css',
+  './src/styles/components.css',
+  './src/styles/pages.css',
+  './src/styles/android.css',
+  './src/pages/LoginPage.js',
+  './src/pages/RegisterPage.js',
+  './src/pages/HomePage.js',
+  './src/pages/TripsPage.js',
+  './src/pages/PurchasePage.js',
+  './src/pages/ProfilePage.js',
+  './src/pages/AdminPage.js',
+  './src/services/AuthService.js',
+  './src/services/DataService.js',
+  './src/services/ApiClient.js',
+  './src/services/Router.js',
+  './src/services/MapService.js',
+  './src/services/OfflineQueue.js',
+  './src/components/Icons.js',
+  './src/components/Navbar.js',
+  './src/components/Toast.js',
 ];
 
-// ── Instalación — Activar inmediatamente ────────
+/** Dominios que siempre requieren red (no cachear) */
+const NETWORK_ONLY_DOMAINS = [
+  'tile.openstreetmap.org',
+  'accounts.google.com',
+  'connect.facebook.net',
+  'graph.facebook.com',
+  'oauth2.googleapis.com',
+];
+
+// ── Instalación — Pre-cache de assets ────────────
 self.addEventListener('install', (event) => {
-  console.log('[SW] Instalado v2');
-  // Activar inmediatamente sin esperar tabs viejos
-  self.skipWaiting();
+  console.log('[SW] Instalando v3 — pre-cacheando assets...');
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        return cache.addAll(PRECACHE_ASSETS).catch((err) => {
+          console.warn('[SW] Algunos assets no se pudieron pre-cachear:', err);
+          // Cachear individualmente los que se pueda
+          return Promise.allSettled(
+            PRECACHE_ASSETS.map((url) => cache.add(url).catch(() => null))
+          );
+        });
+      })
+      .then(() => {
+        console.log('[SW] Pre-cache completado');
+        self.skipWaiting();
+      })
+  );
 });
 
 // ── Activación — Limpiar caches viejos ──────────
@@ -33,15 +77,14 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // Claimear todas las tabs abiertas
   self.clients.claim();
 });
 
-// ── Fetch — Estrategia: Network First, Cache Fallback ──
+// ── Fetch — Cache First + Network Update ────────
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // No interceptar peticiones a la API (siempre deben ir al servidor)
+  // No interceptar peticiones a la API (deben ir al servidor)
   if (url.pathname.includes('/api/')) {
     return;
   }
@@ -51,36 +94,93 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // No interceptar recursos de CDN (mapas, fonts)
-  if (NETWORK_ONLY.some((domain) => url.hostname.includes(domain))) {
+  // No interceptar dominios que requieren red
+  if (NETWORK_ONLY_DOMAINS.some((domain) => url.hostname.includes(domain))) {
     return;
   }
 
+  // Para fonts de Google: cache first
+  if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        }).catch(() => new Response('', { status: 503 }));
+      })
+    );
+    return;
+  }
+
+  // Para Leaflet CDN: cache first
+  if (url.hostname.includes('unpkg.com')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        }).catch(() => new Response('', { status: 503 }));
+      })
+    );
+    return;
+  }
+
+  // App assets: Cache first, then network update in background
   event.respondWith(
-    // Intentar red primero, luego cache
-    fetch(event.request)
-      .then((response) => {
-        // Si la red responde, actualizar cache
+    caches.match(event.request).then((cached) => {
+      // Update cache in background
+      const networkFetch = fetch(event.request).then((response) => {
         if (response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      })
-      .catch(() => {
-        // Si la red falla, servir desde cache
-        return caches.match(event.request).then((cached) => {
-          if (cached) return cached;
+      }).catch(() => null);
 
-          // Fallback para navegación: servir index.html
-          if (event.request.mode === 'navigate') {
-            return caches.match('./index.html');
-          }
+      // Return cached immediately, or wait for network
+      if (cached) {
+        return cached;
+      }
 
-          return new Response('Offline', { status: 503 });
+      return networkFetch.then((response) => {
+        if (response) return response;
+
+        // Last resort: serve index.html for navigation requests
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+
+        return new Response('Offline — recurso no disponible.', { status: 503 });
+      });
+    })
+  );
+});
+
+// ── Background Sync — Sincronizar compras pendientes ──
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-purchases') {
+    console.log('[SW] Background sync: sincronizando compras pendientes...');
+    event.waitUntil(
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({ type: 'SYNC_PURCHASES' });
         });
       })
-  );
+    );
+  }
+});
+
+// ── Messages — Comunicación con la app ──────────
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

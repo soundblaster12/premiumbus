@@ -48,7 +48,7 @@ export async function renderRegisterPage() {
             class="input-wrapper__input"
             type="email"
             id="register-email"
-            placeholder="correo@ejemplo.com"
+            placeholder="usuario@gmail.com"
             autocomplete="email"
             required
           />
