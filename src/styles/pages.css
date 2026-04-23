@@ -902,3 +902,122 @@
   to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
 }
 
+/* ── Profile Photo Upload ───────────────────────── */
+.profile-page__avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  margin-bottom: var(--space-3);
+}
+.profile-page__avatar-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255,255,255,0.5);
+  box-shadow: var(--shadow-md);
+}
+.profile-page__avatar-edit {
+  position: absolute;
+  bottom: 0;
+  right: -4px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-white);
+  border: 2px solid var(--color-gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s;
+}
+.profile-page__avatar-edit:active { transform: scale(0.9); }
+
+/* ── User List Cards (Admin) ────────────────────── */
+.profile-page__users-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--space-2) 0;
+}
+.user-list-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-gray-100);
+}
+.user-list-card:last-child { border-bottom: none; }
+.user-list-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xs);
+  flex-shrink: 0;
+}
+.user-list-card__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.user-list-card__name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-list-card__email {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-list-card__meta {
+  flex-shrink: 0;
+}
+
+/* ── GPS User Marker (Pulsing) ──────────────────── */
+.user-marker-pulse {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.user-marker-pulse::before {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(66, 133, 244, 0.3);
+  animation: gpsPulse 2s ease-in-out infinite;
+}
+.user-marker {
+  width: 14px;
+  height: 14px;
+  background: #4285F4;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 1;
+}
+@keyframes gpsPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(2); opacity: 0; }
+}
+
+

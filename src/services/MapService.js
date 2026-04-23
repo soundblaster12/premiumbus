@@ -1,14 +1,18 @@
 /**
- * MapService.js — Leaflet/OSM Map Wrapper v2
+ * MapService.js — Leaflet/OSM Map Wrapper v3
  * 
  * Incluye:
  * - Renderizado de rutas con polylines
  * - Simulación de bus en tiempo real
- * - Geolocalización del usuario
+ * - Geolocalización del usuario (Android/iOS compatible)
+ * - Manejo completo de permisos y errores GPS
  */
+
+import { showToast } from '../components/Toast.js';
 
 let mapInstances = {};
 let busAnimationTimers = {};
+let userMarkers = {};
 
 class MapServiceWrapper {
   /**
@@ -189,31 +193,131 @@ class MapServiceWrapper {
 
   /**
    * Muestra la posición GPS real del usuario en el mapa.
+   * Compatible con Android (Chrome/WebView) e iOS (Safari/WKWebView).
+   * Maneja permisos, errores, y muestra feedback visual al usuario.
    */
   showUserPosition(containerId) {
     const map = mapInstances[containerId];
-    if (!map || !navigator.geolocation) return;
+    if (!map) {
+      showToast('Mapa no disponible.', 'error');
+      return;
+    }
 
+    // Check if Geolocation API exists
+    if (!('geolocation' in navigator)) {
+      showToast('Tu dispositivo no soporta GPS.', 'error');
+      return;
+    }
+
+    showToast('📍 Obteniendo ubicación...', 'info');
+
+    // Request geolocation with mobile-optimized options
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-
-        const userIcon = L.divIcon({
-          html: '<div class="user-marker"></div>',
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
-          className: '',
-        });
-
-        L.marker([latitude, longitude], { icon: userIcon, zIndexOffset: 500 })
-          .bindPopup('📍 Tu ubicación')
-          .addTo(map);
-      },
-      (error) => {
-        console.warn('[MapService] No se pudo obtener ubicación:', error.message);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
+      (position) => this._handlePositionSuccess(containerId, position),
+      (error) => this._handlePositionError(error),
+      {
+        enableHighAccuracy: true,  // Use GPS on mobile (not just WiFi)
+        timeout: 15000,            // 15s timeout (mobile GPS can be slow)
+        maximumAge: 30000,         // Accept cached position up to 30s old
+      }
     );
+  }
+
+  /**
+   * Inicia tracking continuo de la ubicación (watchPosition).
+   * Ideal para Android/iOS donde el usuario se está moviendo.
+   */
+  startLocationTracking(containerId) {
+    const map = mapInstances[containerId];
+    if (!map || !('geolocation' in navigator)) return null;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => this._handlePositionSuccess(containerId, position),
+      (error) => this._handlePositionError(error),
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 5000,
+      }
+    );
+
+    return watchId;
+  }
+
+  /**
+   * Detiene el tracking de ubicación.
+   */
+  stopLocationTracking(watchId) {
+    if (watchId !== null && watchId !== undefined) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+  }
+
+  /* ── Geolocation Handlers (Private) ────────── */
+
+  _handlePositionSuccess(containerId, position) {
+    const map = mapInstances[containerId];
+    if (!map) return;
+
+    const { latitude, longitude, accuracy } = position.coords;
+
+    // Remove previous user marker if exists
+    if (userMarkers[containerId]) {
+      map.removeLayer(userMarkers[containerId].marker);
+      if (userMarkers[containerId].circle) {
+        map.removeLayer(userMarkers[containerId].circle);
+      }
+    }
+
+    // Create pulsing user marker
+    const userIcon = L.divIcon({
+      html: `<div class="user-marker-pulse">
+               <div class="user-marker"></div>
+             </div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+      className: '',
+    });
+
+    const marker = L.marker([latitude, longitude], {
+      icon: userIcon,
+      zIndexOffset: 500,
+    })
+      .bindPopup(`📍 Tu ubicación<br><small>Precisión: ~${Math.round(accuracy)}m</small>`)
+      .addTo(map);
+
+    // Accuracy circle
+    const circle = L.circle([latitude, longitude], {
+      radius: Math.min(accuracy, 500),
+      color: '#4285F4',
+      fillColor: '#4285F4',
+      fillOpacity: 0.1,
+      weight: 1,
+    }).addTo(map);
+
+    userMarkers[containerId] = { marker, circle };
+
+    // Pan to user position with zoom
+    map.flyTo([latitude, longitude], 15, { duration: 1 });
+
+    showToast('📍 Ubicación encontrada', 'success');
+  }
+
+  _handlePositionError(error) {
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        showToast('⚠️ Activa los permisos de ubicación en tu dispositivo.', 'error');
+        break;
+      case error.POSITION_UNAVAILABLE:
+        showToast('📡 No se pudo obtener la señal GPS.', 'error');
+        break;
+      case error.TIMEOUT:
+        showToast('⏱️ La ubicación tardó demasiado. Intenta de nuevo.', 'error');
+        break;
+      default:
+        showToast('Error al obtener ubicación.', 'error');
+        break;
+    }
   }
 }
 

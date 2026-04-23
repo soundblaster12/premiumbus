@@ -8,6 +8,7 @@ import { DataService } from '../services/DataService.js';
 import { MapService } from '../services/MapService.js';
 import { router } from '../services/Router.js';
 import { Icons } from '../components/Icons.js';
+import { showToast } from '../components/Toast.js';
 import { renderNavbar, attachNavbarListeners } from '../components/Navbar.js';
 
 let currentSimulation = null;
@@ -82,9 +83,9 @@ export async function renderTripsPage() {
       <button class="btn btn--secondary btn--sm" id="btn-my-location" style="flex:1;">
         🧭 Mi Ubicación
       </button>
-      <button class="btn btn--success btn--sm" id="trips-buy-ticket" style="flex:1;">
+      ${AuthService.isAdmin() ? '' : `<button class="btn btn--success btn--sm" id="trips-buy-ticket" style="flex:1;">
         🎫 Comprar
-      </button>
+      </button>`}
     </div>
 
     <!-- ETA Panel -->
