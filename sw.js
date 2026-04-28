@@ -5,7 +5,7 @@
  * completo en Android e iOS. Estrategia: Cache First + Network Update.
  */
 
-const CACHE_NAME = 'premiumbus-v3';
+const CACHE_NAME = 'premiumbus-v4';
 
 /** Archivos que se pre-cachean al instalar el SW */
 const PRECACHE_ASSETS = [

@@ -1,11 +1,12 @@
 /**
- * AuthService.js — Authentication Wrapper
+ * AuthService.js — Authentication Wrapper v4
  * 
  * Estrategia dual:
  *   1. Si la API PHP/MySQL está disponible → usa MySQL
  *   2. Si no → fallback a localStorage (modo demo)
  * 
- * Soporta: email/password, Google OAuth, Facebook OAuth, password reset.
+ * Soporta: email/password, Google OAuth (email+password prompt),
+ *          Facebook OAuth, Instagram OAuth, email verification code, password reset.
  * Para cambiar de backend, solo edita este archivo.
  */
 
@@ -14,6 +15,7 @@ import { isApiAvailable, apiPost, apiGet } from './ApiClient.js';
 const STORAGE_KEYS = {
   USERS: 'premiumbus_users',
   CURRENT_USER: 'premiumbus_current_user',
+  PENDING_VERIFICATION: 'premiumbus_pending_verification',
 };
 
 /**
@@ -23,7 +25,7 @@ const STORAGE_KEYS = {
  * @property {string} correo
  * @property {string} rol - 'user' | 'admin'
  * @property {string} createdAt
- * @property {string} [authProvider] - 'email' | 'google' | 'facebook'
+ * @property {string} [authProvider] - 'email' | 'google' | 'facebook' | 'instagram'
  * @property {string} [picture] - Avatar URL (social login)
  */
 
@@ -75,11 +77,11 @@ class AuthServiceWrapper {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   /**
-   * Registra un nuevo usuario.
+   * Registra un nuevo usuario (paso 1: inicia verificación por email).
    * @param {string} nombre
    * @param {string} correo
    * @param {string} password
-   * @returns {Promise<{success: boolean, error?: string, user?: UserProfile}>}
+   * @returns {Promise<{success: boolean, error?: string, pendingVerification?: boolean, code?: string}>}
    */
   async register(nombre, correo, password) {
     const useApi = await isApiAvailable();
@@ -88,6 +90,69 @@ class AuthServiceWrapper {
       return this._registerApi(nombre, correo, password);
     }
     return this._registerLocal(nombre, correo, password);
+  }
+
+  /**
+   * Genera un código de verificación y lo almacena para el email dado.
+   * En modo demo, se muestra al usuario directamente.
+   * @param {string} correo
+   * @returns {Promise<{success: boolean, code: string}>}
+   */
+  async generateVerificationCode(correo) {
+    const code = this._generateSixDigitCode();
+    const pendingData = {
+      correo: correo.toLowerCase(),
+      code,
+      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutos de validez
+    };
+    localStorage.setItem(STORAGE_KEYS.PENDING_VERIFICATION, JSON.stringify(pendingData));
+
+    // En modo real, aquí enviaríamos un email real vía API
+    const useApi = await isApiAvailable();
+    if (useApi) {
+      try {
+        await apiPost('send_verification', { correo, code });
+      } catch {
+        // Fallback: el código ya está guardado localmente
+      }
+    }
+
+    return { success: true, code };
+  }
+
+  /**
+   * Verifica el código ingresado por el usuario contra el almacenado.
+   * @param {string} correo
+   * @param {string} inputCode
+   * @returns {boolean}
+   */
+  verifyCode(correo, inputCode) {
+    try {
+      const pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_VERIFICATION));
+      if (!pending) return false;
+      if (pending.correo !== correo.toLowerCase()) return false;
+      if (Date.now() > pending.expiresAt) return false;
+      return pending.code === inputCode;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Completa el registro después de verificar el código.
+   * @param {string} nombre
+   * @param {string} correo
+   * @param {string} password
+   * @returns {Promise<{success: boolean, error?: string, user?: UserProfile}>}
+   */
+  async completeRegistration(nombre, correo, password) {
+    localStorage.removeItem(STORAGE_KEYS.PENDING_VERIFICATION);
+
+    const useApi = await isApiAvailable();
+    if (useApi) {
+      return this._registerApi(nombre, correo, password);
+    }
+    return this._registerLocalDirect(nombre, correo, password);
   }
 
   /**
@@ -106,9 +171,10 @@ class AuthServiceWrapper {
   }
 
   /**
-   * Login con proveedor social (Google o Facebook).
-   * @param {'google'|'facebook'} provider
-   * @param {Object} tokenData - { credential } for Google, { accessToken, userID } for Facebook
+   * Login con proveedor social (Google, Facebook o Instagram).
+   * En la versión mejorada, Google pide email+password y genera nombre automático.
+   * @param {'google'|'facebook'|'instagram'} provider
+   * @param {Object} tokenData
    * @returns {Promise<{success: boolean, error?: string, user?: UserProfile}>}
    */
   async loginWithProvider(provider, tokenData) {
@@ -118,6 +184,30 @@ class AuthServiceWrapper {
       return this._loginWithProviderApi(provider, tokenData);
     }
     return this._loginWithProviderLocal(provider, tokenData);
+  }
+
+  /**
+   * Genera un nombre de usuario automático a partir de un correo electrónico.
+   * Ej: "juan.perez123@gmail.com" → "Juan Perez"
+   * @param {string} email
+   * @returns {string}
+   */
+  generateNameFromEmail(email) {
+    if (!email) return 'Usuario';
+    const localPart = email.split('@')[0] || 'usuario';
+    // Reemplaza puntos, guiones y números por espacios
+    const cleaned = localPart
+      .replace(/[._\-]/g, ' ')
+      .replace(/\d+/g, '')
+      .trim();
+
+    if (!cleaned) return 'Usuario';
+
+    // Capitalizar cada palabra
+    return cleaned
+      .split(/\s+/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   /**
@@ -242,7 +332,12 @@ class AuthServiceWrapper {
 
   async _loginWithProviderApi(provider, tokenData) {
     try {
-      const action = provider === 'google' ? 'google_login' : 'facebook_login';
+      const actionMap = {
+        google: 'google_login',
+        facebook: 'facebook_login',
+        instagram: 'instagram_login',
+      };
+      const action = actionMap[provider] || 'google_login';
       const data = await apiPost(action, tokenData);
       const profile = data.user;
       localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(profile));
@@ -265,8 +360,37 @@ class AuthServiceWrapper {
   // PRIVADO — localStorage Fallback
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  /**
+   * Registro local que primero genera código de verificación
+   * (NO crea el usuario hasta que se verifique).
+   */
   async _registerLocal(nombre, correo, password) {
-    await this._delay(600);
+    await this._delay(400);
+
+    const users = this._getStoredUsers();
+    const emailExists = users.some(
+      (u) => u.correo.toLowerCase() === correo.toLowerCase()
+    );
+
+    if (emailExists) {
+      return { success: false, error: 'Este correo electrónico ya está registrado.' };
+    }
+
+    // Generar código y guardarlo temporalmente
+    const codeResult = await this.generateVerificationCode(correo);
+
+    return {
+      success: true,
+      pendingVerification: true,
+      code: codeResult.code,
+    };
+  }
+
+  /**
+   * Registro local directo (después de verificar código).
+   */
+  async _registerLocalDirect(nombre, correo, password) {
+    await this._delay(400);
 
     const users = this._getStoredUsers();
     const emailExists = users.some(
@@ -376,6 +500,14 @@ class AuthServiceWrapper {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
 
     return { success: true, message: 'Contraseña actualizada exitosamente.' };
+  }
+
+  /**
+   * Genera un código numérico de 6 dígitos para verificación.
+   * @returns {string}
+   */
+  _generateSixDigitCode() {
+    return String(Math.floor(100000 + Math.random() * 900000));
   }
 
   /**

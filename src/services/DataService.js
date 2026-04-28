@@ -13,13 +13,14 @@ import { isApiAvailable, apiGet, apiPost } from './ApiClient.js';
 const STORAGE_KEYS = {
   TRIPS: 'premiumbus_trips',
   PURCHASES: 'premiumbus_purchases',
+  HISTORY: 'premiumbus_history',
 };
 
 /**
  * Datos seed de rutas reales de San Luis Potosí.
  * Se usan como fallback cuando no hay MySQL disponible.
  */
-const SEED_VERSION = 'v3_conductores_desc';
+const SEED_VERSION = 'v4_daily_gen_history';
 
 const SEED_TRIPS = [
   {
@@ -297,6 +298,7 @@ const SEED_TRIPS = [
 class DataServiceWrapper {
   constructor() {
     this._initializeSeedData();
+    this._generateDailyTrips();
   }
 
   _initializeSeedData() {
@@ -309,6 +311,39 @@ class DataServiceWrapper {
     if (!localStorage.getItem(STORAGE_KEYS.PURCHASES)) {
       localStorage.setItem(STORAGE_KEYS.PURCHASES, JSON.stringify([]));
     }
+    if (!localStorage.getItem(STORAGE_KEYS.HISTORY)) {
+      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify([]));
+    }
+  }
+
+  /**
+   * Feature 8: Genera fechas de salida dinámicas para los próximos 10 años.
+   * En lugar de guardar 3,650 días x 30 rutas = 109,500 registros,
+   * simplemente actualizamos las fechas de salida de SEED_TRIPS
+   * al día de hoy y dejamos que el sistema calcule dinámicamente.
+   */
+  _generateDailyTrips() {
+    const lastGenDate = localStorage.getItem('premiumbus_last_gen_date');
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    // Solo regenerar si cambió el día
+    if (lastGenDate === todayStr) return;
+
+    const trips = this._getStoredTrips();
+    const today = new Date();
+
+    const updatedTrips = trips.map((trip) => {
+      const originalDate = new Date(trip.fechaSalida);
+      const hours = originalDate.getHours();
+      const minutes = originalDate.getMinutes();
+
+      // Poner la fecha de hoy manteniendo la hora original de la ruta
+      const newDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes, 0);
+      return { ...trip, fechaSalida: newDate.toISOString(), activo: true };
+    });
+
+    localStorage.setItem(STORAGE_KEYS.TRIPS, JSON.stringify(updatedTrips));
+    localStorage.setItem('premiumbus_last_gen_date', todayStr);
   }
 
   _getStoredTrips() {
@@ -371,13 +406,36 @@ class DataServiceWrapper {
   }
 
   /**
+   * Feature 6: Verifica si el usuario tiene un viaje activo (en curso).
+   * Si lo tiene, NO puede comprar otro boleto hasta que finalice.
+   * @param {number|string} userId
+   * @returns {Promise<boolean>}
+   */
+  async userHasActiveRoute(userId) {
+    const purchases = this._getStoredPurchases();
+    return purchases.some(
+      (p) => p.usuarioId == userId && p.status === 'active'
+    );
+  }
+
+  /**
    * Compra un boleto.
+   * Feature 6: Bloquea compra si el usuario ya tiene una ruta en curso.
    * @param {number|string} userId
    * @param {number} tripId
    * @param {number} seatNumber
    * @returns {Promise<{success: boolean, error?: string, purchase?: Object}>}
    */
   async purchaseTicket(userId, tripId, seatNumber) {
+    // Feature 6: Verificar si ya tiene un viaje activo
+    const hasActive = await this.userHasActiveRoute(userId);
+    if (hasActive) {
+      return {
+        success: false,
+        error: 'Ya tienes un viaje en curso. Debes finalizar tu ruta actual antes de comprar otro boleto.',
+      };
+    }
+
     const useApi = await isApiAvailable();
 
     if (useApi) {
@@ -388,7 +446,7 @@ class DataServiceWrapper {
   }
 
   /**
-   * Compras de un usuario.
+   * Compras activas de un usuario (no finalizadas).
    * @param {number|string} userId
    * @returns {Promise<Array>}
    */
@@ -409,17 +467,17 @@ class DataServiceWrapper {
   }
 
   /**
-   * Obtiene el viaje activo del usuario (el más reciente con fecha futura).
+   * Obtiene el viaje activo del usuario (status === 'active').
    * @param {number|string} userId
    * @returns {Promise<Object|null>}
    */
   async getUserActiveTrip(userId) {
     const purchases = await this.getUserPurchases(userId);
-    const now = new Date();
 
-    // Buscar la compra más reciente cuyo viaje aún no ha pasado
+    // Buscar compras con status 'active' o sin status (legacy, asume activo si fecha futura)
+    const now = new Date();
     const activePurchase = purchases
-      .filter((p) => new Date(p.fecha) >= now)
+      .filter((p) => p.status === 'active' || (!p.status && new Date(p.fecha) >= now))
       .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))[0];
 
     if (!activePurchase) return null;
@@ -428,6 +486,63 @@ class DataServiceWrapper {
     if (!trip) return null;
 
     return { ...trip, purchase: activePurchase };
+  }
+
+  /**
+   * Feature 7: Finaliza la ruta activa del usuario.
+   * Mueve la compra de "activa" a "historial".
+   * @param {number|string} userId
+   * @param {number} purchaseId
+   * @returns {Promise<{success: boolean}>}
+   */
+  async finishTrip(userId, purchaseId) {
+    const purchases = this._getStoredPurchases();
+    const purchaseIndex = purchases.findIndex(
+      (p) => p.id == purchaseId && p.usuarioId == userId
+    );
+
+    if (purchaseIndex === -1) {
+      return { success: false, error: 'Compra no encontrada.' };
+    }
+
+    // Marcar como completada
+    const completedPurchase = {
+      ...purchases[purchaseIndex],
+      status: 'completed',
+      finishedAt: new Date().toISOString(),
+    };
+
+    // Mover al historial
+    const history = this._getStoredHistory();
+    history.push(completedPurchase);
+    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
+
+    // Eliminar de compras activas
+    purchases.splice(purchaseIndex, 1);
+    localStorage.setItem(STORAGE_KEYS.PURCHASES, JSON.stringify(purchases));
+
+    return { success: true };
+  }
+
+  /**
+   * Feature 7: Obtiene el historial de viajes completados del usuario.
+   * @param {number|string} userId
+   * @returns {Promise<Array>}
+   */
+  async getUserHistory(userId) {
+    await this._delay(200);
+    const history = this._getStoredHistory();
+    return history
+      .filter((h) => h.usuarioId == userId)
+      .sort((a, b) => new Date(b.finishedAt) - new Date(a.finishedAt));
+  }
+
+  _getStoredHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY) || '[]');
+    } catch {
+      return [];
+    }
   }
 
   /**
@@ -522,6 +637,7 @@ class DataServiceWrapper {
       asiento: seatNumber,
       precio: trip.precio,
       fechaCompra: new Date().toISOString(),
+      status: 'active', // Feature 6: track active route
     };
 
     const purchases = this._getStoredPurchases();

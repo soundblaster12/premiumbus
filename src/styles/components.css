@@ -699,3 +699,106 @@
 .stat-card__label { font-size: var(--font-size-xs); color: var(--color-gray-500); text-transform: uppercase; letter-spacing: 0.5px; font-weight: var(--font-weight-bold); }
 .stat-card__value { font-size: var(--font-size-xl); font-weight: var(--font-weight-black); color: var(--color-gray-900); margin: var(--space-1) 0; }
 .stat-card__change { font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); }
+
+/* ── Feature 2: Verification Code Inputs ──────── */
+.verify-code-input {
+  width: 44px;
+  height: 52px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  border: 2px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  background: var(--color-gray-50);
+  color: var(--color-primary-700);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.verify-code-input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-glow-blue);
+  background: var(--color-white);
+}
+
+/* ── Feature 3/5: Uber-style Bus Marker ────────── */
+.bus-marker--uber {
+  width: 44px;
+  height: 44px;
+  background: var(--color-primary-600);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  position: relative;
+}
+.bus-marker--uber span {
+  font-size: 22px;
+  z-index: 2;
+}
+.bus-marker__pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(43,109,214,0.3);
+  animation: uberPulse 1.5s ease-out infinite;
+  z-index: 1;
+}
+@keyframes uberPulse {
+  0%   { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* ── Feature 7: History Card ──────────────────── */
+.history-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--color-gray-300);
+  opacity: 0.85;
+}
+.history-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+.history-card__route {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-700);
+}
+.history-card__badge {
+  background: var(--color-gray-200);
+  color: var(--color-gray-600);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+.history-card__detail {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+}
+
+/* ── Feature 6: Active route warning ──────────── */
+.active-route-warning {
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-accent-orange);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-800);
+}
+.active-route-warning__icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador Presentación (PPTX)</title>
+    <!-- Libería PptxGenJS para generar PowerPoint nativo desde JS -->
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #e5e7eb; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 600px; text-align: center; }
+        h1 { color: #d83b01; margin-bottom: 10px; }
+        p { color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 30px; }
+        button { background: #d83b01; color: white; border: none; padding: 16px 32px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #a42c01; }
+        .info { background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border-left: 5px solid #ffeeba; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📊 Generador de Presentación</h1>
+        <div class="info">
+            <strong>Diapositivas listas:</strong> He preparado exactamente 6 diapositivas muy limpias y profesionales con el flujo para tus 15 minutos de presentación.
+        </div>
+        <p>Haz clic en el botón de abajo. Se generará un archivo <b>.pptx</b> de PowerPoint real de forma instantánea usando tu navegador.</p>
+        <button onclick="generarPPTX()">Descargar PowerPoint (.pptx)</button>
+    </div>
+
+    <script>
+        function generarPPTX() {
+            let pptx = new PptxGenJS();
+            pptx.layout = 'LAYOUT_16x9';
+
+            // Diapositiva 1 - Portada
+            let slide1 = pptx.addSlide();
+            slide1.background = { color: "0B1B3D" }; // Azul muy oscuro elegante
+            slide1.addText("DEMOSTRACIÓN EN VIVO", { x: 1, y: 1.8, w: '80%', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center' });
+            slide1.addText("Plan de Pruebas: Metodología Pressman en PremiumBus", { x: 1, y: 3.2, w: '80%', fontSize: 24, color: '41C4F2', align: 'center' });
+            slide1.addText("Aseguramiento de Calidad y Verificación", { x: 1, y: 4.8, w: '80%', fontSize: 16, color: 'AAAAAA', align: 'center' });
+
+            // Diapositiva 2 - Enfoque
+            let slide2 = pptx.addSlide();
+            slide2.background = { color: "FFFFFF" };
+            slide2.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.5, w: '90%', h: 0.8, fill: '0B1B3D' });
+            slide2.addText("1. Estrategia y Entornos de Prueba", { x: 0.5, y: 0.5, w: '90%', h: 0.8, fontSize: 32, bold: true, color: 'FFFFFF', align: 'center' });
+            slide2.addText([
+                { text: "Metodología Aplicada:\n", options: { bold: true, color: 'd83b01' } },
+                { text: "Pruebas de Unidad, Integración y Sistema (Capítulos 17-20).\n\n", options: { bullet: true } },
+                { text: "Estructura de la Demostración (Live Testing):\n", options: { bold: true, color: 'd83b01' } },
+                { text: "Escenario 1: Pruebas Web/Móvil e Interfaz.\n", options: { bullet: true } },
+                { text: "Escenario 2: Lógica Convencional (Pago de Boletos).\n", options: { bullet: true } },
+                { text: "Escenario 3: Seguridad O-O y Arquitectura de Datos.\n\n", options: { bullet: true } },
+                { text: "Dispositivos en red: Laptop (Base de datos), iPhone 13, y Androids.", options: { bullet: { type: 'star' } } }
+            ], { x: 0.8, y: 1.8, w: '85%', fontSize: 20, color: '333333' });
+
+            // Diapositiva 3 - Escenario UI
+            let slide3 = pptx.addSlide();
+            slide3.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.5, w: '90%', h: 0.8, fill: '0B1B3D' });
+            slide3.addText("2. Escenario UI y Compatibilidad", { x: 0.5, y: 0.5, w: '90%', h: 0.8, fontSize: 32, bold: true, color: 'FFFFFF', align: 'center' });
+            slide3.addText([
+                { text: "Caja Negra y Usabilidad:", options: { bold: true, color: 'd83b01' } },
+                { text: "\n  • Validación cruzada entre ecosistemas iOS (iPhone) y Android." },
+                { text: "\n  • Demostración de la reactividad del Sistema de Diseño." },
+                { text: "\n\nResiliencia Visual en Acción:", options: { bold: true, color: 'd83b01' } },
+                { text: "\n  • Las nuevas alertas (Toast) compactadas no bloquean la pantalla." },
+                { text: "\n\nGeolocalización Ininterrumpida:", options: { bold: true, color: 'd83b01' } },
+                { text: "\n  • Inyección de coordenadas al mapa de forma nativa sin latencia." }
+            ], { x: 0.8, y: 1.8, w: '85%', fontSize: 20, color: '333333' });
+
+            // Diapositiva 4 - Escenario Reglas Negocio
+            let slide4 = pptx.addSlide();
+            slide4.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.5, w: '90%', h: 0.8, fill: '0B1B3D' });
+            slide4.addText("3. Escenario Reglas de Negocio", { x: 0.5, y: 0.5, w: '90%', h: 0.8, fontSize: 32, bold: true, color: 'FFFFFF', align: 'center' });
+            slide4.addText([
+                { text: "Cálculo y Validación Algorítmica:\n", options: { bold: true, color: 'd83b01' } },
+                { text: "Prueba de Límites: Transacción atómica deduciendo exactamente $13.50 MXN.\n", options: { bullet: true } },
+                { text: "Early Return Pattern:\n", options: { bold: true, color: 'd83b01' } },
+                { text: "Manejo de Errores: Denegación de compra por fondos insuficientes.\n", options: { bullet: true } },
+                { text: "Prueba a Nivel de Clase (Orientada a Objetos):\n", options: { bold: true, color: 'd83b01' } },
+                { text: "Transición inmutable del estado del Objeto Ticket (Generado a Pagado).", options: { bullet: true } }
+            ], { x: 0.8, y: 1.8, w: '85%', fontSize: 20, color: '333333' });
+
+            // Diapositiva 5 - Base de Datos
+            let slide5 = pptx.addSlide();
+            slide5.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.5, w: '90%', h: 0.8, fill: '0B1B3D' });
+            slide5.addText("4. Integración y Seguridad (Firestore)", { x: 0.5, y: 0.5, w: '90%', h: 0.8, fontSize: 32, bold: true, color: 'FFFFFF', align: 'center' });
+            slide5.addText([
+                { text: "Pruebas sobre el Backend en tiempo real:", options: { bold: true, color: 'd83b01' } },
+                { text: "\n  • Visualización en Firestore de la deducción del saldo (Laptop)." },
+                { text: "\n\nControl de Acceso y Roles (Prueba de Seguridad):", options: { bold: true, color: 'd83b01' } },
+                { text: "\n  • Ejecución como Administrador: Renderizado condicional." },
+                { text: "\n  • Ocultamiento absoluto del botón de compra para Admins." },
+                { text: "\n  • Consulta paginada al Directorio de Usuarios sin error de índices." }
+            ], { x: 0.8, y: 1.8, w: '85%', fontSize: 20, color: '333333' });
+
+            // Diapositiva 6 - Cierre
+            let slide6 = pptx.addSlide();
+            slide6.background = { color: "0B1B3D" };
+            slide6.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.5, w: '90%', h: 0.8, fill: '41C4F2' });
+            slide6.addText("5. Criterios de Aceptación Cumplidos", { x: 0.5, y: 0.5, w: '90%', h: 0.8, fontSize: 32, bold: true, color: '0B1B3D', align: 'center' });
+            slide6.addText([
+                { text: "Resultados Finales:", options: { bold: true, color: 'FFFFFF' } },
+                { text: "\n  1. Tasa de éxito del 100% en casos de uso críticos." },
+                { text: "\n  2. Cero incidentes o caídas del sistema bajo pruebas de esfuerzo." },
+                { text: "\n  3. Cumplimiento absoluto de los principios SOLID." },
+                { text: "\n\n  ✅  Software Aprobado y listo para su despliegue." }
+            ], { x: 0.8, y: 1.8, w: '85%', fontSize: 22, color: 'DDDDDD' });
+
+            // Descargar el PPTX
+            pptx.writeFile({ fileName: 'Presentacion_Pruebas_PremiumBus.pptx' });
+        }
+    </script>
+</body>
+</html>

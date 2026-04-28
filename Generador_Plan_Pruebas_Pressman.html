@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador del Plan de Pruebas (Pressman)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 700px;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .btn-download {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+        .btn-download:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        .btn-download:active {
+            transform: translateY(0);
+        }
+        .features {
+            text-align: left;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3b82f6;
+        }
+        .features ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #334155;
+        }
+        #document-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📑 Plan de Pruebas Listo para Descargar</h1>
+        <p>He generado el documento maestro del Plan de Pruebas de Software aplicando la teoría de <b>Roger S. Pressman (Capítulos 17 al 20)</b>. El documento ha sido adaptado específicamente para el ecosistema de <b>PremiumBus</b> y la aplicación desarrollada.</p>
+        
+        <div class="features">
+            <ul>
+                <li>Más de 12 páginas de justificación teórica y práctica.</li>
+                <li>Estrategias de Prueba (Cap. 17).</li>
+                <li>Pruebas de Caja Blanca y Negra (Cap. 18).</li>
+                <li>Pruebas Orientadas a Objetos (Cap. 19).</li>
+                <li>Pruebas Web / Móviles UI, Geolocalización, Pagos (Cap. 20).</li>
+                <li>Tablas de Casos de Prueba exhaustivas (Login, Compra de Boleto a $13.50, Rol Administrador, etc).</li>
+            </ul>
+        </div>
+
+        <button class="btn-download" onclick="exportHTML()">Descargar Archivo Word (.doc)</button>
+        <p style="margin-top: 15px; font-size: 14px; color: #6b7280;">Al hacer clic, el archivo se descargará nativamente (no necesitas Python instalado).</p>
+    </div>
+
+    <!-- CONTENIDO DEL WORD OCULTO -->
+    <div id="document-content">
+        <div class="title-page">
+            <br><br><br><br><br><br>
+            <h1>DOCUMENTO ESTRATÉGICO Y PLAN DE PRUEBAS DE SOFTWARE</h1>
+            <h2>Aplicación Móvil y Plataforma Administrativa</h2>
+            <h3>Basado en la Metodología de Roger S. Pressman<br>(Capítulos 17 al 20 de Ingeniería del Software)</h3>
+            <br><br><br><br>
+            <p><strong>Proyecto:</strong> Sistema de Geolocalización, Venta de Boletos y Gestión de Usuarios (PremiumBus)</p>
+            <p><strong>Enfoque:</strong> Pruebas Estructurales, Funcionales, Orientadas a Objetos y WebApp.</p>
+            <br><br><br><br>
+            <p><strong>Fecha de Emisión:</strong> Abril 2026</p>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>Índice de Contenido</h2>
+        <p>1. Introducción y Objetivos del Plan de Pruebas<br>
+        2. Alcance del Proyecto y Marco Metodológico<br>
+        3. Estrategias de Prueba de Software (Capítulo 17)<br>
+        &nbsp;&nbsp;&nbsp;3.1. Enfoque Estratégico General<br>
+        &nbsp;&nbsp;&nbsp;3.2. Pruebas de Unidad<br>
+        &nbsp;&nbsp;&nbsp;3.3. Pruebas de Integración (Top-Down y Bottom-Up)<br>
+        &nbsp;&nbsp;&nbsp;3.4. Pruebas de Validación y del Sistema<br>
+        4. Prueba de Aplicaciones Convencionales (Capítulo 18)<br>
+        &nbsp;&nbsp;&nbsp;4.1. Fundamentos y Facilidad de Prueba<br>
+        &nbsp;&nbsp;&nbsp;4.2. Pruebas de Caja Blanca<br>
+        &nbsp;&nbsp;&nbsp;4.3. Pruebas de Caja Negra (Partición de Equivalencia y Valores Límite)<br>
+        5. Prueba de Aplicaciones Orientadas a Objetos (Capítulo 19)<br>
+        &nbsp;&nbsp;&nbsp;5.1. Impacto de la Orientación a Objetos en el Testeo<br>
+        &nbsp;&nbsp;&nbsp;5.2. Pruebas a Nivel de Clase (Modelos de Dominio)<br>
+        &nbsp;&nbsp;&nbsp;5.3. Pruebas de Integración O-O<br>
+        6. Prueba de Aplicaciones Web y Móviles (Capítulo 20)<br>
+        &nbsp;&nbsp;&nbsp;6.1. Dimensiones de Calidad (Móvil / WebApp)<br>
+        &nbsp;&nbsp;&nbsp;6.2. Prueba de la Interfaz de Usuario (UI) y Usabilidad<br>
+        &nbsp;&nbsp;&nbsp;6.3. Prueba de Compatibilidad, Seguridad y Rendimiento<br>
+        7. Diseño Detallado de Casos de Prueba (Matrices de Ejecución)<br>
+        &nbsp;&nbsp;&nbsp;7.1. Módulo de Autenticación y Perfil<br>
+        &nbsp;&nbsp;&nbsp;7.2. Módulo de Compra de Boletos y Roles<br>
+        &nbsp;&nbsp;&nbsp;7.3. Módulo de Geolocalización<br>
+        8. Entornos, Recursos y Criterios de Aceptación<br>
+        9. Conclusiones y Firmas de Aprobación</p>
+
+        <div class="page-break"></div>
+
+        <h2>1. Introducción y Objetivos del Plan de Pruebas</h2>
+        <p>El presente Plan de Pruebas de Software ha sido elaborado con el propósito de establecer las directrices, técnicas y metodologías para asegurar la máxima calidad en la aplicación desarrollada (PremiumBus). Esta aplicación está diseñada para gestionar la geolocalización de autobuses, venta de boletos interactiva al usuario final, validación estricta de roles (Administrador vs. Usuario Estándar) y la administración de perfiles (actualización de fotografías y acceso a un directorio general de usuarios en tiempo real).</p>
+        <p>El objetivo principal del plan es detectar, aislar, reportar, mitigar y corregir defectos en el código antes de su despliegue en el entorno de producción (Android/iOS/Web). A través de la aplicación metódica de los postulados expuestos en la obra de ingeniería referente: "Ingeniería del Software. Un Enfoque Práctico" de Roger S. Pressman (Capítulos 17, 18, 19 y 20), este documento argumenta sólidamente el marco teórico y práctico de las pruebas de unidad, de integración, de validación y sistémicas. Se garantiza así que todos los requisitos y reglas de negocio, como la inmutabilidad arquitectónica o la persistencia de sesión por Firebase, se cumplan a cabalidad.</p>
+
+        <h2>2. Alcance del Proyecto y Marco Metodológico</h2>
+        <p>El alcance de estas pruebas cubre el cien por ciento (100%) de los módulos críticos recién implementados o refactorizados en el sistema. Esto incluye la persistencia del control de inicio de sesión gestionado con Firebase Authentication, las consultas optimizadas a la base de datos no relacional de Firestore, la lógica matemática y de validación en la compra de boletos (asegurando el cumplimiento de la tarifa fija de 13.50 MXN), la validación de visibilidad asimétrica de componentes según el rol del usuario (por ejemplo, ocultando el botón "comprar boleto" si la sesión corresponde a un perfil de administrador), y las actualizaciones estéticas de la interfaz de usuario, priorizando las notificaciones interactivas Toast de formato compacto.</p>
+        <p>La metodología aplicada se basa en un paradigma de "Diseño y Testeo Atómico", donde cada componente visual o lógico se aísla, se estresa, y se le realizan aserciones (pruebas de unidad) antes de ser acoplado al árbol de dependencias principal del sistema (pruebas de integración). Este modelo iterativo e incremental mitiga el riesgo del "efecto cascada" donde un error mínimo en un módulo de bajo nivel rompe toda la aplicación.</p>
+
+        <div class="page-break"></div>
+
+        <h2>3. Estrategias de Prueba de Software (Referencia: Capítulo 17)</h2>
+        <h3>3.1. Enfoque Estratégico General</h3>
+        <p>En el capítulo 17 de su texto, Pressman aborda las pruebas de software desde un nivel estratégico global, estableciendo que deben construirse sobre el concepto de V&amp;V (Verificación y Validación). La verificación responde a "¿Estamos construyendo el producto correctamente?", mientras que la validación responde a "¿Estamos construyendo el producto correcto?". Para PremiumBus, este enfoque en espiral implica iniciar desde el epicentro del sistema (bases de datos y controladores) hacia el exterior (interfaces gráficas y experiencia de usuario).</p>
+        <p>La recolección de métricas estará a cargo de un equipo ITG (Grupo Independiente de Prueba), quien, simulando el comportamiento del usuario sin estar "sesgado" por conocer el código de antemano, confirmará que las estrategias planeadas convergen en un producto confiable.</p>
+
+        <h3>3.2. Pruebas de Unidad</h3>
+        <p>Siguiendo la literatura, la prueba de unidad centra el esfuerzo de verificación en la menor porción de diseño del software: el módulo. Durante esta etapa probaremos el comportamiento algorítmico interno. Para nuestra aplicación se focalizarán en:</p>
+        <ul>
+            <li><b>Lógica de Facturación y Compra:</b> Funciones aisladas que calculan la deducción matemática de 13.50 MXN del saldo total del usuario. Se enviarán vectores de prueba con saldos insuficientes, exactos y excedentes para garantizar el cumplimiento de "Early Return" propuesto por Clean Code.</li>
+            <li><b>Autenticación de Estado:</b> Módulos responsables de descifrar y almacenar el JWT de Firebase. Se comprobará de manera aislada que un reinicio abrupto de la aplicación no invalida la sesión si el token no ha expirado.</li>
+            <li><b>Optimización de Consultas:</b> Módulos de filtrado de Firebase que evitan usar índices compuestos innecesarios cuando se solicitan grandes volúmenes de usuarios para la vista de Directorio Administrativo.</li>
+        </ul>
+
+        <h3>3.3. Pruebas de Integración (Top-Down y Bottom-Up)</h3>
+        <p>Las pruebas unitarias independientes son insuficientes si los módulos no se comunican correctamente. Pressman sugiere dos enfoques. Emplearemos una estrategia de Integración "Top-Down" para los módulos de la interfaz. Esto significa que la arquitectura de navegación de pantallas (React Navigation / Expo Router) se prueba primero empleando "Stubs" temporales en lugar de llamadas reales a la API.</p>
+        <p>Paralelamente, para la persistencia de datos aplicaremos un enfoque "Bottom-Up". Probaremos la lectura/escritura en Firebase (la base), la conectaremos a los repositorios de datos y luego a los casos de uso, minimizando fallos asíncronos imprevistos y bloqueos (race conditions).</p>
+
+        <h3>3.4. Pruebas de Validación y del Sistema</h3>
+        <p>En esta etapa validamos todo el software bajo condiciones de "caja negra" reales. Destacan las siguientes pruebas de nivel Sistema:</p>
+        <ul>
+            <li><b>Pruebas de Recuperación (Recovery Testing):</b> Interrupción forzada del Wifi o Datos Móviles durante la ventana de confirmación del ticket de 13.50 MXN. Se verificará que el rollback se ejecuta, el sistema reporta la desconexión vía Toast y no se efectúan deducciones fantasmas.</li>
+            <li><b>Prueba de Rendimiento (Performance Testing):</b> Carga concurrente del directorio con datos simulados masivos. Evaluación del tiempo de renderizado de la UI de React Native y que no se presente "Frame dropping" notable en el scroll.</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <h2>4. Prueba de Aplicaciones Convencionales (Referencia: Capítulo 18)</h2>
+        <h3>4.1. Fundamentos y Facilidad de Prueba (Testability)</h3>
+        <p>La "Testability" o facilidad para someter un sistema a pruebas se garantiza en nuestro desarrollo acatando los principios de Separación Estricta de Responsabilidades (SoC). La capa visual es deliberadamente "tonta", lo que facilita enormemente correr pruebas sobre los controladores subyacentes sin depender de un simulador visual corriendo en segundo plano.</p>
+
+        <h3>4.2. Pruebas de Caja Blanca</h3>
+        <p>La técnica de Caja Blanca (también conocida como prueba de cristal) se realiza comprendiendo y vislumbrando el código fuente. Pressman recomienda el uso de grafos de flujo para definir el camino básico.</p>
+        <p><b>Análisis de Complejidad Ciclomática - Módulo "Procesar Compra":</b> Se evaluarán las aristas y nodos condicionales. El proceso evalúa si el usuario está autenticado, si el rol permite comprar (siendo Admin = false, interrupción de ruta), si el usuario tiene un saldo &gt;= 13.50 MXN y si la base de datos acepta la transacción. El diseño de pruebas garantiza que se ejecuten casos para cubrir absolutamente todos los caminos independientes del código, reduciendo así la probabilidad de condiciones "fantasma" que produzcan bugs latentes.</p>
+
+        <h3>4.3. Pruebas de Caja Negra</h3>
+        <p>Las pruebas de Caja Negra operan sobre la interfaz pública del software sin saber cómo trabaja internamente, priorizando la detección de errores funcionales o de entrada/salida. Las técnicas implementadas serán Partición de Equivalencia y Análisis de Valores Límite.</p>
+        <ul>
+            <li><b>Valores Límite en Formularios Financieros:</b> Siendo el boleto 13.50, probaremos saldos del usuario en 13.49 (Debería rechazar), 13.50 (Límite exacto, debería aceptar y dejar balance en 0) y 13.51 (Acepta, balance 0.01).</li>
+            <li><b>Particiones de Equivalencia en Fotografía de Perfil:</b> Agruparemos las entradas válidas (Imágenes PNG o JPG menores a 2MB) y entradas inválidas (Archivos PDF, TXT, imágenes mayores a 2MB) para verificar que el sistema de validación previene fallos antes de contactar con el almacenamiento de Firebase Storage.</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <h2>5. Prueba de Aplicaciones Orientadas a Objetos (Referencia: Capítulo 19)</h2>
+        <h3>5.1. Impacto de la Orientación a Objetos en el Testeo</h3>
+        <p>Las arquitecturas tradicionales prueban funciones modulares. Sin embargo, Pressman describe cómo en sistemas Orientados a Objetos (OO), la unidad mínima testeable encapsulada es la Clase (Modelos de entidad). Conceptos como encapsulamiento, inmutabilidad de datos y polimorfismo dictan la manera de construir los casos.</p>
+
+        <h3>5.2. Pruebas a Nivel de Clase (Modelos de Dominio)</h3>
+        <p>El comportamiento de los modelos `Usuario`, `Ticket` y `GeoMarker` se pondrá a prueba en sus propios entornos. Por ejemplo, el objeto Ticket experimenta un ciclo de vida, cambiando su estado interno (atributo) de "Emitido" a "Consumido". Las pruebas asegurarán que el encapsulamiento impida que agentes externos modifiquen este estado de manera ad-hoc. Solo los métodos legítimos del objeto (por ejemplo `ticket.scan()`) podrán alterar su atributo, validando la regla de "Inmutabilidad por Defecto" de las buenas prácticas.</p>
+
+        <h3>5.3. Pruebas de Integración O-O</h3>
+        <p>La interacción mediante paso de mensajes entre objetos será escrutada a fondo a través de Pruebas Basadas en Hilos (Thread-based testing). Se ejecutará un hilo asíncrono donde un objeto `GPSController` pasa continuamente latitud y longitud a un modelo `SessionLocation`. Se medirá la tolerancia de estas instancias a retrasos en red, evaluando si un hilo entra en un ciclo mortal infinito esperando el evento "promise resolve" o si los timeouts se administran con gracia.</p>
+
+        <div class="page-break"></div>
+
+        <h2>6. Prueba de Aplicaciones Web y Móviles (Referencia: Capítulo 20)</h2>
+        <h3>6.1. Dimensiones de Calidad para Ecosistemas App/Web</h3>
+        <p>Según el capítulo 20 de la bibliografía base, las WebApps y sistemas móviles enfrentan el reto constante de operar en plataformas altamente fragmentadas (diferentes navegadores, versiones de Android/iOS y tamaños de pantalla). La calidad se evalúa en confiabilidad de la red y estética de la interfaz ("Vibe Atómico").</p>
+
+        <h3>6.2. Prueba de la Interfaz de Usuario (UI) y Usabilidad</h3>
+        <p>En este sistema se ha invertido significativamente en diseño moderno. Por lo tanto, las pruebas estéticas son estrictas:</p>
+        <p><b>Validación de Tokens Visuales:</b> Ninguna parte de la aplicación debe fallar en seguir las pautas de estilo. Las notificaciones interactivas tipo "Toast" fueron compactadas expresamente para no estorbar el espacio móvil. Se validará que su ancho no supere el 85% de la pantalla en dispositivos pequeños (como iPhone SE o pantallas pequeñas de Android), preservando la "Resiliencia Visual" y el "Responsive Design".</p>
+
+        <h3>6.3. Prueba de Seguridad, Compatibilidad y Geolocalización</h3>
+        <p><b>Configuración Multi-Plataforma:</b> Se simularán escenarios bajo emuladores nativos de iOS y Android para asegurar que el uso de librerías como MapView cargue correctamente los mapas de Apple en iOS y Google Maps en Android, ajustando las coordenadas geográficas de forma transparente.</p>
+        <p><b>Pruebas de Seguridad en Auth y Bases de Datos:</b> Se comprobarán las reglas de seguridad publicadas en el backend (Firebase Rules). Intentaremos, bajo el contexto O-O, falsificar el objeto `AuthToken` del usuario e inyectar un cambio de tarifa para evadir el cobro de 13.50. El servidor deberá identificar la discrepancia del JWT y rechazar la acción permanentemente. De esta forma, protegemos los accesos exclusivos al Directorio de Usuarios para Administradores.</p>
+
+        <div class="page-break"></div>
+
+        <h2>7. Matrices Formales y Casos de Prueba Extendidos (Caja Negra y Blanca)</h2>
+        <p>Las siguientes tablas definen el protocolo estricto que deberá seguir el departamento de aseguramiento de calidad (QA). Se han seleccionado escenarios vitales del ecosistema PremiumBus para aplicar la teoría de Ingeniería del Software vista en los capítulos previos.</p>
+
+        <h3>7.1. Módulo de Autenticación, Acceso y Perfil de Usuario</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Descripción del Escenario</th>
+                <th>Datos de Precondición</th>
+                <th>Procedimiento / Pasos</th>
+                <th>Resultado Esperado (Validación)</th>
+            </tr>
+            <tr>
+                <td>CP-AUTH-01</td>
+                <td>Inicio de sesión feliz y retención de token</td>
+                <td>Usuario creado y red estable.</td>
+                <td>1. Ingresar credenciales correctas.<br>2. Acceder al sistema.<br>3. Cerrar la aplicación desde el administrador de tareas de OS.<br>4. Reabrir.</td>
+                <td>El sistema inicia sin pedir credenciales, reanudando la sesión mediante token persistente guardado localmente de forma segura.</td>
+            </tr>
+            <tr>
+                <td>CP-AUTH-02</td>
+                <td>Prevención de Inyecciones/Ataque.</td>
+                <td>Ninguna.</td>
+                <td>1. Ingresar como email scripts como <code>&lt;script&gt;</code>.<br>2. Pulsar botón login.</td>
+                <td>Bloqueo inmediato local sin petición de red, indicando "Formato de email inválido" (Clean Code Early Return).</td>
+            </tr>
+            <tr>
+                <td>CP-PERF-01</td>
+                <td>Carga masiva de fotografía de perfil</td>
+                <td>Usuario autenticado y API Storage operativa.</td>
+                <td>1. Clic en modificar perfil.<br>2. Cargar una imagen en formato .JPG válida.<br>3. Enviar formulario.</td>
+                <td>El archivo sube asíncronamente mostrando barra de progreso o un spinner de carga, finalmente actualiza la miniatura en tiempo real.</td>
+            </tr>
+        </table>
+
+        <div class="page-break"></div>
+
+        <h3>7.2. Módulo de Compras ($13.50) y Roles de Acceso (Admin)</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Descripción del Escenario</th>
+                <th>Datos de Precondición</th>
+                <th>Procedimiento / Pasos</th>
+                <th>Resultado Esperado (Validación)</th>
+            </tr>
+            <tr>
+                <td>CP-COMPRA-01</td>
+                <td>Comprobación límite exacto de compra de ticket.</td>
+                <td>Saldo en billetera = $13.50 MXN (Usuario normal).</td>
+                <td>1. Ir a sección de tickets.<br>2. Pulsar botón "Adquirir".</td>
+                <td>La transacción es aprobada, el código QR se emite. El saldo restante reflejado del cliente es de $0.00 MXN exactamente.</td>
+            </tr>
+            <tr>
+                <td>CP-COMPRA-02</td>
+                <td>Fallo previsto por insuficiencia de saldo.</td>
+                <td>Saldo en billetera = $13.49 MXN (Usuario normal).</td>
+                <td>1. Pulsar botón "Adquirir".</td>
+                <td>Fallo procesado. Alerta Toast (Estilo Error compacto rojo) indica "Fondo insuficiente", transacción abortada en milisegundos.</td>
+            </tr>
+            <tr>
+                <td>CP-ROL-01</td>
+                <td>Restricción de vistas por perfil Administrador.</td>
+                <td>Cuenta tipo "Admin" logueada.</td>
+                <td>1. Inspeccionar pantalla de inicio y menú lateral.</td>
+                <td>La opción de "Comprar Boletos" ha desaparecido de la interfaz (Renderizado Condicional), cumpliendo los requerimientos de la actualización V2.</td>
+            </tr>
+            <tr>
+                <td>CP-ROL-02</td>
+                <td>Acceso a la información general por directorio.</td>
+                <td>Cuenta tipo "Admin" logueada.</td>
+                <td>1. Navegar a "Directorio de Usuarios".</td>
+                <td>Se despliega una lista completa optimizada sin arrojar advertencias de "composite indices" requeridos en la consola de Firebase.</td>
+            </tr>
+        </table>
+
+        <div class="page-break"></div>
+
+        <h3>7.3. Módulo de Geolocalización Activa y Reactiva</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Descripción del Escenario</th>
+                <th>Datos de Precondición</th>
+                <th>Procedimiento / Pasos</th>
+                <th>Resultado Esperado (Validación)</th>
+            </tr>
+            <tr>
+                <td>CP-GEO-01</td>
+                <td>Seguimiento ininterrumpido en tiempo real.</td>
+                <td>Dispositivo con GPS activado y permisos dados en Settings.</td>
+                <td>1. Ingresar a la sección de Mapa (Ubicación de Buses).<br>2. Desplazar físicamente el teléfono 10 metros.</td>
+                <td>El marcador gráfico del usuario se desliza de forma fluida reflejando el movimiento sin "saltos" exagerados (poller optimizado).</td>
+            </tr>
+            <tr>
+                <td>CP-GEO-02</td>
+                <td>Corte abrupto de servicios de ubicación.</td>
+                <td>El mapa está funcionando normal.</td>
+                <td>1. Cambiar a los ajustes del sistema y desactivar el hardware GPS (Modo Avión o Apagar Ubicación).<br>2. Regresar a la app.</td>
+                <td>La app detecta el cambio de estado, congela la actualización y notifica cortésmente vía Toast compacto: "Se perdió señal GPS". Evita un crash fatal.</td>
+            </tr>
+        </table>
+
+        <div class="page-break"></div>
+
+        <h2>8. Entornos, Recursos y Criterios de Aceptación</h2>
+        <p>Para la correcta puesta en marcha de estas pruebas se dispondrá de dispositivos virtuales (Emuladores como Android Studio o Simuladores de XCode) y dispositivos físicos reales (Smartphones de prueba dedicados). El entorno de backend se mantendrá en un servidor de Staging (Pruebas), separando la base de datos de producción para evitar contaminación de datos de clientes reales.</p>
+        <p><b>Métricas y Criterios de Aceptación/Cierre:</b> De acuerdo con la etapa final descrita por Pressman, estas pruebas no pueden prolongarse indefinidamente. Se considerará el producto apto para su lanzamiento (Deploy) cuando:</p>
+        <ol>
+            <li>La tasa de éxito en las Pruebas Críticas (Casos: CP-AUTH, CP-COMPRA, CP-ROL) alcance estrictamente el 100%.</li>
+            <li>No existan incidentes clasificados como "Severidad 1" (Caídas completas de la aplicación, fugas de datos y corrupción de saldos).</li>
+            <li>Todo el código subido al repositorio principal pase las revisiones automáticas (Linter, revisiones de arquitectura SOLID e Inmutabilidad).</li>
+        </ol>
+
+        <div class="page-break"></div>
+
+        <h2>9. Conclusiones y Firmas de Aprobación</h2>
+        <p>La adopción de estrategias formales de Ingeniería de Software (según los paradigmas de Roger S. Pressman) no solo previene que defectos fatales lleguen al cliente final, sino que eleva dramáticamente el nivel de profesionalismo del proyecto. Mediante estas pruebas de caja blanca, caja negra y estrategias de integración web y móvil, este software demuestra ser un producto robusto, seguro, visualmente vanguardista (Atómico y Resiliente) y completamente funcional de cara a la evaluación final.</p>
+        <br><br><br><br><br>
+        
+        <table style="border: none; width: 80%; margin: 0 auto;">
+            <tr style="border: none;">
+                <td style="border: none; text-align: center; width: 50%;">
+                    ____________________________________<br><br>
+                    <b>Responsable / Director de Proyecto</b><br>
+                    Aprobación de Ingeniería de Software
+                </td>
+                <td style="border: none; text-align: center; width: 50%;">
+                    ____________________________________<br><br>
+                    <b>Validación de Calidad (QA)</b><br>
+                    Autorización de Fase de Pruebas
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+    <script>
+        function exportHTML() {
+            var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Plan de Pruebas de Software - Pressman</title><style> body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 11.5pt; line-height: 1.5; text-align: justify; } h1, h2, h3 { color: #1F3864; font-family: 'Arial', sans-serif; } h1 { text-align: center; font-size: 20pt; margin-top: 80px; font-weight: bold; } h2 { font-size: 16pt; margin-top: 35px; margin-bottom: 15px; border-bottom: 1px solid #A6A6A6; padding-bottom: 5px; } h3 { font-size: 13pt; margin-top: 20px; font-style: italic; } p { margin-bottom: 15px; } ul, ol { margin-bottom: 15px; } li { margin-bottom: 8px; } .page-break { page-break-before: always; } table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 30px; } table, th, td { border: 1px solid #333; } th { background-color: #E6EAF2; padding: 12px; font-weight: bold; text-align: left; } td { padding: 12px; vertical-align: top; } .title-page { text-align: center; margin-top: 150px; } </style></head><body>";
+            
+            var footer = "</body></html>";
+            
+            var content = document.getElementById("document-content").innerHTML;
+            var sourceHTML = header + content + footer;
+            
+            var blob = new Blob(['\ufeff', sourceHTML], {
+                type: 'application/msword'
+            });
+            
+            var url = URL.createObjectURL(blob);
+            var fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = url;
+            fileDownload.download = 'Plan_De_Pruebas_PremiumBus_Pressman.doc';
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        }
+    </script>
+</body>
+</html>

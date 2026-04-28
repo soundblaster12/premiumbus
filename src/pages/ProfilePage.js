@@ -39,18 +39,20 @@ export async function renderProfilePage() {
   const profilePhoto = getProfilePhoto(user.id);
 
   let purchases = [];
+  let history = [];
   if (!isAdmin) {
     try {
       purchases = await DataService.getUserPurchases(user.id);
-    } catch {
-      purchases = [];
-    }
+    } catch { purchases = []; }
+    try {
+      history = await DataService.getUserHistory(user.id);
+    } catch { history = []; }
   }
 
   const sortedPurchases = [...purchases].sort(
     (a, b) => new Date(b.fechaCompra) - new Date(a.fechaCompra)
   );
-  const totalSpent = purchases.reduce((sum, p) => sum + (p.precio || 0), 0);
+  const totalSpent = [...purchases, ...history].reduce((sum, p) => sum + (p.precio || 0), 0);
   const now = new Date();
 
   // Admin: fetch all users
@@ -108,7 +110,7 @@ export async function renderProfilePage() {
     </div>
 
     <div class="profile-page__content">
-      ${isAdmin ? renderAdminSection(allUsers) : renderUserSection(sortedPurchases, now)}
+      ${isAdmin ? renderAdminSection(allUsers) : renderUserSection(sortedPurchases, history, now)}
 
       <!-- Logout -->
       <div class="profile-page__logout">
@@ -165,7 +167,7 @@ function renderAdminSection(allUsers) {
 
 /* ── User Section: Quick Actions + Purchase History ── */
 
-function renderUserSection(sortedPurchases, now) {
+function renderUserSection(sortedPurchases, historyItems, now) {
   return `
     <!-- Quick Actions -->
     <div class="profile-page__quick-actions">
@@ -179,34 +181,28 @@ function renderUserSection(sortedPurchases, now) {
       </button>
     </div>
 
-    <!-- Purchase History -->
+    <!-- Active Purchases -->
     <div class="profile-page__section">
       <div class="section-header">
-        <h2 class="section-header__title">📋 Historial de Compras</h2>
+        <h2 class="section-header__title">🎫 Viajes Activos</h2>
         <span class="profile-page__count-badge">${sortedPurchases.length}</span>
       </div>
 
       ${sortedPurchases.length === 0
         ? `<div class="profile-page__empty">
             <span class="profile-page__empty-icon">🎫</span>
-            <p class="profile-page__empty-title">Sin compras aún</p>
-            <p class="profile-page__empty-desc">Tus boletos comprados aparecerán aquí</p>
+            <p class="profile-page__empty-title">Sin viajes activos</p>
+            <p class="profile-page__empty-desc">Compra un boleto para comenzar tu viaje</p>
             <button class="btn btn--primary btn--md" id="profile-first-buy">
               Comprar mi primer boleto
             </button>
           </div>`
         : `<div class="profile-page__history" id="purchase-history-list">
             ${sortedPurchases.map((purchase, index) => {
-              const purchaseDate = new Date(purchase.fechaCompra || purchase.fecha_compra);
-              const tripDate = new Date(purchase.fecha);
-              const isActive = tripDate >= now;
-              const statusLabel = isActive ? 'Activo' : 'Completado';
-              const statusClass = isActive ? 'active' : 'completed';
-
               return `
                 <div class="purchase-history-card" style="animation: slideInRight 0.3s ease ${index * 0.05}s both;">
-                  <div class="purchase-history-card__status purchase-history-card__status--${statusClass}">
-                    ${isActive ? '🟢' : '✅'} ${statusLabel}
+                  <div class="purchase-history-card__status purchase-history-card__status--active">
+                    🟢 En Curso
                   </div>
                   <div class="purchase-history-card__header">
                     <span class="purchase-history-card__route">🚌 ${purchase.nombreRuta || purchase.nombre_ruta}</span>
@@ -222,11 +218,43 @@ function renderUserSection(sortedPurchases, now) {
                   </div>
                   <div class="purchase-history-card__footer">
                     <span class="purchase-history-card__folio">Folio: ${purchase.id}</span>
-                    <span class="purchase-history-card__date">Comprado ${formatRelativeDate(purchaseDate)}</span>
+                    <span class="purchase-history-card__date">Comprado ${formatRelativeDate(new Date(purchase.fechaCompra || purchase.fecha_compra))}</span>
                   </div>
                 </div>
               `;
             }).join('')}
+          </div>`
+      }
+    </div>
+
+    <!-- Feature 7: Trip History (Completed) -->
+    <div class="profile-page__section">
+      <div class="section-header">
+        <h2 class="section-header__title">📜 Historial de Viajes</h2>
+        <span class="profile-page__count-badge">${historyItems.length}</span>
+      </div>
+
+      ${historyItems.length === 0
+        ? `<div class="profile-page__empty">
+            <span class="profile-page__empty-icon">📜</span>
+            <p class="profile-page__empty-title">Sin historial</p>
+            <p class="profile-page__empty-desc">Tus viajes completados aparecerán aquí</p>
+          </div>`
+        : `<div id="history-list">
+            ${historyItems.map((item, index) => `
+              <div class="history-card" style="animation: slideInRight 0.3s ease ${index * 0.05}s both;">
+                <div class="history-card__header">
+                  <span class="history-card__route">✅ ${item.nombreRuta || item.nombre_ruta}</span>
+                  <span class="history-card__badge">Completado</span>
+                </div>
+                <div class="history-card__detail">
+                  ${item.origen} → ${item.destino} | Asiento #${item.asiento} | $${item.precio.toFixed(2)}
+                </div>
+                <div class="history-card__detail">
+                  Finalizado: ${new Date(item.finishedAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
+              </div>
+            `).join('')}
           </div>`
       }
     </div>

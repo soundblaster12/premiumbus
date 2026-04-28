@@ -108,8 +108,9 @@ class MapServiceWrapper {
   }
 
   /**
-   * Inicia la simulación de bus en tiempo real.
-   * Un marcador 🚌 se mueve a lo largo de las paradas.
+   * Feature 3/5: Simulación de bus estilo Uber.
+   * Genera puntos intermedios densos entre paradas para movimiento fluido,
+   * el mapa sigue al bus automáticamente y se muestra un trail de progreso.
    */
   startBusSimulation(containerId, trip) {
     const map = mapInstances[containerId];
@@ -118,56 +119,75 @@ class MapServiceWrapper {
     const stops = trip.paradas || [];
     if (stops.length < 2) return null;
 
-    // Create bus marker
+    // Generar ruta densa interpolada (puntos cada ~50m para suavidad)
+    const denseRoute = this._generateDenseRoute(stops);
+
+    // Crear marcador de bus con estilo premium
     const busIcon = L.divIcon({
-      html: '<div class="bus-marker">🚌</div>',
-      iconSize: [36, 36],
-      iconAnchor: [18, 18],
+      html: `<div class="bus-marker bus-marker--uber">
+               <div class="bus-marker__pulse"></div>
+               <span>🚌</span>
+             </div>`,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
       className: '',
     });
 
-    const busMarker = L.marker([stops[0].lat, stops[0].lng], { icon: busIcon, zIndexOffset: 1000 }).addTo(map);
+    const busMarker = L.marker(denseRoute[0], { icon: busIcon, zIndexOffset: 1000 }).addTo(map);
 
-    // Animate along the route
+    // Trail polyline (línea recorrida en verde)
+    const trailLine = L.polyline([], {
+      color: '#34c759',
+      weight: 6,
+      opacity: 0.9,
+    }).addTo(map);
+
+    // Remaining route (gris tenue)
+    const remainingLine = L.polyline(denseRoute, {
+      color: '#aaa',
+      weight: 4,
+      opacity: 0.4,
+      dashArray: '8 6',
+    }).addTo(map);
+
+    let pointIndex = 0;
     let currentStopIndex = 0;
-    const routeCoords = stops.map((s) => [s.lat, s.lng]);
+    const trailCoords = [];
+    const FRAME_DELAY = 60; // ms entre frames (velocidad simulada)
 
-    // Interpolation state
-    let progress = 0;
-    const SPEED = 0.003; // units per frame (~30km/h equivalent)
+    // Mapear qué índice en denseRoute corresponde a cada parada
+    const stopIndices = this._mapStopsToDenseIndices(stops, denseRoute);
 
     const animateBus = () => {
-      if (currentStopIndex >= routeCoords.length - 1) {
-        currentStopIndex = 0; // Loop
-        progress = 0;
+      if (pointIndex >= denseRoute.length) {
+        pointIndex = 0; // Loop
+        trailCoords.length = 0;
+        trailLine.setLatLngs([]);
+        currentStopIndex = 0;
       }
 
-      const from = routeCoords[currentStopIndex];
-      const to = routeCoords[currentStopIndex + 1];
+      const pos = denseRoute[pointIndex];
+      busMarker.setLatLng(pos);
 
-      // Interpolate position
-      const lat = from[0] + (to[0] - from[0]) * progress;
-      const lng = from[1] + (to[1] - from[1]) * progress;
+      // Actualizar trail
+      trailCoords.push(pos);
+      trailLine.setLatLngs(trailCoords);
 
-      busMarker.setLatLng([lat, lng]);
+      // Seguir al bus con el mapa (estilo Uber: suave, sin saltos)
+      map.panTo(pos, { animate: true, duration: 0.3, noMoveStart: true });
 
-      // Calculate distance between stops
-      const dx = to[0] - from[0];
-      const dy = to[1] - from[1];
-      const segmentLength = Math.sqrt(dx * dx + dy * dy);
-      const step = SPEED / (segmentLength * 1000 || 1);
-
-      progress += step;
-
-      if (progress >= 1) {
-        progress = 0;
-        currentStopIndex++;
+      // Detectar en qué parada estamos
+      for (let i = currentStopIndex; i < stopIndices.length; i++) {
+        if (pointIndex >= stopIndices[i]) {
+          currentStopIndex = i;
+        }
       }
 
-      busAnimationTimers[containerId] = requestAnimationFrame(animateBus);
+      pointIndex++;
+      busAnimationTimers[containerId] = setTimeout(animateBus, FRAME_DELAY);
     };
 
-    busAnimationTimers[containerId] = requestAnimationFrame(animateBus);
+    busAnimationTimers[containerId] = setTimeout(animateBus, FRAME_DELAY);
 
     return {
       busMarker,
@@ -176,9 +196,52 @@ class MapServiceWrapper {
       getProgress: () => ({
         currentIndex: currentStopIndex,
         total: stops.length,
-        fraction: progress,
+        fraction: pointIndex / denseRoute.length,
       }),
+      isFinished: () => pointIndex >= denseRoute.length - 1,
     };
+  }
+
+  /**
+   * Genera puntos intermedios densos entre paradas para movimiento suave.
+   */
+  _generateDenseRoute(stops) {
+    const dense = [];
+    const POINTS_PER_SEGMENT = 80; // puntos entre cada par de paradas
+
+    for (let i = 0; i < stops.length - 1; i++) {
+      const from = [stops[i].lat, stops[i].lng];
+      const to = [stops[i + 1].lat, stops[i + 1].lng];
+
+      for (let j = 0; j <= POINTS_PER_SEGMENT; j++) {
+        const t = j / POINTS_PER_SEGMENT;
+        dense.push([
+          from[0] + (to[0] - from[0]) * t,
+          from[1] + (to[1] - from[1]) * t,
+        ]);
+      }
+    }
+    return dense;
+  }
+
+  /**
+   * Mapea cada parada a su índice aproximado en la ruta densa.
+   */
+  _mapStopsToDenseIndices(stops, denseRoute) {
+    return stops.map((stop) => {
+      let closestIdx = 0;
+      let closestDist = Infinity;
+      for (let i = 0; i < denseRoute.length; i++) {
+        const dx = denseRoute[i][0] - stop.lat;
+        const dy = denseRoute[i][1] - stop.lng;
+        const dist = dx * dx + dy * dy;
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestIdx = i;
+        }
+      }
+      return closestIdx;
+    });
   }
 
   /**
@@ -186,7 +249,7 @@ class MapServiceWrapper {
    */
   stopBusSimulation(containerId) {
     if (busAnimationTimers[containerId]) {
-      cancelAnimationFrame(busAnimationTimers[containerId]);
+      clearTimeout(busAnimationTimers[containerId]);
       delete busAnimationTimers[containerId];
     }
   }

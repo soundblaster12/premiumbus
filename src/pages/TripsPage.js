@@ -86,6 +86,9 @@ export async function renderTripsPage() {
       ${AuthService.isAdmin() ? '' : `<button class="btn btn--success btn--sm" id="trips-buy-ticket" style="flex:1;">
         🎫 Comprar
       </button>`}
+      ${activeTrip && !AuthService.isAdmin() ? `<button class="btn btn--orange btn--sm" id="btn-finish-trip" style="flex:1;">
+        🏁 Finalizar Ruta
+      </button>` : ''}
     </div>
 
     <!-- ETA Panel -->
@@ -313,7 +316,7 @@ function attachTripsListeners(trips, activeTrip) {
     }
   });
 
-  // EN VIVO — Start/stop bus simulation
+  // EN VIVO — Start/stop bus simulation (Feature 3/5: Uber-style GPS tracking)
   document.getElementById('btn-live')?.addEventListener('click', () => {
     if (!selectedTrip) return;
 
@@ -328,8 +331,11 @@ function attachTripsListeners(trips, activeTrip) {
       badge.style.display = 'inline-flex';
       etaPanel.style.display = 'block';
 
-      // Start simulation
+      // Start Uber-style bus simulation
       currentSimulation = MapService.startBusSimulation('trip-map', selectedTrip);
+
+      // Also start tracking user's real GPS position alongside
+      MapService.startLocationTracking('trip-map');
 
       // Update ETA periodically
       const routeName = selectedTrip.nombreRuta || selectedTrip.nombre_ruta;
@@ -348,6 +354,28 @@ function attachTripsListeners(trips, activeTrip) {
   // My Location
   document.getElementById('btn-my-location')?.addEventListener('click', () => {
     MapService.showUserPosition('trip-map');
+  });
+
+  // Feature 7: Finish Trip — Move to history
+  document.getElementById('btn-finish-trip')?.addEventListener('click', async () => {
+    if (!activeTrip?.purchase) return;
+
+    const user = AuthService.getCurrentUser();
+    if (!user) return;
+
+    const btn = document.getElementById('btn-finish-trip');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn__spinner"></span> Finalizando...'; }
+
+    const result = await DataService.finishTrip(user.id, activeTrip.purchase.id);
+    if (result.success) {
+      showToast('✅ ¡Ruta finalizada! Tu viaje se guardó en el historial.', 'success');
+      MapService.stopBusSimulation('trip-map');
+      // Reload the page to reflect changes
+      router.navigate('trips');
+    } else {
+      showToast(result.error || 'Error al finalizar la ruta.', 'error');
+      if (btn) { btn.disabled = false; btn.innerHTML = '🏁 Finalizar Ruta'; }
+    }
   });
 
   // Search filter

@@ -26,6 +26,15 @@ export async function renderPurchasePage() {
   const tripIdMatch = hash.match(/trip=(\d+)/);
   const preSelectedTripId = tripIdMatch ? parseInt(tripIdMatch[1]) : null;
 
+  // Feature 6: Check if user already has an active route
+  const user = AuthService.getCurrentUser();
+  let hasActiveRoute = false;
+  if (user) {
+    try {
+      hasActiveRoute = await DataService.userHasActiveRoute(user.id);
+    } catch { hasActiveRoute = false; }
+  }
+
   let trips = [];
   try {
     trips = await DataService.getTrips();
@@ -55,6 +64,15 @@ export async function renderPurchasePage() {
     </div>
 
     <div class="purchase-page__content">
+      ${hasActiveRoute ? `
+        <div class="active-route-warning">
+          <span class="active-route-warning__icon">⚠️</span>
+          <div>
+            <strong>Ya tienes un viaje en curso.</strong><br>
+            Debes finalizar tu ruta actual antes de comprar otro boleto. Ve a <a href="#/trips" style="color:var(--color-primary-600);font-weight:bold;">Viajes</a> para finalizar.
+          </div>
+        </div>
+      ` : ''}
       <!-- Trip Selection -->
       <div class="input-group">
         <label class="input-group__label">🚌 Selecciona tu viaje</label>
