@@ -135,7 +135,32 @@ export async function renderLoginPage() {
       </div>
     </div>
 
-    <!-- Modal: Forgot Password Step 2 (New Password) -->
+    <!-- Modal: Forgot Password Step 2 (Verification Code) -->
+    <div class="modal-overlay" id="forgot-code-modal" style="display:none;">
+      <div class="modal">
+        <div class="modal__handle"></div>
+        <h2 class="modal__title">📧 Verifica tu identidad</h2>
+        <p style="text-align:center;color:var(--color-gray-500);font-size:var(--font-size-sm);margin-bottom:var(--space-4);" id="forgot-code-email-display">
+          Ingresa el código de 6 dígitos enviado a tu correo
+        </p>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:var(--space-4);">
+          <input class="verify-code-input" id="fc-1" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input class="verify-code-input" id="fc-2" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input class="verify-code-input" id="fc-3" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input class="verify-code-input" id="fc-4" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input class="verify-code-input" id="fc-5" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input class="verify-code-input" id="fc-6" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+        </div>
+        <button class="btn btn--primary btn--full btn--lg" id="forgot-code-submit" type="button">
+          ✅ Verificar código
+        </button>
+        <button class="btn btn--secondary btn--full btn--md" id="forgot-code-cancel" type="button" style="margin-top:var(--space-3);">
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal: Forgot Password Step 3 (New Password) -->
     <div class="modal-overlay" id="reset-modal" style="display:none;">
       <div class="modal">
         <div class="modal__handle"></div>
@@ -325,28 +350,93 @@ function attachForgotPasswordListeners() {
     document.getElementById('forgot-modal').style.display = 'none';
   });
 
+  // Step 1: Verify email exists → send verification code
   document.getElementById('forgot-submit')?.addEventListener('click', async () => {
     const email = document.getElementById('forgot-email')?.value?.trim();
     if (!email) { showToast('Ingresa tu correo.', 'error'); return; }
 
     const btn = document.getElementById('forgot-submit');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn__spinner"></span> Verificando...'; }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn__spinner"></span> Enviando código...'; }
 
     const exists = await AuthService.emailExists(email);
-    if (btn) { btn.disabled = false; btn.innerHTML = 'Verificar correo'; }
-
     if (!exists) {
       showToast('No existe una cuenta con ese correo.', 'error');
+      if (btn) { btn.disabled = false; btn.innerHTML = 'Verificar correo'; }
       return;
     }
 
+    // Generate and send verification code
+    const codeResult = await AuthService.generateVerificationCode(email, 'Usuario');
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Verificar correo'; }
+
     resetEmail = email;
+
+    if (codeResult.emailSent) {
+      showToast(`📧 Código enviado a ${email}. Revisa tu bandeja.`, 'success');
+    } else {
+      showToast(`📧 Código enviado a ${email}`, 'success');
+      showToast(`🔑 Tu código es: ${codeResult.code} (modo demo)`, 'info');
+    }
+
+    // Show code verification modal
     document.getElementById('forgot-modal').style.display = 'none';
+    document.getElementById('forgot-code-modal').style.display = 'flex';
+    document.getElementById('forgot-code-email-display').textContent =
+      `Ingresa el código de 6 dígitos enviado a ${email}`;
+
+    // Clear code inputs and focus first
+    for (let i = 1; i <= 6; i++) {
+      const inp = document.getElementById(`fc-${i}`);
+      if (inp) inp.value = '';
+    }
+    setTimeout(() => document.getElementById('fc-1')?.focus(), 100);
+  });
+
+  // Step 2: Code input auto-advance
+  for (let i = 1; i <= 6; i++) {
+    const input = document.getElementById(`fc-${i}`);
+    input?.addEventListener('input', (e) => {
+      if (e.target.value && i < 6) {
+        document.getElementById(`fc-${i + 1}`)?.focus();
+      }
+    });
+    input?.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && i > 1) {
+        document.getElementById(`fc-${i - 1}`)?.focus();
+      }
+    });
+  }
+
+  // Step 2: Verify code
+  document.getElementById('forgot-code-submit')?.addEventListener('click', () => {
+    let code = '';
+    for (let i = 1; i <= 6; i++) {
+      code += document.getElementById(`fc-${i}`)?.value || '';
+    }
+
+    if (code.length !== 6) {
+      showToast('Ingresa el código completo de 6 dígitos.', 'error');
+      return;
+    }
+
+    const isValid = AuthService.verifyCode(resetEmail, code);
+    if (!isValid) {
+      showToast('❌ Código incorrecto o expirado.', 'error');
+      return;
+    }
+
+    showToast('✅ Código verificado correctamente.', 'success');
+    document.getElementById('forgot-code-modal').style.display = 'none';
     document.getElementById('reset-modal').style.display = 'flex';
-    document.getElementById('reset-email-display').textContent = `Cambiar contraseña para: ${email}`;
+    document.getElementById('reset-email-display').textContent = `Cambiar contraseña para: ${resetEmail}`;
     document.getElementById('reset-new-password')?.focus();
   });
 
+  document.getElementById('forgot-code-cancel')?.addEventListener('click', () => {
+    document.getElementById('forgot-code-modal').style.display = 'none';
+  });
+
+  // Step 3: Set new password
   document.getElementById('reset-cancel')?.addEventListener('click', () => {
     document.getElementById('reset-modal').style.display = 'none';
   });
@@ -375,7 +465,7 @@ function attachForgotPasswordListeners() {
   });
 
   // Close modals on overlay click
-  ['forgot-modal', 'reset-modal'].forEach((modalId) => {
+  ['forgot-modal', 'forgot-code-modal', 'reset-modal'].forEach((modalId) => {
     document.getElementById(modalId)?.addEventListener('click', (e) => {
       if (e.target.id === modalId) {
         document.getElementById(modalId).style.display = 'none';
