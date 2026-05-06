@@ -173,6 +173,11 @@ export async function renderTripsPage() {
     if (selectedTrip) {
       MapService.renderTrip('trip-map', selectedTrip);
     }
+
+    // Integration 1: Auto-start live if coming from "En Vivo" button
+    if (window.location.hash.includes('live=1') && selectedTrip) {
+      setTimeout(() => document.getElementById('btn-live')?.click(), 300);
+    }
   }, 50);
 
   return container;

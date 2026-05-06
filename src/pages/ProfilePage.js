@@ -77,7 +77,8 @@ export async function renderProfilePage() {
         </button>
         <input type="file" id="profile-photo-input" accept="image/*" style="display:none;" />
       </div>
-      <h1 class="profile-page__name">${user.nombre}</h1>
+      <h1 class="profile-page__name" id="profile-user-name">${user.nombre}</h1>
+      <button class="profile-page__edit-name" id="profile-edit-name" title="Cambiar nombre">✏️</button>
       <p class="profile-page__email">${user.correo}</p>
       <div class="profile-page__stats-row">
         ${isAdmin ? `
@@ -324,6 +325,35 @@ function attachProfileListeners(user, isAdmin) {
     await AuthService.logout();
     showToast('Sesión cerrada.', 'info');
     router.navigate('login');
+  });
+
+  // Integration 2: Edit name
+  document.getElementById('profile-edit-name')?.addEventListener('click', () => {
+    const currentName = user.nombre || '';
+    const newName = prompt('Ingresa tu nuevo nombre:', currentName);
+    if (!newName || !newName.trim()) return;
+    if (newName.trim() === currentName) return;
+
+    // Update in localStorage users list
+    const users = JSON.parse(localStorage.getItem('premiumbus_users') || '[]');
+    const idx = users.findIndex(u => u.correo === user.correo);
+    if (idx !== -1) {
+      users[idx].nombre = newName.trim();
+      localStorage.setItem('premiumbus_users', JSON.stringify(users));
+    }
+
+    // Update current user session
+    const currentUser = AuthService.getCurrentUser();
+    if (currentUser) {
+      currentUser.nombre = newName.trim();
+      localStorage.setItem('premiumbus_current_user', JSON.stringify(currentUser));
+    }
+
+    // Update visually
+    const nameEl = document.getElementById('profile-user-name');
+    if (nameEl) nameEl.textContent = newName.trim();
+
+    showToast('Nombre actualizado ✅', 'success');
   });
 }
 

@@ -311,6 +311,22 @@ function showConfirmationModal(purchase) {
   overlay.className = 'modal-overlay';
   overlay.id = 'confirmation-modal';
 
+  const purchaseDate = purchase.fechaCompra
+    ? new Date(purchase.fechaCompra).toLocaleString('es-MX')
+    : new Date().toLocaleString('es-MX');
+  const folio = purchase.id || Math.floor(Math.random() * 100000);
+
+  // QR data: folio, seat, route, date
+  const qrData = JSON.stringify({
+    folio: folio,
+    ruta: purchase.nombreRuta || purchase.nombre_ruta,
+    asiento: purchase.asiento,
+    fecha: purchaseDate,
+    origen: purchase.origen,
+    destino: purchase.destino,
+    precio: purchase.precio,
+  });
+
   overlay.innerHTML = `
     <div class="modal">
       <div class="modal__handle"></div>
@@ -332,13 +348,21 @@ function showConfirmationModal(purchase) {
           <span class="confirmation__detail-value">#${purchase.asiento}</span>
         </div>
         <div class="confirmation__detail-row">
+          <span class="confirmation__detail-label">Fecha</span>
+          <span class="confirmation__detail-value">${purchaseDate}</span>
+        </div>
+        <div class="confirmation__detail-row">
           <span class="confirmation__detail-label">Total</span>
           <span class="confirmation__detail-value" style="color: var(--color-primary-700); font-weight: 800;">$${purchase.precio.toFixed(2)} MXN</span>
         </div>
         <div class="confirmation__detail-row">
           <span class="confirmation__detail-label">Folio</span>
-          <span class="confirmation__detail-value" style="font-size: var(--font-size-xs);">${purchase.id}</span>
+          <span class="confirmation__detail-value" style="font-size: var(--font-size-xs);">${folio}</span>
         </div>
+      </div>
+      <div id="qr-code-container" style="display:flex;justify-content:center;margin:var(--space-4) 0;flex-direction:column;align-items:center;">
+        <p style="font-size:var(--font-size-xs);color:var(--color-gray-500);margin-bottom:var(--space-2);">Tu código QR del boleto:</p>
+        <canvas id="qr-canvas" style="border-radius:var(--radius-md);border:3px solid var(--color-gray-200);"></canvas>
       </div>
       <button class="btn btn--success btn--full btn--lg" id="confirmation-done">
         🏠 Volver al Inicio
@@ -347,6 +371,9 @@ function showConfirmationModal(purchase) {
   `;
 
   document.body.appendChild(overlay);
+
+  // Generate QR Code on canvas
+  generateQROnCanvas('qr-canvas', qrData);
 
   document.getElementById('confirmation-done')?.addEventListener('click', () => {
     overlay.remove();
@@ -359,4 +386,60 @@ function showConfirmationModal(purchase) {
       router.navigate('home');
     }
   });
+}
+
+/**
+ * Generates a QR code on a canvas element using a minimal implementation.
+ * No external library needed — uses a simple QR encoding algorithm.
+ */
+function generateQROnCanvas(canvasId, data) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  // Load qrcode-generator library dynamically
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js';
+  script.onload = () => {
+    if (typeof qrcode === 'undefined') return;
+
+    const qr = qrcode(0, 'M');
+    qr.addData(data);
+    qr.make();
+
+    const moduleCount = qr.getModuleCount();
+    const cellSize = 5;
+    const margin = 16;
+    const size = moduleCount * cellSize + margin * 2;
+
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+
+    // QR modules
+    ctx.fillStyle = '#1a3a6b';
+    for (let row = 0; row < moduleCount; row++) {
+      for (let col = 0; col < moduleCount; col++) {
+        if (qr.isDark(row, col)) {
+          ctx.fillRect(
+            margin + col * cellSize,
+            margin + row * cellSize,
+            cellSize,
+            cellSize
+          );
+        }
+      }
+    }
+  };
+  script.onerror = () => {
+    // Fallback: show text folio if QR fails
+    const container = document.getElementById('qr-code-container');
+    if (container) {
+      container.innerHTML = `<p style="text-align:center;font-size:var(--font-size-sm);color:var(--color-gray-500);">📋 Folio: <strong>${data}</strong></p>`;
+    }
+  };
+  document.head.appendChild(script);
 }

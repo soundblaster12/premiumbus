@@ -270,7 +270,7 @@ function attachHomeListeners(isAdmin, trips) {
 
   document.getElementById('action-trips')?.addEventListener('click', () => router.navigate('trips'));
   document.getElementById('action-buy')?.addEventListener('click', () => router.navigate('purchase'));
-  document.getElementById('action-live')?.addEventListener('click', () => router.navigate('trips'));
+  document.getElementById('action-live')?.addEventListener('click', () => router.navigate('trips?live=1'));
   document.getElementById('action-history')?.addEventListener('click', () => router.navigate('profile'));
   document.getElementById('view-all-trips')?.addEventListener('click', () => router.navigate('trips'));
   document.getElementById('active-trip-card')?.addEventListener('click', () => router.navigate('trips'));

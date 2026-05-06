@@ -502,6 +502,23 @@
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-black);
 }
+.profile-page__edit-name {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: var(--font-size-xs);
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: var(--space-1);
+}
+.profile-page__edit-name:hover {
+  background: rgba(255,255,255,0.3);
+}
+.profile-page__edit-name:active {
+  transform: scale(0.95);
+}
 .profile-page__email {
   font-size: var(--font-size-sm);
   opacity: 0.8;

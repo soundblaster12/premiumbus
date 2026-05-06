@@ -271,13 +271,13 @@ function openSocialLoginModal(provider) {
 }
 
 function attachSocialLoginModalListeners() {
-  // Auto-generate name preview as user types email
+  // Auto-generate name preview as user types email (only for new accounts)
   document.getElementById('social-email')?.addEventListener('input', (e) => {
     const email = e.target.value.trim();
     const autoName = document.getElementById('social-auto-name');
     if (autoName && email) {
       const generatedName = AuthService.generateNameFromEmail(email);
-      autoName.textContent = `👤 Tu nombre de usuario será: ${generatedName}`;
+      autoName.textContent = `👤 Si es cuenta nueva, tu nombre será: ${generatedName}`;
     } else if (autoName) {
       autoName.textContent = '';
     }

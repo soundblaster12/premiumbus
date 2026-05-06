@@ -266,7 +266,6 @@ class MapServiceWrapper {
       return;
     }
 
-    // Check if Geolocation API exists
     if (!('geolocation' in navigator)) {
       showToast('Tu dispositivo no soporta GPS.', 'error');
       return;
@@ -274,14 +273,13 @@ class MapServiceWrapper {
 
     showToast('📍 Obteniendo ubicación...', 'info');
 
-    // Request geolocation with mobile-optimized options
     navigator.geolocation.getCurrentPosition(
-      (position) => this._handlePositionSuccess(containerId, position),
+      (position) => this._handlePositionSuccess(containerId, position, false),
       (error) => this._handlePositionError(error),
       {
-        enableHighAccuracy: true,  // Use GPS on mobile (not just WiFi)
-        timeout: 15000,            // 15s timeout (mobile GPS can be slow)
-        maximumAge: 30000,         // Accept cached position up to 30s old
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 30000,
       }
     );
   }
@@ -295,8 +293,8 @@ class MapServiceWrapper {
     if (!map || !('geolocation' in navigator)) return null;
 
     const watchId = navigator.geolocation.watchPosition(
-      (position) => this._handlePositionSuccess(containerId, position),
-      (error) => this._handlePositionError(error),
+      (position) => this._handlePositionSuccess(containerId, position, true),
+      () => {}, // Silent errors in continuous tracking
       {
         enableHighAccuracy: true,
         timeout: 15000,
@@ -318,13 +316,12 @@ class MapServiceWrapper {
 
   /* ── Geolocation Handlers (Private) ────────── */
 
-  _handlePositionSuccess(containerId, position) {
+  _handlePositionSuccess(containerId, position, silent = false) {
     const map = mapInstances[containerId];
     if (!map) return;
 
     const { latitude, longitude, accuracy } = position.coords;
 
-    // Remove previous user marker if exists
     if (userMarkers[containerId]) {
       map.removeLayer(userMarkers[containerId].marker);
       if (userMarkers[containerId].circle) {
@@ -332,7 +329,6 @@ class MapServiceWrapper {
       }
     }
 
-    // Create pulsing user marker
     const userIcon = L.divIcon({
       html: `<div class="user-marker-pulse">
                <div class="user-marker"></div>
@@ -349,7 +345,6 @@ class MapServiceWrapper {
       .bindPopup(`📍 Tu ubicación<br><small>Precisión: ~${Math.round(accuracy)}m</small>`)
       .addTo(map);
 
-    // Accuracy circle
     const circle = L.circle([latitude, longitude], {
       radius: Math.min(accuracy, 500),
       color: '#4285F4',
@@ -360,10 +355,10 @@ class MapServiceWrapper {
 
     userMarkers[containerId] = { marker, circle };
 
-    // Pan to user position with zoom
-    map.flyTo([latitude, longitude], 15, { duration: 1 });
-
-    showToast('📍 Ubicación encontrada', 'success');
+    if (!silent) {
+      map.flyTo([latitude, longitude], 15, { duration: 1 });
+      showToast('📍 Ubicación encontrada', 'success');
+    }
   }
 
   _handlePositionError(error) {
