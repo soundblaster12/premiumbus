@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>🎬 Instrucciones para Grabar Videos</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:32px}
+h1{text-align:center;font-size:28px;color:#fff;margin-bottom:8px}
+.sub{text-align:center;color:#94a3b8;font-size:14px;margin-bottom:32px}
+.container{max-width:800px;margin:0 auto}
+.step{background:#1e293b;border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid #3b82f6}
+.step h3{font-size:16px;color:#fff;margin-bottom:8px}
+.step p{font-size:13px;color:#94a3b8;line-height:1.6}
+.step code{background:#0f172a;padding:2px 8px;border-radius:4px;font-size:12px;color:#f59e0b}
+.step kbd{background:#374151;padding:3px 8px;border-radius:4px;font-size:12px;color:#fff;border:1px solid #4b5563}
+.video-list{margin-top:12px}
+.video-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0f172a;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:.2s;text-decoration:none;color:#e2e8f0}
+.video-item:hover{background:#334155;transform:translateX(4px)}
+.video-item .num{width:28px;height:28px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.video-item .info{flex:1}
+.video-item .info h4{font-size:13px;margin-bottom:2px}
+.video-item .info p{font-size:11px;color:#94a3b8}
+.video-item .dur{font-size:11px;color:#64748b}
+.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:14px;font-size:13px;color:#fbbf24;margin-bottom:16px;line-height:1.6}
+.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:14px;font-size:13px;color:#4ade80;margin-bottom:16px;line-height:1.6}
+</style>
+</head>
+<body>
+<h1>🎬 Grabación de Videos de Pruebas</h1>
+<p class="sub">Instrucciones para grabar cada prueba en formato MP4</p>
+<div class="container">
+
+<div class="success">
+✅ <strong>Los 10 demos de pruebas están listos.</strong> Cada archivo HTML se auto-ejecuta con animaciones profesionales. Solo necesitas grabar la pantalla mientras se reproducen.
+</div>
+
+<div class="step">
+<h3>📋 Paso 1: Preparar el grabador de Windows</h3>
+<p>
+Presiona <kbd>Win</kbd> + <kbd>Alt</kbd> + <kbd>R</kbd> para iniciar/detener la grabación con Xbox Game Bar.<br><br>
+<strong>Primera vez:</strong> Si no funciona, ve a <strong>Configuración → Juegos → Xbox Game Bar</strong> y actívalo.<br><br>
+Alternativa: Usa la <strong>Herramienta de Recortes</strong> (Snipping Tool) → clic en 📹 para grabar pantalla.
+</p>
+</div>
+
+<div class="step">
+<h3>🎥 Paso 2: Grabar cada prueba</h3>
+<p>Para cada archivo HTML:</p>
+<ol style="margin:8px 0 0 20px;font-size:13px;color:#94a3b8;line-height:2">
+<li>Abre el archivo HTML en Chrome (doble clic)</li>
+<li>Presiona <kbd>F11</kbd> para pantalla completa</li>
+<li>Presiona <kbd>Win</kbd>+<kbd>Alt</kbd>+<kbd>R</kbd> para grabar</li>
+<li>Espera a que aparezca "✅ PRUEBA APROBADA" (~15-20 seg)</li>
+<li>Presiona <kbd>Win</kbd>+<kbd>Alt</kbd>+<kbd>R</kbd> para detener</li>
+<li>Presiona <kbd>F11</kbd> para salir de pantalla completa</li>
+</ol>
+</div>
+
+<div class="step">
+<h3>📂 Paso 3: Encontrar los videos</h3>
+<p>
+Los videos MP4 se guardan automáticamente en:<br>
+<code>C:\Users\GAMER\Videos\Captures\</code><br><br>
+Renombra cada archivo al nombre de la prueba correspondiente.
+</p>
+</div>
+
+<div class="warn">
+⚠️ <strong>Importante:</strong> Cada demo se auto-ejecuta UNA vez al abrir. Si necesitas repetirlo, recarga la página con <kbd>F5</kbd>.
+</div>
+
+<div class="step">
+<h3>📄 Archivos de pruebas (haz clic para abrir)</h3>
+<div class="video-list">
+<a class="video-item" href="CP-AUTH-01.html" target="_blank">
+<div class="num">1</div>
+<div class="info"><h4>CP-AUTH-01: Login Exitoso y Retención de Token</h4><p>Autenticación — Caja Negra</p></div>
+<div class="dur">~18s</div>
+</a>
+<a class="video-item" href="CP-AUTH-02.html" target="_blank">
+<div class="num">2</div>
+<div class="info"><h4>CP-AUTH-02: Prevención de Inyección XSS</h4><p>Seguridad — Caja Negra</p></div>
+<div class="dur">~20s</div>
+</a>
+<a class="video-item" href="CP-PERF-01.html" target="_blank">
+<div class="num">3</div>
+<div class="info"><h4>CP-PERF-01: Carga de Fotografía de Perfil</h4><p>Rendimiento — Firebase Storage</p></div>
+<div class="dur">~18s</div>
+</a>
+<a class="video-item" href="CP-COMPRA-01.html" target="_blank">
+<div class="num">4</div>
+<div class="info"><h4>CP-COMPRA-01: Compra con Saldo Exacto $13.50</h4><p>Compras — Valores Límite</p></div>
+<div class="dur">~18s</div>
+</a>
+<a class="video-item" href="CP-COMPRA-02.html" target="_blank">
+<div class="num">5</div>
+<div class="info"><h4>CP-COMPRA-02: Rechazo por Saldo Insuficiente</h4><p>Compras — Valores Límite</p></div>
+<div class="dur">~16s</div>
+</a>
+<a class="video-item" href="CP-ROL-01.html" target="_blank">
+<div class="num">6</div>
+<div class="info"><h4>CP-ROL-01: Restricción de Vistas Admin</h4><p>Roles — Cap.19 OO</p></div>
+<div class="dur">~15s</div>
+</a>
+<a class="video-item" href="CP-ROL-02.html" target="_blank">
+<div class="num">7</div>
+<div class="info"><h4>CP-ROL-02: Acceso al Directorio de Usuarios</h4><p>Roles — Cap.19 OO</p></div>
+<div class="dur">~16s</div>
+</a>
+<a class="video-item" href="CP-GEO-01.html" target="_blank">
+<div class="num">8</div>
+<div class="info"><h4>CP-GEO-01: Seguimiento GPS en Tiempo Real</h4><p>Geolocalización — Tracking</p></div>
+<div class="dur">~18s</div>
+</a>
+<a class="video-item" href="CP-GEO-02.html" target="_blank">
+<div class="num">9</div>
+<div class="info"><h4>CP-GEO-02: Corte de Servicios GPS</h4><p>Geolocalización — Resiliencia</p></div>
+<div class="dur">~16s</div>
+</a>
+<a class="video-item" href="CP-UI-01.html" target="_blank">
+<div class="num">10</div>
+<div class="info"><h4>CP-UI-01: Validación de Tokens de Diseño</h4><p>UI/UX — Cap.20 WebApp</p></div>
+<div class="dur">~22s</div>
+</a>
+</div>
+</div>
+</div>
+</body>
+</html>

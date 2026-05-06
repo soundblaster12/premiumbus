@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Convertidor WebP → MP4 | PremiumBus</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:24px}
+h1{text-align:center;font-size:24px;margin-bottom:4px;color:#fff}
+.sub{text-align:center;color:#94a3b8;font-size:13px;margin-bottom:24px}
+.container{max-width:700px;margin:0 auto}
+.card{background:#1e293b;border-radius:12px;padding:24px;margin-bottom:16px}
+.drop-zone{border:2px dashed #334155;border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:.2s}
+.drop-zone:hover,.drop-zone.over{border-color:#3b82f6;background:rgba(59,130,246,.05)}
+.drop-zone input{display:none}
+.drop-zone h3{font-size:18px;color:#e2e8f0;margin-bottom:8px}
+.drop-zone p{color:#94a3b8;font-size:13px}
+.file-list{margin-top:16px}
+.file-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0f172a;border-radius:8px;margin-bottom:6px;font-size:13px}
+.file-item .name{color:#e2e8f0;flex:1}
+.file-item .status{font-weight:600;font-size:12px;min-width:100px;text-align:right}
+.pending{color:#f59e0b}
+.done{color:#22c55e}
+.error{color:#ef4444}
+.converting{color:#3b82f6}
+.btn{padding:14px 28px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;transition:.2s;width:100%;margin-top:16px}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-primary:disabled{background:#334155;cursor:not-allowed;color:#64748b}
+.btn-success{background:#22c55e;color:#fff}
+.log{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:12px;margin-top:12px;font-family:monospace;font-size:11px;color:#94a3b8;max-height:200px;overflow-y:auto}
+.info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:8px;padding:12px;font-size:12px;color:#93c5fd;margin-bottom:16px;line-height:1.6}
+.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;font-size:12px;color:#fbbf24;margin-bottom:16px;line-height:1.6}
+canvas{display:none}
+</style>
+</head>
+<body>
+<h1>🎬 Convertidor WebP → Video</h1>
+<p class="sub">Sin dependencias externas — funciona 100% en el navegador</p>
+
+<div class="container">
+<div class="info">
+📁 <strong>Archivos originales en:</strong><br>
+<code>C:\Users\GAMER\.gemini\antigravity\brain\81ba8c2b-ed05-497b-85d1-2842c5896f30\</code><br>
+Selecciona los archivos <code>.webp</code> que empiezan con <strong>prueba_</strong>
+</div>
+<div class="warn">
+⚠️ Los videos se descargan en formato <strong>.webm</strong> (compatible con VLC, Chrome, Edge).<br>
+Si necesitas MP4, abre con VLC → Medio → Convertir → MP4.
+</div>
+
+<div class="card">
+<div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+<input type="file" id="fileInput" accept=".webp" multiple>
+<h3>📂 Arrastra tus archivos .webp aquí</h3>
+<p>o haz clic para seleccionar</p>
+</div>
+<div class="file-list" id="fileList"></div>
+<button class="btn btn-primary" id="convertBtn" onclick="convertAll()" disabled>🔄 Convertir Videos</button>
+<div class="log" id="log"></div>
+</div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const NAMES = {
+  'prueba_auth_login': 'CP-AUTH-01_Login_Exitoso',
+  'prueba_auth_xss': 'CP-AUTH-02_Prevencion_XSS',
+  'prueba_compra_exacto': 'CP-COMPRA-01_Saldo_Exacto',
+  'prueba_compra_rechazo': 'CP-COMPRA-02_Saldo_Insuficiente',
+  'prueba_rol_admin': 'CP-ROL-01_Restriccion_Admin',
+  'prueba_directorio': 'CP-ROL-02_Directorio_Usuarios',
+  'prueba_ui_tokens': 'CP-UI-01_Tokens_Diseno'
+};
+
+let files = [];
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  addFiles(Array.from(e.target.files));
+});
+
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  addFiles(Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.webp')));
+});
+
+function outName(n) {
+  for (const [k, v] of Object.entries(NAMES)) {
+    if (n.includes(k)) return v;
+  }
+  return n.replace(/\.webp$/, '');
+}
+
+function addFiles(nf) {
+  nf.forEach(f => { if (!files.find(x => x.name === f.name)) files.push(f); });
+  renderList();
+  document.getElementById('convertBtn').disabled = files.length === 0;
+}
+
+function renderList() {
+  document.getElementById('fileList').innerHTML = files.map((f, i) =>
+    `<div class="file-item" id="fi-${i}">
+      <span class="name">📄 ${f.name} → <strong>${outName(f.name)}.webm</strong></span>
+      <span class="status pending" id="st-${i}">⏳ Pendiente</span>
+    </div>`
+  ).join('');
+}
+
+function log(m) {
+  const el = document.getElementById('log');
+  el.style.display = 'block';
+  el.innerHTML += m + '<br>';
+  el.scrollTop = el.scrollHeight;
+}
+
+async function convertWithImageDecoder(file, index) {
+  const st = document.getElementById(`st-${index}`);
+  st.className = 'status converting';
+  st.textContent = '🔄 Decodificando...';
+
+  const arrayBuf = await file.arrayBuffer();
+  
+  // Intentar con ImageDecoder API (Chrome 94+)
+  if ('ImageDecoder' in window) {
+    try {
+      return await convertWithDecoder(arrayBuf, file, index);
+    } catch (e) {
+      log(`⚠️ ImageDecoder falló: ${e.message}, usando método alternativo...`);
+    }
+  }
+  
+  // Fallback: renderizar como imagen animada
+  return await convertWithCanvas(file, index);
+}
+
+async function convertWithDecoder(arrayBuf, file, index) {
+  const st = document.getElementById(`st-${index}`);
+  
+  const decoder = new ImageDecoder({
+    data: new Blob([arrayBuf], {type: 'image/webp'}),
+    type: 'image/webp'
+  });
+  
+  await decoder.completed;
+  const track = decoder.tracks.selectedTrack;
+  const frameCount = track.frameCount;
+  log(`📊 ${outName(file.name)}: ${frameCount} frames detectados`);
+  
+  if (frameCount <= 1) {
+    // Es una imagen estática, no animada - usar método canvas
+    decoder.close();
+    return await convertWithCanvas(file, index);
+  }
+
+  // Decodificar primer frame para obtener dimensiones
+  const firstFrame = await decoder.decode({frameIndex: 0});
+  const w = firstFrame.image.displayWidth;
+  const h = firstFrame.image.displayHeight;
+  
+  // Asegurar dimensiones pares (requerido por codecs de video)
+  const cw = w % 2 === 0 ? w : w + 1;
+  const ch = h % 2 === 0 ? h : h + 1;
+  
+  const canvas = document.getElementById('canvas');
+  canvas.width = cw;
+  canvas.height = ch;
+  const ctx = canvas.getContext('2d');
+  
+  // Configurar MediaRecorder
+  const stream = canvas.captureStream(0); // 0 = manual frame capture
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9'
+    : 'video/webm';
+  
+  const chunks = [];
+  const recorder = new MediaRecorder(stream, {mimeType, videoBitsPerSecond: 2000000});
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  
+  recorder.start();
+  st.textContent = `🔄 0/${frameCount}`;
+  
+  // Renderizar cada frame
+  for (let i = 0; i < frameCount; i++) {
+    const result = await decoder.decode({frameIndex: i});
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(result.image, 0, 0, cw, ch);
+    stream.getVideoTracks()[0].requestFrame();
+    
+    // Duración del frame en microsegundos → milisegundos
+    const duration = (result.image.duration || 100000) / 1000;
+    await new Promise(r => setTimeout(r, Math.max(duration, 33)));
+    
+    result.image.close();
+    st.textContent = `🔄 ${i+1}/${frameCount}`;
+  }
+  
+  decoder.close();
+  
+  // Finalizar grabación
+  return new Promise(resolve => {
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, {type: mimeType});
+      resolve(blob);
+    };
+    recorder.stop();
+  });
+}
+
+async function convertWithCanvas(file, index) {
+  const st = document.getElementById(`st-${index}`);
+  st.textContent = '🔄 Grabando...';
+  
+  // Cargar como imagen animada
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  await new Promise((resolve, reject) => {
+    img.onload = resolve;
+    img.onerror = reject;
+    img.src = url;
+  });
+  
+  const cw = img.naturalWidth % 2 === 0 ? img.naturalWidth : img.naturalWidth + 1;
+  const ch = img.naturalHeight % 2 === 0 ? img.naturalHeight : img.naturalHeight + 1;
+  
+  const canvas = document.getElementById('canvas');
+  canvas.width = cw;
+  canvas.height = ch;
+  const ctx = canvas.getContext('2d');
+  
+  const stream = canvas.captureStream(30);
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9'
+    : 'video/webm';
+  
+  const chunks = [];
+  const recorder = new MediaRecorder(stream, {mimeType, videoBitsPerSecond: 2000000});
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  
+  // Grabar durante la duración de la animación (~15 segundos)
+  const RECORD_DURATION = 15000;
+  const FPS = 30;
+  const totalFrames = (RECORD_DURATION / 1000) * FPS;
+  
+  recorder.start(100);
+  
+  for (let i = 0; i < totalFrames; i++) {
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, 0, 0, cw, ch);
+    await new Promise(r => setTimeout(r, 1000 / FPS));
+    st.textContent = `🔄 ${Math.round(i/totalFrames*100)}%`;
+  }
+  
+  URL.revokeObjectURL(url);
+  
+  return new Promise(resolve => {
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, {type: mimeType});
+      resolve(blob);
+    };
+    recorder.stop();
+  });
+}
+
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function convertAll() {
+  const btn = document.getElementById('convertBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Convirtiendo...';
+  
+  let ok = 0;
+  for (let i = 0; i < files.length; i++) {
+    const st = document.getElementById(`st-${i}`);
+    try {
+      log(`🔄 Procesando: ${files[i].name}...`);
+      const blob = await convertWithImageDecoder(files[i], i);
+      
+      if (blob && blob.size > 0) {
+        const name = outName(files[i].name) + '.webm';
+        downloadBlob(blob, name);
+        st.className = 'status done';
+        st.textContent = '✅ Descargado';
+        log(`✅ ${name} (${Math.round(blob.size/1024)} KB)`);
+        ok++;
+      } else {
+        throw new Error('Video vacío');
+      }
+    } catch (e) {
+      st.className = 'status error';
+      st.textContent = '❌ Error';
+      log(`❌ ${files[i].name}: ${e.message}`);
+    }
+    await new Promise(r => setTimeout(r, 300));
+  }
+  
+  btn.textContent = `✅ ${ok}/${files.length} convertidos`;
+  btn.className = 'btn btn-success';
+  log(`\n🏁 Completado: ${ok}/${files.length} videos`);
+  log(`💡 Los .webm se abren con VLC, Chrome o Edge en cualquier PC`);
+}
+</script>
+</body>
+</html>

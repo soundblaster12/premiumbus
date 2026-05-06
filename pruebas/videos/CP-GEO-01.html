@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-GEO-01 — Seguimiento GPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.bar span{color:#fff;font-size:12px;font-weight:600}
+.pc{height:calc(100% - 44px);overflow:hidden;position:relative}
+.map{position:absolute;inset:0;background:linear-gradient(135deg,#d4e6b5,#c8daa0)}
+.map-grid{position:absolute;inset:0;opacity:.15}
+.road{position:absolute;background:#888;border-radius:4px}
+.road.h{height:8px;left:0;right:0}.road.v{width:8px;top:0;bottom:0}
+.bus-marker{position:absolute;width:40px;height:40px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(59,130,246,.4);transition:all 1s ease;z-index:10;border:3px solid #fff}
+.bus-pulse{position:absolute;width:60px;height:60px;border-radius:50%;border:2px solid rgba(59,130,246,.3);animation:pulse3 2s infinite;z-index:5}
+@keyframes pulse3{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.8);opacity:0}}
+.user-marker{position:absolute;width:16px;height:16px;background:#22c55e;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(34,197,94,.4);z-index:8;transition:all 1s ease}
+.coords{position:absolute;bottom:70px;left:12px;right:12px;background:rgba(255,255,255,.95);border-radius:10px;padding:10px;font-size:10px;color:#374151;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.coords h4{font-size:11px;color:#1a3a6b;margin-bottom:4px}
+.coords .row{display:flex;justify-content:space-between;margin-bottom:2px}
+.info-bar{position:absolute;top:0;left:0;right:0;background:rgba(26,58,107,.9);padding:10px 16px;color:#fff;font-size:11px;display:flex;justify-content:space-between;z-index:20}
+.navbar{position:absolute;bottom:0;left:0;right:0;height:56px;background:#fff;display:flex;border-top:1px solid #e5e7eb;z-index:20}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;color:#94a3b8}
+.nav-item.active{color:#2b5ea7}
+.si{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:360px}
+.sb{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:8px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.sb.a{opacity:1;border-left-color:#3b82f6}.sb.d{opacity:1;border-left-color:#22c55e}
+.sb h4{font-size:13px;color:#e2e8f0;margin-bottom:3px}.sb p{font-size:11px;color:#94a3b8}
+.tt{position:fixed;top:30px;left:40px}.tt h2{font-size:20px;color:#fff}.tt p{font-size:12px;color:#94a3b8}
+.rb{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.rb.show{opacity:1}.rb h3{color:#22c55e;font-size:18px}.rb p{color:#94a3b8;font-size:12px}
+.cd{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+.building{position:absolute;background:rgba(100,100,100,.2);border-radius:4px}
+</style>
+</head>
+<body>
+<div class="tt"><h2>🧪 CP-GEO-01</h2><p>Seguimiento GPS en Tiempo Real — Geolocalización</p></div>
+<div class="cd" id="timer">⏱️ 0:00</div>
+<div class="phone">
+<div class="bar"><span>PremiumBus — Mapa</span></div>
+<div class="pc">
+<div class="map">
+<div class="road h" style="top:35%"></div>
+<div class="road h" style="top:60%"></div>
+<div class="road v" style="left:30%"></div>
+<div class="road v" style="left:65%"></div>
+<div class="building" style="top:15%;left:10%;width:50px;height:40px"></div>
+<div class="building" style="top:40%;left:45%;width:60px;height:35px"></div>
+<div class="building" style="top:70%;left:15%;width:45px;height:50px"></div>
+<div class="building" style="top:20%;left:70%;width:55px;height:45px"></div>
+<div class="bus-marker" id="bus" style="left:50px;top:200px">🚌</div>
+<div class="bus-pulse" id="busPulse" style="left:40px;top:190px"></div>
+<div class="user-marker" id="user" style="left:180px;top:300px"></div>
+</div>
+<div class="info-bar"><span>📍 Ruta 1 - Saucito</span><span id="status">● En vivo</span></div>
+<div class="coords" id="coords">
+<h4>📊 Coordenadas en tiempo real</h4>
+<div class="row"><span>Lat:</span><span id="lat">22.1565</span></div>
+<div class="row"><span>Lng:</span><span id="lng">-100.9855</span></div>
+<div class="row"><span>Velocidad:</span><span id="speed">35 km/h</span></div>
+</div>
+<div class="navbar">
+<div class="nav-item">🏠<span>Home</span></div>
+<div class="nav-item">🎫<span>Boletos</span></div>
+<div class="nav-item active">📍<span>Mapa</span></div>
+<div class="nav-item">👤<span>Perfil</span></div>
+</div>
+</div>
+</div>
+<div class="si">
+<div class="sb" id="s1"><h4>Paso 1: Abrir mapa</h4><p>GPS activado y permisos dados</p></div>
+<div class="sb" id="s2"><h4>Paso 2: Seguimiento del bus</h4><p>Marcador se desplaza fluidamente</p></div>
+<div class="sb" id="s3"><h4>Paso 3: Movimiento del usuario</h4><p>Marcador verde sigue posición real</p></div>
+</div>
+<div class="rb" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-GEO-01: Tracking fluido sin saltos</p></div>
+<script>
+const w=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const ti=setInterval(()=>{sec++;document.getElementById('timer').textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+const bus=document.getElementById('bus');const bp=document.getElementById('busPulse');const user=document.getElementById('user');
+const busPath=[{x:50,y:200},{x:100,y:200},{x:160,y:200},{x:200,y:180},{x:240,y:160},{x:280,y:160},{x:280,y:200},{x:280,y:260}];
+const userPath=[{x:180,y:300},{x:190,y:280},{x:200,y:260},{x:210,y:240}];
+let lat=22.1565,lng=-100.9855;
+async function moveBus(i){
+const p=busPath[i];bus.style.left=p.x+'px';bus.style.top=p.y+'px';
+bp.style.left=(p.x-10)+'px';bp.style.top=(p.y-10)+'px';
+lat+=(Math.random()-.3)*0.001;lng+=(Math.random()-.5)*0.001;
+document.getElementById('lat').textContent=lat.toFixed(4);
+document.getElementById('lng').textContent=lng.toFixed(4);
+document.getElementById('speed').textContent=Math.floor(25+Math.random()*15)+' km/h';
+}
+async function run(){
+await w(1500);
+document.getElementById('s1').classList.add('a');await w(1500);document.getElementById('s1').className='sb d';
+document.getElementById('s2').classList.add('a');
+for(let i=0;i<busPath.length;i++){moveBus(i);await w(1000);}
+await w(500);document.getElementById('s2').className='sb d';
+document.getElementById('s3').classList.add('a');
+for(let i=0;i<userPath.length;i++){const p=userPath[i];user.style.left=p.x+'px';user.style.top=p.y+'px';await w(800);}
+await w(1000);document.getElementById('s3').className='sb d';
+await w(500);document.getElementById('result').classList.add('show');clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>

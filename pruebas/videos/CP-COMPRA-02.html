@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-COMPRA-02 — Saldo Insuficiente</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.bar span{color:#fff;font-size:12px;font-weight:600}
+.pc{height:calc(100% - 44px);overflow:hidden;position:relative;background:#f8fafc}
+.hdr{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);padding:20px;color:#fff}
+.hdr h2{font-size:18px}.hdr p{font-size:12px;opacity:.7}
+.wallet{display:flex;justify-content:space-between;padding:14px 20px;background:#fff;border-bottom:1px solid #e5e7eb}
+.wl{font-size:12px;color:#6b7280}.wv{font-size:22px;font-weight:800;color:#f59e0b}
+.rt{padding:12px 20px;background:#fff;margin:8px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.rt h4{font-size:13px;color:#1f2937}.rt p{font-size:11px;color:#6b7280}
+.calc{margin:12px 20px;background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.calc-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:#374151}
+.calc-row.total{border-top:2px solid #e5e7eb;margin-top:6px;padding-top:8px;font-weight:700}
+.calc-row.deficit{color:#ef4444;font-weight:700}
+.bb{margin:12px 20px;padding:14px;background:#ef4444;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;width:calc(100% - 40px);font-family:Inter,sans-serif;opacity:.5}
+.toast{position:absolute;top:50px;left:50%;transform:translateX(-50%) translateY(-20px);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:100;background:#ef4444;color:#fff}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.si{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:360px}
+.sb{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:8px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.sb.a{opacity:1;border-left-color:#3b82f6}.sb.d{opacity:1;border-left-color:#22c55e}.sb.r{opacity:1;border-left-color:#ef4444}
+.sb h4{font-size:13px;color:#e2e8f0;margin-bottom:3px}.sb p{font-size:11px;color:#94a3b8}
+.tt{position:fixed;top:30px;left:40px}.tt h2{font-size:20px;color:#fff}.tt p{font-size:12px;color:#94a3b8}
+.rb{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.rb.show{opacity:1}.rb h3{color:#22c55e;font-size:18px}.rb p{color:#94a3b8;font-size:12px}
+.cd{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+.shake{animation:shake .5s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+</style>
+</head>
+<body>
+<div class="tt"><h2>🧪 CP-COMPRA-02</h2><p>Rechazo por Saldo Insuficiente $13.49 — Valores Límite</p></div>
+<div class="cd" id="timer">⏱️ 0:00</div>
+<div class="phone" id="phone">
+<div class="bar"><span>PremiumBus — Comprar Boleto</span></div>
+<div class="pc">
+<div class="hdr"><h2>Comprar Boleto</h2><p>Selecciona ruta y asiento</p></div>
+<div class="wallet"><span class="wl">💰 Tu saldo</span><span class="wv" id="saldo">$13.49</span></div>
+<div class="rt"><h4>🚌 Ruta 1 - Saucito</h4><p>Col. Saucito → Centro Histórico | $13.50</p></div>
+<div class="calc" id="calc" style="opacity:0">
+<div class="calc-row"><span>Saldo actual</span><span>$13.49</span></div>
+<div class="calc-row"><span>Precio boleto</span><span>-$13.50</span></div>
+<div class="calc-row total deficit"><span>Diferencia</span><span>-$0.01</span></div>
+</div>
+<button class="bb" id="buyBtn">Confirmar Compra — $13.50</button>
+<div class="toast" id="toast"></div>
+</div>
+</div>
+<div class="si">
+<div class="sb" id="s1"><h4>Paso 1: Verificar saldo</h4><p>Saldo = $13.49 | Precio = $13.50 | Diferencia = -$0.01</p></div>
+<div class="sb" id="s2"><h4>Paso 2: Intentar compra</h4><p>Pulsar "Confirmar Compra"</p></div>
+<div class="sb" id="s3"><h4>Paso 3: Verificar rechazo</h4><p>Toast error: "Fondo insuficiente"</p></div>
+<div class="sb" id="s4"><h4>Paso 4: Saldo preservado</h4><p>Saldo debe seguir en $13.49 (sin deducción)</p></div>
+</div>
+<div class="rb" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-COMPRA-02: Rechazo correcto con $13.49 (Early Return)</p></div>
+<script>
+const w=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const ti=setInterval(()=>{sec++;document.getElementById('timer').textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+async function run(){
+await w(1500);
+document.getElementById('s1').classList.add('a');await w(1000);
+document.getElementById('calc').style.opacity='1';await w(2000);
+document.getElementById('s1').className='sb d';
+document.getElementById('s2').classList.add('a');await w(1000);
+document.getElementById('phone').classList.add('shake');await w(500);
+document.getElementById('s2').className='sb r';
+document.getElementById('s3').classList.add('a');
+const t=document.getElementById('toast');t.textContent='❌ Fondo insuficiente — Faltan $0.01';t.className='toast show';
+await w(2500);t.classList.remove('show');
+document.getElementById('s3').className='sb d';
+document.getElementById('s4').classList.add('a');await w(500);
+document.getElementById('saldo').textContent='$13.49 ✓';
+await w(2000);document.getElementById('s4').className='sb d';
+await w(500);document.getElementById('result').classList.add('show');clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>

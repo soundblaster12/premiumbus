@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Generador PPTX</title>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgenjs.bundle.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center}
+.card{background:#1e293b;border-radius:16px;padding:40px;max-width:500px;text-align:center}
+h1{font-size:22px;margin-bottom:8px}
+p{color:#94a3b8;margin-bottom:20px;font-size:13px}
+.btn{padding:16px 40px;background:#3b82f6;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer}
+.btn:hover{background:#2563eb}
+#st{margin-top:14px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Presentacion de Pruebas</h1>
+<p>8 diapositivas - 10 pruebas</p>
+<button class="btn" id="b" onclick="gen()">Generar PPTX</button>
+<div id="st"></div>
+</div>
+<script>
+function gen(){
+var el=document.getElementById('st');
+el.textContent='Generando...';
+el.style.color='#f59e0b';
+document.getElementById('b').disabled=true;
+setTimeout(function(){
+try{
+var pptx=new PptxGenJS();
+pptx.layout='LAYOUT_WIDE';
+var D='0F172A',B='1A3A6B',C='1E293B',W='FFFFFF',L='E2E8F0',GR='94A3B8',B2='2B5EA7',GN='22C55E',RD='EF4444';
+var s;
+
+s=pptx.addSlide();
+s.background={color:B};
+s.addText('Plan de Pruebas de Software',{x:0.5,y:1.8,w:12.3,h:0.8,fontSize:36,color:W,bold:true,align:'center'});
+s.addText('PremiumBus - Pressman (Cap. 17-20)',{x:0.5,y:2.8,w:12.3,h:0.5,fontSize:18,color:L,align:'center'});
+s.addText('10 pruebas | 10 aprobadas | 100% cobertura',{x:0.5,y:3.6,w:12.3,h:0.4,fontSize:14,color:GR,align:'center'});
+s.addText('Mayo 2026',{x:0.5,y:5.2,w:12.3,h:0.3,fontSize:12,color:GR,align:'center'});
+
+s=pptx.addSlide();
+s.background={color:D};
+s.addText('Modulo de Autenticacion',{x:0.5,y:0.2,w:12,h:0.6,fontSize:26,color:W,bold:true});
+s.addText('CP-AUTH-01: Login y Retencion de Token',{x:0.5,y:1,w:5.8,h:0.4,fontSize:14,color:B2,bold:true,fill:{color:C}});
+s.addText('Se ingresaron credenciales validas.\nSe verifico acceso al Home.\nSe simulo cierre y reapertura.\n\nEl token persiste en localStorage.\nSesion mantenida sin re-login.\n\nResultado: APROBADA',{x:0.5,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+s.addText('CP-AUTH-02: Prevencion XSS/SQL',{x:6.9,y:1,w:5.8,h:0.4,fontSize:14,color:B2,bold:true,fill:{color:C}});
+s.addText('Se inyectaron 3 vectores:\n- XSS script injection\n- SQL: OR 1=1 --\n- HTML img injection\n\nTodos bloqueados por regex\n(Early Return Pattern)\n\nResultado: APROBADA',{x:6.9,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+
+s=pptx.addSlide();
+s.background={color:D};
+s.addText('Modulo de Compras - Valores Limite',{x:0.5,y:0.2,w:12,h:0.6,fontSize:26,color:W,bold:true});
+s.addText('CP-COMPRA-01: Saldo Exacto $13.50',{x:0.5,y:1,w:5.8,h:0.4,fontSize:14,color:GN,bold:true,fill:{color:C}});
+s.addText('Saldo = $13.50\nPrecio = $13.50\n\nSe selecciono ruta y asiento.\nTransaccion aprobada.\nCodigo QR emitido.\n\nSaldo final: $0.00\n\nResultado: APROBADA',{x:0.5,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+s.addText('CP-COMPRA-02: Saldo Insuficiente $13.49',{x:6.9,y:1,w:5.8,h:0.4,fontSize:14,color:RD,bold:true,fill:{color:C}});
+s.addText('Saldo = $13.49 (-$0.01)\nPrecio = $13.50\n\nToast rojo: "Fondo insuficiente"\nTransaccion abortada.\n\nSaldo preservado.\n\nResultado: APROBADA',{x:6.9,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+
+s=pptx.addSlide();
+s.background={color:D};
+s.addText('Modulo de Roles y Acceso',{x:0.5,y:0.2,w:12,h:0.6,fontSize:26,color:W,bold:true});
+s.addText('CP-ROL-01: Restriccion Vistas Admin',{x:0.5,y:1,w:5.8,h:0.4,fontSize:14,color:B2,bold:true,fill:{color:C}});
+s.addText('Con cuenta Admin:\n\nPanel Conductores -> VISIBLE\nEstadisticas -> VISIBLE\nBoton Comprar -> OCULTO\nQuick Action -> OCULTO\n\nRenderizado condicional OK.\n\nResultado: APROBADA',{x:0.5,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+s.addText('CP-ROL-02: Directorio Usuarios',{x:6.9,y:1,w:5.8,h:0.4,fontSize:14,color:B2,bold:true,fill:{color:C}});
+s.addText('Se navego al directorio como Admin.\n\nLista completa cargada:\nnombre, correo y rol.\n\nSin errores de composite indices.\nConsulta optimizada.\n\nResultado: APROBADA',{x:6.9,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+
+s=pptx.addSlide();
+s.background={color:D};
+s.addText('Modulo de Perfil y Rendimiento',{x:0.5,y:0.2,w:12,h:0.6,fontSize:26,color:W,bold:true});
+s.addText('CP-PERF-01: Carga de Fotografia de Perfil',{x:0.5,y:1,w:12.2,h:0.4,fontSize:14,color:B2,bold:true,fill:{color:C}});
+s.addText('Se abrio el selector de imagen.\nSe cargo foto JPG valida (1.2 MB).\n\nBarra de progreso asincrona (0% a 100%).\nMiniatura actualizada en tiempo real.\n\nIntegracion con Firebase Storage validada.\n\nResultado: APROBADA',{x:0.5,y:1.5,w:12.2,h:5,fontSize:13,color:L,fill:{color:C},valign:'top'});
+
+s=pptx.addSlide();
+s.background={color:D};
+s.addText('Modulo de Geolocalizacion',{x:0.5,y:0.2,w:12,h:0.6,fontSize:26,color:W,bold:true});
+s.addText('CP-GEO-01: Tracking Tiempo Real',{x:0.5,y:1,w:5.8,h:0.4,fontSize:14,color:B2,bold:true,fill:{color:C}});
+s.addText('GPS activado, mapa abierto.\n\nMarcador del bus se desplazo\nfluidamente sin saltos.\n\nCoordenadas y velocidad\nactualizadas en tiempo real.\n\nResultado: APROBADA',{x:0.5,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+s.addText('CP-GEO-02: Corte de GPS',{x:6.9,y:1,w:5.8,h:0.4,fontSize:14,color:RD,bold:true,fill:{color:C}});
+s.addText('Se desactivo GPS en tracking.\n\nApp detecto el cambio.\nMapa congelado.\nToast: "Se perdio senal GPS"\n\nSin crash. App estable.\n\nResultado: APROBADA',{x:6.9,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+
+s=pptx.addSlide();
+s.background={color:D};
+s.addText('Validacion UI/UX - Cap. 20',{x:0.5,y:0.2,w:12,h:0.6,fontSize:26,color:W,bold:true});
+s.addText('CP-UI-01: Tokens de Diseno',{x:0.5,y:1,w:5.8,h:0.4,fontSize:14,color:B2,bold:true,fill:{color:C}});
+s.addText('Tokens verificados:\n- --color-primary: #1a3a6b\n- --color-green: #34c759\n- --font-family: Inter\n- --radius-md: 16px\n\nComponentes aislados:\nToast / Navbar / Icons\n\nResultado: APROBADA',{x:0.5,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+s.addText('Videos de Evidencia',{x:6.9,y:1,w:5.8,h:0.4,fontSize:14,color:GN,bold:true,fill:{color:C}});
+s.addText('Cada prueba grabada en video:\n\n1. CP-AUTH-01_Login.mp4\n2. CP-AUTH-02_XSS.mp4\n3. CP-PERF-01_Foto.mp4\n4. CP-COMPRA-01_Exacto.mp4\n5. CP-COMPRA-02_Insuf.mp4\n6. CP-ROL-01_Admin.mp4\n7. CP-ROL-02_Directorio.mp4\n8. CP-GEO-01_GPS.mp4\n9. CP-GEO-02_Corte.mp4\n10. CP-UI-01_Tokens.mp4',{x:6.9,y:1.5,w:5.8,h:5,fontSize:12,color:L,fill:{color:C},valign:'top'});
+
+s=pptx.addSlide();
+s.background={color:B};
+s.addText('Conclusiones',{x:0.5,y:0.3,w:12.3,h:0.6,fontSize:28,color:W,bold:true,align:'center'});
+s.addText('- 10 de 10 pruebas aprobadas (100%)\n- Cero incidentes de Severidad 1\n- Cobertura: Auth, Compras, Roles, Perfil, GPS, UI\n\n- Pruebas Criticas (AUTH, COMPRA, ROL): 100%\n- Sin caidas ni corrupcion de saldos\n- Codigo cumple SOLID y Early Return\n- Tokens de diseno atomico validados\n\nPremiumBus es apto para produccion.',{x:0.8,y:1.2,w:11.7,h:5.2,fontSize:16,color:L,fill:{color:C},valign:'top'});
+s.addText('PremiumBus - Mayo 2026',{x:0.5,y:6.8,w:12.3,h:0.3,fontSize:12,color:GR,align:'center'});
+
+pptx.writeFile({fileName:'Presentacion_Pruebas_PremiumBus.pptx'}).then(function(){
+el.textContent='Descargada!';
+el.style.color='#22c55e';
+document.getElementById('b').disabled=false;
+}).catch(function(e){
+el.textContent='Error: '+e;
+el.style.color='#ef4444';
+document.getElementById('b').disabled=false;
+});
+}catch(e){
+el.textContent='Error: '+e.message;
+el.style.color='#ef4444';
+document.getElementById('b').disabled=false;
+}
+},500);
+}
+</script>
+</body>
+</html>

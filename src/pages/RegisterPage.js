@@ -149,9 +149,13 @@ function attachRegisterListeners() {
 
       if (result.pendingVerification) {
         // Feature 2: Show verification code modal
-        showToast(`📧 Código de verificación enviado a ${correo}`, 'success');
-        // In demo mode, show the code as a Toast for the user
-        showToast(`🔑 Tu código es: ${result.code} (modo demo)`, 'info');
+        if (result.emailSent) {
+          showToast(`📧 Código enviado a ${correo}. Revisa tu bandeja de entrada.`, 'success');
+        } else {
+          showToast(`📧 Código de verificación enviado a ${correo}`, 'success');
+          // En modo demo, mostrar el código directamente
+          showToast(`🔑 Tu código es: ${result.code} (modo demo)`, 'info');
+        }
         showVerificationModal(nombre, correo, password);
       } else if (result.success) {
         // Direct registration (API mode)

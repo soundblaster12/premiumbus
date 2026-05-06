@@ -11,6 +11,7 @@
  */
 
 import { isApiAvailable, apiPost, apiGet } from './ApiClient.js';
+import { EmailService } from './EmailService.js';
 
 const STORAGE_KEYS = {
   USERS: 'premiumbus_users',
@@ -98,7 +99,7 @@ class AuthServiceWrapper {
    * @param {string} correo
    * @returns {Promise<{success: boolean, code: string}>}
    */
-  async generateVerificationCode(correo) {
+  async generateVerificationCode(correo, nombre) {
     const code = this._generateSixDigitCode();
     const pendingData = {
       correo: correo.toLowerCase(),
@@ -107,17 +108,28 @@ class AuthServiceWrapper {
     };
     localStorage.setItem(STORAGE_KEYS.PENDING_VERIFICATION, JSON.stringify(pendingData));
 
-    // En modo real, aquí enviaríamos un email real vía API
+    // Intentar enviar email real via EmailJS
+    if (EmailService.isConfigured()) {
+      const emailResult = await EmailService.sendVerificationEmail(correo, nombre || 'Usuario', code);
+      if (emailResult.success) {
+        console.log('[Auth] Código enviado por email a:', correo);
+        return { success: true, code, emailSent: true };
+      }
+      console.warn('[Auth] Falló envío de email, usando modo demo');
+    }
+
+    // Fallback: API PHP
     const useApi = await isApiAvailable();
     if (useApi) {
       try {
         await apiPost('send_verification', { correo, code });
+        return { success: true, code, emailSent: true };
       } catch {
-        // Fallback: el código ya está guardado localmente
+        // Fallback al modo demo
       }
     }
 
-    return { success: true, code };
+    return { success: true, code, emailSent: false };
   }
 
   /**
@@ -377,7 +389,7 @@ class AuthServiceWrapper {
     }
 
     // Generar código y guardarlo temporalmente
-    const codeResult = await this.generateVerificationCode(correo);
+    const codeResult = await this.generateVerificationCode(correo, nombre);
 
     return {
       success: true,

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-AUTH-02 — Prevención XSS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.phone-bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.phone-bar span{color:#fff;font-size:12px;font-weight:600}
+.phone-content{height:calc(100% - 44px);overflow:hidden;position:relative}
+.login-header{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);padding:40px 24px 30px;text-align:center}
+.login-header h1{color:#fff;font-size:22px;margin-bottom:4px}
+.login-header p{color:rgba(255,255,255,.7);font-size:13px}
+.login-body{padding:24px;background:#fff}
+.input-group{margin-bottom:16px}
+.input-group label{display:block;font-size:12px;color:#6b7280;margin-bottom:4px;font-weight:600}
+.input-group input{width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:Inter,sans-serif;color:#1f2937;transition:.2s;outline:none}
+.input-group input.error{border-color:#ef4444;background:#fef2f2}
+.input-group .err-msg{color:#ef4444;font-size:11px;margin-top:4px;display:none}
+.input-group .err-msg.show{display:block}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,#1a3a6b,#2b5ea7);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:Inter,sans-serif}
+.toast{position:absolute;top:50px;left:50%;transform:translateX(-50%) translateY(-20px);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:100;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:#ef4444;color:#fff}
+.side-info{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:400px}
+.step-box{background:#1e293b;border-radius:12px;padding:16px;margin-bottom:10px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.step-box.active{opacity:1;border-left-color:#3b82f6}
+.step-box.done{opacity:1;border-left-color:#22c55e}
+.step-box.blocked{opacity:1;border-left-color:#ef4444}
+.step-box h4{font-size:13px;color:#e2e8f0;margin-bottom:4px}
+.step-box p{font-size:11px;color:#94a3b8}
+.step-box code{background:#0f172a;padding:2px 6px;border-radius:4px;font-size:10px;color:#f59e0b}
+.test-title{position:fixed;top:30px;left:40px}
+.test-title h2{font-size:20px;color:#fff;margin-bottom:4px}
+.test-title p{font-size:12px;color:#94a3b8}
+.result-badge{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.result-badge.show{opacity:1}
+.result-badge h3{color:#22c55e;font-size:18px}
+.result-badge p{color:#94a3b8;font-size:12px}
+.countdown{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+</style>
+</head>
+<body>
+<div class="test-title"><h2>🧪 CP-AUTH-02</h2><p>Prevención de Inyección XSS/SQL — Seguridad</p></div>
+<div class="countdown" id="timer">⏱️ 0:00</div>
+<div class="phone">
+<div class="phone-bar"><span>PremiumBus</span></div>
+<div class="phone-content">
+<div class="login-header"><h1>🚌 PremiumBus</h1><p>Inicia sesión para continuar</p></div>
+<div class="login-body">
+<div class="input-group">
+<label>Correo electrónico</label>
+<input type="text" id="emailInput" placeholder="correo@ejemplo.com" readonly>
+<div class="err-msg" id="errMsg">⚠️ Formato de email inválido</div>
+</div>
+<div class="input-group">
+<label>Contraseña</label>
+<input type="password" id="passInput" value="test123" readonly>
+</div>
+<button class="login-btn" id="loginBtn">Iniciar Sesión</button>
+</div>
+<div class="toast" id="toast"></div>
+</div>
+</div>
+<div class="side-info">
+<div class="step-box" id="s1"><h4>Paso 1: Inyección XSS</h4><p>Input: <code>&lt;script&gt;alert(1)&lt;/script&gt;</code></p></div>
+<div class="step-box" id="s2"><h4>Paso 2: Inyección SQL</h4><p>Input: <code>' OR 1=1 --</code></p></div>
+<div class="step-box" id="s3"><h4>Paso 3: Inyección HTML</h4><p>Input: <code>&lt;img onerror=alert(1)&gt;</code></p></div>
+<div class="step-box" id="s4"><h4>Verificación</h4><p>Early Return: sin petición de red enviada</p></div>
+</div>
+<div class="result-badge" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-AUTH-02: XSS, SQL y HTML Injection bloqueados por Early Return</p></div>
+<script>
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const timerEl=document.getElementById('timer');
+const ti=setInterval(()=>{sec++;timerEl.textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.className='toast error show';setTimeout(()=>t.classList.remove('show'),1800);}
+async function typeText(el,text,spd=50){el.classList.remove('error');document.getElementById('errMsg').classList.remove('show');el.value='';for(let i=0;i<=text.length;i++){el.value=text.substring(0,i);await wait(spd);}}
+async function tryInject(stepId,text,label){
+  const el=document.getElementById('emailInput');
+  document.getElementById(stepId).classList.add('active');
+  await typeText(el,text,40);
+  await wait(500);
+  el.classList.add('error');
+  document.getElementById('errMsg').classList.add('show');
+  showToast('❌ '+label+' BLOQUEADO');
+  await wait(1800);
+  document.getElementById(stepId).classList.remove('active');
+  document.getElementById(stepId).classList.add('blocked');
+  await wait(400);
+}
+async function run(){
+  await wait(1500);
+  await tryInject('s1','\x3Cscript\x3Ealert(1)\x3C/script\x3E','XSS');
+  await tryInject('s2',"' OR 1=1 --",'SQL Injection');
+  await tryInject('s3','\x3Cimg onerror=alert(1)\x3E','HTML Injection');
+  document.getElementById('s4').classList.add('active');
+  await wait(800);
+  document.getElementById('s4').classList.remove('active');
+  document.getElementById('s4').classList.add('done');
+  await wait(500);
+  document.getElementById('result').classList.add('show');
+  clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>

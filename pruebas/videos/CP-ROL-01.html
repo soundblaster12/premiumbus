@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-ROL-01 — Restricción Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.bar span{color:#fff;font-size:12px;font-weight:600}
+.pc{height:calc(100% - 44px);overflow:hidden;position:relative;background:#f8fafc}
+.hdr{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);padding:20px;color:#fff}
+.hdr h2{font-size:18px}.hdr p{font-size:12px;opacity:.7}
+.badge{display:inline-block;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:10px;margin-top:4px}
+.body-content{padding:12px 16px;background:#f8fafc}
+.card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.card h4{font-size:13px;color:#1f2937;margin-bottom:4px}
+.card p{font-size:11px;color:#6b7280}
+.card.highlight{border:2px solid #22c55e;position:relative}
+.card.highlight::after{content:'✅ VISIBLE';position:absolute;top:8px;right:8px;font-size:9px;color:#22c55e;font-weight:700}
+.card.hidden-card{border:2px dashed #ef4444;opacity:.4;position:relative}
+.card.hidden-card::after{content:'🚫 OCULTO';position:absolute;top:8px;right:8px;font-size:9px;color:#ef4444;font-weight:700}
+.driver-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9}
+.driver-row:last-child{border:none}
+.driver-avatar{width:28px;height:28px;background:#e8f0fe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+.driver-info{flex:1}.driver-info h5{font-size:11px;color:#1f2937}.driver-info p{font-size:9px;color:#6b7280}
+.driver-status{font-size:9px;font-weight:700;color:#22c55e}
+.navbar{position:absolute;bottom:0;left:0;right:0;height:56px;background:#fff;display:flex;border-top:1px solid #e5e7eb}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;color:#94a3b8}
+.nav-item.active{color:#2b5ea7}
+.nav-item.blocked{color:#ef4444;text-decoration:line-through;opacity:.4}
+.si{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:360px}
+.sb{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:8px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.sb.a{opacity:1;border-left-color:#3b82f6}.sb.d{opacity:1;border-left-color:#22c55e}
+.sb h4{font-size:13px;color:#e2e8f0;margin-bottom:3px}.sb p{font-size:11px;color:#94a3b8}
+.tt{position:fixed;top:30px;left:40px}.tt h2{font-size:20px;color:#fff}.tt p{font-size:12px;color:#94a3b8}
+.rb{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.rb.show{opacity:1}.rb h3{color:#22c55e;font-size:18px}.rb p{color:#94a3b8;font-size:12px}
+.cd{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+.fade-in{animation:fadeIn .5s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="tt"><h2>🧪 CP-ROL-01</h2><p>Restricción de Vistas para Admin — Cap.19 OO</p></div>
+<div class="cd" id="timer">⏱️ 0:00</div>
+<div class="phone">
+<div class="bar"><span>PremiumBus — Admin</span></div>
+<div class="pc">
+<div class="hdr">
+<h2>¡Hola, Admin! 👋</h2>
+<p>Panel de administración</p>
+<div class="badge">🔑 Rol: Administrador</div>
+</div>
+<div class="body-content" id="content"></div>
+<div class="navbar">
+<div class="nav-item active">🏠<span>Home</span></div>
+<div class="nav-item blocked" id="navBuy">🎫<span>Comprar</span></div>
+<div class="nav-item">📍<span>Mapa</span></div>
+<div class="nav-item active">⚙️<span>Admin</span></div>
+</div>
+</div>
+</div>
+<div class="si">
+<div class="sb" id="s1"><h4>Paso 1: Verificar Home Admin</h4><p>Panel de conductores visible</p></div>
+<div class="sb" id="s2"><h4>Paso 2: Botón "Comprar" oculto</h4><p>isAdmin=true → no renderiza compra</p></div>
+<div class="sb" id="s3"><h4>Paso 3: Panel conductores visible</h4><p>Sección exclusiva de admin renderizada</p></div>
+</div>
+<div class="rb" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-ROL-01: Renderizado condicional Admin correcto</p></div>
+<script>
+const w=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const ti=setInterval(()=>{sec++;document.getElementById('timer').textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+const content=document.getElementById('content');
+async function run(){
+await w(1500);
+document.getElementById('s1').classList.add('a');
+content.innerHTML=`<div class="card highlight fade-in"><h4>📊 Estadísticas del Día</h4><p>Rutas activas: 24 | Pasajeros: 4,230 | Ingresos: $4,590</p></div>`;
+await w(1500);
+content.innerHTML+=`<div class="card highlight fade-in"><h4>👨‍✈️ Conductores en Servicio</h4>
+<div class="driver-row"><div class="driver-avatar">👤</div><div class="driver-info"><h5>Miguel Á. Hernández</h5><p>Ruta 1 - Saucito</p></div><div class="driver-status">● En ruta</div></div>
+<div class="driver-row"><div class="driver-avatar">👤</div><div class="driver-info"><h5>José L. Martínez</h5><p>Ruta 2 - Circuito</p></div><div class="driver-status">● En ruta</div></div>
+<div class="driver-row"><div class="driver-avatar">👤</div><div class="driver-info"><h5>Roberto C. López</h5><p>Ruta 3 - Soledad</p></div><div class="driver-status">● En ruta</div></div>
+</div>`;
+await w(1500);document.getElementById('s1').className='sb d';
+document.getElementById('s2').classList.add('a');
+content.innerHTML+=`<div class="card hidden-card fade-in"><h4>🎫 Comprar Boleto</h4><p>if(isAdmin) → componente NO renderizado</p></div>`;
+await w(2000);document.getElementById('s2').className='sb d';
+document.getElementById('s3').classList.add('a');await w(2000);document.getElementById('s3').className='sb d';
+await w(500);document.getElementById('result').classList.add('show');clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>

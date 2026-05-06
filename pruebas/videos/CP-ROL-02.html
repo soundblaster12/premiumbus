@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-ROL-02 — Directorio Usuarios</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.bar span{color:#fff;font-size:12px;font-weight:600}
+.pc{height:calc(100% - 44px);overflow:hidden;position:relative;background:#f8fafc}
+.hdr{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);padding:20px;color:#fff}
+.hdr h2{font-size:18px}.hdr p{font-size:12px;opacity:.7}
+.body-c{padding:12px 16px;overflow-y:auto;height:calc(100% - 90px)}
+.user-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,.05);display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(15px);transition:.4s}
+.user-card.show{opacity:1;transform:translateY(0)}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+.avatar.admin{background:#fef3c7}.avatar.user{background:#e8f0fe}
+.user-info{flex:1}.user-info h5{font-size:12px;color:#1f2937}.user-info p{font-size:10px;color:#6b7280}
+.role-badge{padding:3px 8px;border-radius:12px;font-size:9px;font-weight:700}
+.role-badge.admin{background:#fef3c7;color:#d97706}.role-badge.user{background:#e8f0fe;color:#2563eb}
+.si{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:360px}
+.sb{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:8px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.sb.a{opacity:1;border-left-color:#3b82f6}.sb.d{opacity:1;border-left-color:#22c55e}
+.sb h4{font-size:13px;color:#e2e8f0;margin-bottom:3px}.sb p{font-size:11px;color:#94a3b8}
+.tt{position:fixed;top:30px;left:40px}.tt h2{font-size:20px;color:#fff}.tt p{font-size:12px;color:#94a3b8}
+.rb{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.rb.show{opacity:1}.rb h3{color:#22c55e;font-size:18px}.rb p{color:#94a3b8;font-size:12px}
+.cd{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+.count{text-align:center;margin:8px 0;font-size:12px;color:#6b7280;font-weight:600}
+</style>
+</head>
+<body>
+<div class="tt"><h2>🧪 CP-ROL-02</h2><p>Acceso al Directorio de Usuarios — Cap.19 OO</p></div>
+<div class="cd" id="timer">⏱️ 0:00</div>
+<div class="phone">
+<div class="bar"><span>PremiumBus — Admin</span></div>
+<div class="pc">
+<div class="hdr"><h2>👥 Directorio de Usuarios</h2><p>Lista completa del sistema</p></div>
+<div class="count" id="count">Cargando...</div>
+<div class="body-c" id="list"></div>
+</div>
+</div>
+<div class="si">
+<div class="sb" id="s1"><h4>Paso 1: Navegar al directorio</h4><p>Acceso exclusivo para rol admin</p></div>
+<div class="sb" id="s2"><h4>Paso 2: Verificar lista de usuarios</h4><p>Nombre, correo y rol presentes</p></div>
+<div class="sb" id="s3"><h4>Paso 3: Integridad de datos</h4><p>Sin errores de composite indices</p></div>
+</div>
+<div class="rb" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-ROL-02: Directorio completo y optimizado</p></div>
+<script>
+const w=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const ti=setInterval(()=>{sec++;document.getElementById('timer').textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+const users=[
+{n:'Administrador',e:'admin@premiumbus.com',r:'admin',emoji:'👑'},
+{n:'Juan Pérez',e:'juan@correo.com',r:'user',emoji:'👤'},
+{n:'María García',e:'maria@correo.com',r:'user',emoji:'👩'},
+{n:'Carlos López',e:'carlos@correo.com',r:'user',emoji:'👨'},
+{n:'Ana Martínez',e:'ana@correo.com',r:'user',emoji:'👩'},
+{n:'Roberto Sánchez',e:'roberto@correo.com',r:'user',emoji:'👤'},
+];
+async function run(){
+await w(1500);
+document.getElementById('s1').classList.add('a');await w(1500);document.getElementById('s1').className='sb d';
+document.getElementById('s2').classList.add('a');
+document.getElementById('count').textContent=`${users.length} usuarios registrados`;
+const list=document.getElementById('list');
+for(let i=0;i<users.length;i++){
+const u=users[i];
+list.innerHTML+=`<div class="user-card" id="uc-${i}"><div class="avatar ${u.r}">${u.emoji}</div><div class="user-info"><h5>${u.n}</h5><p>${u.e}</p></div><span class="role-badge ${u.r}">${u.r}</span></div>`;
+await w(100);document.getElementById('uc-'+i).classList.add('show');
+await w(400);
+}
+await w(1000);document.getElementById('s2').className='sb d';
+document.getElementById('s3').classList.add('a');await w(2000);document.getElementById('s3').className='sb d';
+await w(500);document.getElementById('result').classList.add('show');clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>

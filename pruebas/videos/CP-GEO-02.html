@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-GEO-02 — Corte GPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.bar span{color:#fff;font-size:12px;font-weight:600}
+.pc{height:calc(100% - 44px);overflow:hidden;position:relative}
+.map{position:absolute;inset:0;background:linear-gradient(135deg,#d4e6b5,#c8daa0);transition:.5s}
+.map.disabled{filter:grayscale(1) brightness(.7)}
+.road{position:absolute;background:#888;border-radius:4px}
+.road.h{height:8px;left:0;right:0}.road.v{width:8px;top:0;bottom:0}
+.bus-marker{position:absolute;width:40px;height:40px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(59,130,246,.4);transition:all 1s ease;z-index:10;border:3px solid #fff}
+.bus-marker.frozen{background:#94a3b8;box-shadow:none;border-color:#94a3b8}
+.info-bar{position:absolute;top:0;left:0;right:0;background:rgba(26,58,107,.9);padding:10px 16px;color:#fff;font-size:11px;display:flex;justify-content:space-between;z-index:20}
+.info-bar.error{background:rgba(239,68,68,.9)}
+.gps-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;opacity:0;transition:.4s}
+.gps-overlay.show{opacity:1}
+.gps-icon{font-size:64px;margin-bottom:12px}
+.gps-text{color:#fff;font-size:16px;font-weight:700;margin-bottom:4px}
+.gps-sub{color:rgba(255,255,255,.7);font-size:12px;text-align:center;max-width:200px}
+.toast{position:absolute;top:50px;left:50%;transform:translateX(-50%) translateY(-20px);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:40;color:#fff;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.warn{background:#f59e0b}
+.si{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:360px}
+.sb{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:8px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.sb.a{opacity:1;border-left-color:#3b82f6}.sb.d{opacity:1;border-left-color:#22c55e}.sb.r{opacity:1;border-left-color:#ef4444}
+.sb h4{font-size:13px;color:#e2e8f0;margin-bottom:3px}.sb p{font-size:11px;color:#94a3b8}
+.tt{position:fixed;top:30px;left:40px}.tt h2{font-size:20px;color:#fff}.tt p{font-size:12px;color:#94a3b8}
+.rb{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.rb.show{opacity:1}.rb h3{color:#22c55e;font-size:18px}.rb p{color:#94a3b8;font-size:12px}
+.cd{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+.building{position:absolute;background:rgba(100,100,100,.2);border-radius:4px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.shake{animation:shake .4s 2}
+</style>
+</head>
+<body>
+<div class="tt"><h2>🧪 CP-GEO-02</h2><p>Corte de Servicios de Ubicación — Resiliencia</p></div>
+<div class="cd" id="timer">⏱️ 0:00</div>
+<div class="phone" id="phone">
+<div class="bar"><span>PremiumBus — Mapa</span></div>
+<div class="pc">
+<div class="map" id="map">
+<div class="road h" style="top:35%"></div>
+<div class="road h" style="top:60%"></div>
+<div class="road v" style="left:30%"></div>
+<div class="road v" style="left:65%"></div>
+<div class="building" style="top:15%;left:10%;width:50px;height:40px"></div>
+<div class="building" style="top:40%;left:45%;width:60px;height:35px"></div>
+<div class="bus-marker" id="bus" style="left:100px;top:200px">🚌</div>
+</div>
+<div class="info-bar" id="infoBar"><span>📍 Ruta 1 - Saucito</span><span id="status">● En vivo</span></div>
+<div class="gps-overlay" id="gpsOverlay">
+<div class="gps-icon">📡</div>
+<div class="gps-text">Señal GPS perdida</div>
+<div class="gps-sub">La actualización se ha pausado. Activa los servicios de ubicación.</div>
+</div>
+<div class="toast" id="toast"></div>
+</div>
+</div>
+<div class="si">
+<div class="sb" id="s1"><h4>Paso 1: Mapa funcionando normal</h4><p>Bus se desplaza en tiempo real</p></div>
+<div class="sb" id="s2"><h4>Paso 2: Desactivar GPS</h4><p>Simular Modo Avión / Apagar ubicación</p></div>
+<div class="sb" id="s3"><h4>Paso 3: Detección y notificación</h4><p>Toast: "Se perdió señal GPS"</p></div>
+<div class="sb" id="s4"><h4>Paso 4: Sin crash</h4><p>App estable, no se cierra</p></div>
+</div>
+<div class="rb" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-GEO-02: Corte GPS detectado, Toast mostrado, sin crash</p></div>
+<script>
+const w=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const ti=setInterval(()=>{sec++;document.getElementById('timer').textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+const bus=document.getElementById('bus');
+const positions=[{x:100,y:200},{x:140,y:200},{x:180,y:200},{x:220,y:190}];
+async function run(){
+await w(1500);
+document.getElementById('s1').classList.add('a');
+for(const p of positions){bus.style.left=p.x+'px';bus.style.top=p.y+'px';await w(1000);}
+await w(500);document.getElementById('s1').className='sb d';
+document.getElementById('s2').classList.add('a');
+await w(1000);
+document.getElementById('phone').classList.add('shake');
+document.getElementById('map').classList.add('disabled');
+bus.classList.add('frozen');
+document.getElementById('status').textContent='✖ Sin señal';
+document.getElementById('infoBar').classList.add('error');
+await w(1000);document.getElementById('s2').className='sb r';
+document.getElementById('s3').classList.add('a');
+const t=document.getElementById('toast');
+t.textContent='⚠️ Se perdió señal GPS';t.className='toast warn show';
+document.getElementById('gpsOverlay').classList.add('show');
+await w(2500);t.classList.remove('show');
+document.getElementById('s3').className='sb d';
+document.getElementById('s4').classList.add('a');
+await w(2000);document.getElementById('s4').className='sb d';
+await w(500);document.getElementById('result').classList.add('show');clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>

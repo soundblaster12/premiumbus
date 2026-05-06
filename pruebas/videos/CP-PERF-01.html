@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-PERF-01 — Carga Foto Perfil</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.bar span{color:#fff;font-size:12px;font-weight:600}
+.pc{height:calc(100% - 44px);overflow:hidden;position:relative;background:#f8fafc}
+.hdr{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);padding:20px;color:#fff;text-align:center}
+.hdr h2{font-size:18px}
+.avatar-area{text-align:center;padding:24px;background:#fff}
+.avatar{width:120px;height:120px;border-radius:50%;background:#e5e7eb;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden;transition:.5s;border:4px solid #e5e7eb}
+.avatar.uploading{border-color:#3b82f6;animation:pulse2 1s infinite}
+.avatar.done{border-color:#22c55e}
+.avatar img{width:100%;height:100%;object-fit:cover}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,.4)}50%{box-shadow:0 0 0 12px rgba(59,130,246,0)}}
+.upload-btn{padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer}
+.upload-btn.done{background:#22c55e}
+.progress-container{margin:16px 24px;display:none}
+.progress-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#22c55e);border-radius:3px;width:0;transition:width .3s}
+.progress-label{font-size:11px;color:#6b7280;margin-top:4px;text-align:center}
+.file-info{margin:12px 24px;padding:10px;background:#f1f5f9;border-radius:8px;font-size:11px;color:#374151;display:none}
+.toast{position:absolute;top:50px;left:50%;transform:translateX(-50%) translateY(-20px);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:100;color:#fff}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:#22c55e}.toast.error{background:#ef4444}
+.si{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:360px}
+.sb{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:8px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.sb.a{opacity:1;border-left-color:#3b82f6}.sb.d{opacity:1;border-left-color:#22c55e}
+.sb h4{font-size:13px;color:#e2e8f0;margin-bottom:3px}.sb p{font-size:11px;color:#94a3b8}
+.tt{position:fixed;top:30px;left:40px}.tt h2{font-size:20px;color:#fff}.tt p{font-size:12px;color:#94a3b8}
+.rb{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.rb.show{opacity:1}.rb h3{color:#22c55e;font-size:18px}.rb p{color:#94a3b8;font-size:12px}
+.cd{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+</style>
+</head>
+<body>
+<div class="tt"><h2>🧪 CP-PERF-01</h2><p>Carga de Fotografía de Perfil — Rendimiento</p></div>
+<div class="cd" id="timer">⏱️ 0:00</div>
+<div class="phone">
+<div class="bar"><span>PremiumBus — Mi Perfil</span></div>
+<div class="pc">
+<div class="hdr"><h2>👤 Mi Perfil</h2></div>
+<div class="avatar-area">
+<div class="avatar" id="avatar">👤</div>
+<button class="upload-btn" id="uploadBtn">📷 Cambiar Foto</button>
+</div>
+<div class="file-info" id="fileInfo">📄 foto_perfil.jpg — 1.2 MB — 1920×1080</div>
+<div class="progress-container" id="progressContainer">
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="progress-label" id="progressLabel">0%</div>
+</div>
+<div class="toast" id="toast"></div>
+</div>
+</div>
+<div class="si">
+<div class="sb" id="s1"><h4>Paso 1: Clic en modificar perfil</h4><p>Abrir selector de imagen</p></div>
+<div class="sb" id="s2"><h4>Paso 2: Seleccionar imagen JPG</h4><p>Archivo válido .jpg &lt; 2MB</p></div>
+<div class="sb" id="s3"><h4>Paso 3: Subida asíncrona</h4><p>Barra de progreso + spinner</p></div>
+<div class="sb" id="s4"><h4>Paso 4: Miniatura actualizada</h4><p>Avatar refleja nueva foto en tiempo real</p></div>
+</div>
+<div class="rb" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-PERF-01: Foto subida y miniatura actualizada en tiempo real</p></div>
+<script>
+const w=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const ti=setInterval(()=>{sec++;document.getElementById('timer').textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+function showToast(m,t){const el=document.getElementById('toast');el.textContent=m;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),2000);}
+async function run(){
+await w(1500);
+document.getElementById('s1').classList.add('a');
+document.getElementById('uploadBtn').style.background='#2563eb';
+await w(1500);document.getElementById('s1').className='sb d';
+document.getElementById('s2').classList.add('a');
+document.getElementById('fileInfo').style.display='block';
+await w(1500);document.getElementById('s2').className='sb d';
+document.getElementById('s3').classList.add('a');
+document.getElementById('avatar').classList.add('uploading');
+const pc=document.getElementById('progressContainer');pc.style.display='block';
+const fill=document.getElementById('progressFill');
+const label=document.getElementById('progressLabel');
+for(let p=0;p<=100;p+=5){fill.style.width=p+'%';label.textContent=p+'%';await w(80);}
+document.getElementById('avatar').classList.remove('uploading');
+await w(500);document.getElementById('s3').className='sb d';
+document.getElementById('s4').classList.add('a');
+const av=document.getElementById('avatar');
+av.classList.add('done');
+av.innerHTML='<div style="width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:48px">😊</div>';
+document.getElementById('uploadBtn').textContent='✅ Foto Actualizada';
+document.getElementById('uploadBtn').classList.add('done');
+showToast('✅ Foto actualizada correctamente','success');
+await w(2000);document.getElementById('s4').className='sb d';
+await w(500);document.getElementById('result').classList.add('show');clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>

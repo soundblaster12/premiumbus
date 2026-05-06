@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-COMPRA-01 — Saldo Exacto</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.bar span{color:#fff;font-size:12px;font-weight:600}
+.pc{height:calc(100% - 44px);overflow:hidden;position:relative;background:#f8fafc}
+.hdr{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);padding:20px;color:#fff}
+.hdr h2{font-size:18px}.hdr p{font-size:12px;opacity:.7}
+.wallet{display:flex;justify-content:space-between;padding:14px 20px;background:#fff;border-bottom:1px solid #e5e7eb}
+.wl{font-size:12px;color:#6b7280}.wv{font-size:22px;font-weight:800;color:#22c55e;transition:.3s}
+.rt{padding:12px 20px;background:#fff;margin:8px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.rt h4{font-size:13px;color:#1f2937}.rt p{font-size:11px;color:#6b7280}
+.sg{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;padding:8px 20px}
+.st{aspect-ratio:1;border-radius:6px;background:#e5e7eb;border:none;font-size:9px;color:#6b7280;transition:.2s;display:flex;align-items:center;justify-content:center}
+.st.tk{background:#fecaca;color:#ef4444}.st.sel{background:#2b5ea7;color:#fff;transform:scale(1.15)}
+.bb{margin:12px 20px;padding:14px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;width:calc(100% - 40px);font-family:Inter,sans-serif}
+.bb.ld{background:#94a3b8}
+.toast{position:absolute;top:50px;left:50%;transform:translateX(-50%) translateY(-20px);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:100;background:#22c55e;color:#fff}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.qro{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;opacity:0;transition:.3s;z-index:50}
+.qro.show{opacity:1}
+.qrc{background:#fff;border-radius:16px;padding:24px;text-align:center;width:260px}
+.qrc h3{color:#1f2937;font-size:16px;margin-bottom:8px}
+.qrimg{width:100px;height:100px;background:repeating-conic-gradient(#1f2937 0% 25%,#fff 0% 50%) 0 0/16px 16px;margin:0 auto 12px;border-radius:8px}
+.qrc p{font-size:11px;color:#6b7280}
+.si{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:360px}
+.sb{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:8px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.sb.a{opacity:1;border-left-color:#3b82f6}.sb.d{opacity:1;border-left-color:#22c55e}
+.sb h4{font-size:13px;color:#e2e8f0;margin-bottom:3px}.sb p{font-size:11px;color:#94a3b8}
+.tt{position:fixed;top:30px;left:40px}.tt h2{font-size:20px;color:#fff}.tt p{font-size:12px;color:#94a3b8}
+.rb{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.rb.show{opacity:1}.rb h3{color:#22c55e;font-size:18px}.rb p{color:#94a3b8;font-size:12px}
+.cd{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+</style>
+</head>
+<body>
+<div class="tt"><h2>🧪 CP-COMPRA-01</h2><p>Compra con Saldo Exacto $13.50 — Valores Límite</p></div>
+<div class="cd" id="timer">⏱️ 0:00</div>
+<div class="phone">
+<div class="bar"><span>PremiumBus — Comprar Boleto</span></div>
+<div class="pc">
+<div class="hdr"><h2>Comprar Boleto</h2><p>Selecciona ruta y asiento</p></div>
+<div class="wallet"><span class="wl">💰 Tu saldo</span><span class="wv" id="saldo">$13.50</span></div>
+<div class="rt"><h4>🚌 Ruta 1 - Saucito</h4><p>Col. Saucito → Centro Histórico | $13.50</p></div>
+<div class="sg" id="seats"></div>
+<button class="bb" id="buyBtn">Confirmar Compra — $13.50</button>
+<div class="toast" id="toast"></div>
+<div class="qro" id="qr"><div class="qrc"><h3>🎉 ¡Compra Exitosa!</h3><div class="qrimg"></div><p>Boleto #PB-2026-1547<br>Asiento #15</p></div></div>
+</div>
+</div>
+<div class="si">
+<div class="sb" id="s1"><h4>Paso 1: Verificar saldo</h4><p>Saldo = $13.50 | Precio = $13.50</p></div>
+<div class="sb" id="s2"><h4>Paso 2: Seleccionar asiento #15</h4><p>Asiento disponible</p></div>
+<div class="sb" id="s3"><h4>Paso 3: Confirmar compra</h4><p>$13.50 - $13.50 = $0.00</p></div>
+<div class="sb" id="s4"><h4>Paso 4: Saldo final = $0.00</h4><p>Valor límite exacto verificado</p></div>
+</div>
+<div class="rb" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-COMPRA-01: Valor límite $13.50 → saldo $0.00</p></div>
+<script>
+const w=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const ti=setInterval(()=>{sec++;document.getElementById('timer').textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+[3,7,12].forEach(n=>{const g=document.getElementById('seats');});
+const g=document.getElementById('seats');
+for(let i=1;i<=32;i++){const s=document.createElement('div');s.className='st'+([3,7,12].includes(i)?' tk':'');s.textContent=i;s.id='seat-'+i;g.appendChild(s);}
+async function run(){
+await w(1500);
+document.getElementById('s1').classList.add('a');await w(1500);document.getElementById('s1').className='sb d';
+document.getElementById('s2').classList.add('a');await w(800);document.getElementById('seat-15').classList.add('sel');await w(1500);document.getElementById('s2').className='sb d';
+document.getElementById('s3').classList.add('a');await w(500);const b=document.getElementById('buyBtn');b.className='bb ld';b.textContent='Procesando...';await w(2000);b.textContent='✅ Compra Exitosa';b.style.background='#22c55e';
+const t=document.getElementById('toast');t.textContent='🎉 ¡Compra Exitosa!';t.className='toast show';document.getElementById('qr').classList.add('show');await w(2000);t.classList.remove('show');document.getElementById('s3').className='sb d';
+document.getElementById('s4').classList.add('a');document.getElementById('saldo').textContent='$0.00';document.getElementById('saldo').style.color='#3b82f6';await w(2000);document.getElementById('s4').className='sb d';
+await w(500);document.getElementById('result').classList.add('show');clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>

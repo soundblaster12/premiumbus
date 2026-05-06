@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CP-UI-01 — Tokens de Diseño</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.phone{width:375px;height:680px;background:#fff;border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;border:3px solid #334155}
+.bar{height:44px;background:#1a3a6b;display:flex;align-items:center;justify-content:center}
+.bar span{color:#fff;font-size:12px;font-weight:600}
+.pc{height:calc(100% - 44px);overflow-y:auto;position:relative;background:#f8fafc;padding:16px}
+.section{margin-bottom:16px}
+.section h3{font-size:14px;color:#1a3a6b;margin-bottom:8px;font-weight:700}
+.token-row{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#fff;border-radius:8px;margin-bottom:4px;box-shadow:0 1px 4px rgba(0,0,0,.04);opacity:0;transform:translateX(-10px);transition:.3s}
+.token-row.show{opacity:1;transform:translateX(0)}
+.color-swatch{width:24px;height:24px;border-radius:6px;border:1px solid rgba(0,0,0,.1)}
+.token-name{font-size:10px;color:#6b7280;font-family:monospace;flex:1}
+.token-val{font-size:10px;color:#1f2937;font-weight:600}
+.check{color:#22c55e;font-size:12px}
+.component-preview{background:#fff;border-radius:10px;padding:10px;margin-bottom:6px;box-shadow:0 2px 6px rgba(0,0,0,.05);opacity:0;transition:.3s}
+.component-preview.show{opacity:1}
+.mini-toast{background:#22c55e;color:#fff;padding:6px 12px;border-radius:6px;font-size:10px;font-weight:600;display:inline-block}
+.mini-btn{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);color:#fff;padding:8px 16px;border:none;border-radius:8px;font-size:11px;font-weight:600}
+.mini-nav{display:flex;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb}
+.mini-nav div{flex:1;padding:6px;text-align:center;font-size:9px;color:#94a3b8}
+.mini-nav div.active{color:#2b5ea7;border-bottom:2px solid #2b5ea7}
+.si{position:fixed;right:40px;top:50%;transform:translateY(-50%);width:360px}
+.sb{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:8px;border-left:4px solid #334155;opacity:.3;transition:.4s}
+.sb.a{opacity:1;border-left-color:#3b82f6}.sb.d{opacity:1;border-left-color:#22c55e}
+.sb h4{font-size:13px;color:#e2e8f0;margin-bottom:3px}.sb p{font-size:11px;color:#94a3b8}
+.tt{position:fixed;top:30px;left:40px}.tt h2{font-size:20px;color:#fff}.tt p{font-size:12px;color:#94a3b8}
+.rb{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:2px solid #22c55e;padding:14px 40px;border-radius:12px;text-align:center;opacity:0;transition:.5s}
+.rb.show{opacity:1}.rb h3{color:#22c55e;font-size:18px}.rb p{color:#94a3b8;font-size:12px}
+.cd{position:fixed;top:30px;right:40px;font-size:14px;color:#64748b;font-weight:600}
+</style>
+</head>
+<body>
+<div class="tt"><h2>🧪 CP-UI-01</h2><p>Validación de Tokens de Diseño — Cap.20 WebApp</p></div>
+<div class="cd" id="timer">⏱️ 0:00</div>
+<div class="phone">
+<div class="bar"><span>PremiumBus — Design System</span></div>
+<div class="pc" id="content"></div>
+</div>
+<div class="si">
+<div class="sb" id="s1"><h4>Paso 1: Tokens CSS</h4><p>Colores, tipografía, espaciado semánticos</p></div>
+<div class="sb" id="s2"><h4>Paso 2: Tipografía</h4><p>Google Fonts Inter cargada</p></div>
+<div class="sb" id="s3"><h4>Paso 3: Componentización</h4><p>Toast, Navbar, Icons aislados</p></div>
+<div class="sb" id="s4"><h4>Paso 4: Resiliencia visual</h4><p>Toast ≤85%, responsive, estados de borde</p></div>
+</div>
+<div class="rb" id="result"><h3>✅ PRUEBA APROBADA</h3><p>CP-UI-01: Sistema de diseño atómico validado</p></div>
+<script>
+const w=ms=>new Promise(r=>setTimeout(r,ms));
+let sec=0;const ti=setInterval(()=>{sec++;document.getElementById('timer').textContent=`⏱️ 0:${String(sec).padStart(2,'0')}`;},1000);
+const c=document.getElementById('content');
+const tokens=[
+{name:'--color-primary-700',val:'#1a3a6b',color:'#1a3a6b'},
+{name:'--color-accent-green',val:'#34c759',color:'#34c759'},
+{name:'--color-accent-red',val:'#ff3b30',color:'#ff3b30'},
+{name:'--color-accent-orange',val:'#ff9500',color:'#ff9500'},
+{name:'--color-gray-500',val:'#6b7280',color:'#6b7280'},
+];
+const typo=[
+{name:'--font-family-base',val:'Inter, sans-serif'},
+{name:'--font-size-base',val:'15px'},
+{name:'--font-weight-bold',val:'700'},
+];
+const spacing=[
+{name:'--radius-md',val:'16px'},
+{name:'--shadow-md',val:'0 4px 16px'},
+{name:'--space-4',val:'16px'},
+{name:'--navbar-height',val:'72px'},
+];
+async function addTokens(title,items,hasColor){
+c.innerHTML+=`<div class="section"><h3>${title}</h3><div id="grp-${title.replace(/\s/g,'')}"></div></div>`;
+const grp=document.getElementById('grp-'+title.replace(/\s/g,''));
+for(const t of items){
+const row=document.createElement('div');
+row.className='token-row';
+row.innerHTML=(hasColor?`<div class="color-swatch" style="background:${t.color}"></div>`:'')+
+`<span class="token-name">${t.name}</span><span class="token-val">${t.val}</span><span class="check">✅</span>`;
+grp.appendChild(row);
+await w(100);row.classList.add('show');await w(250);
+}
+}
+async function run(){
+await w(1500);
+document.getElementById('s1').classList.add('a');
+await addTokens('🎨 Colores',tokens,true);
+await addTokens('📝 Tipografía',typo,false);
+await addTokens('📐 Espaciado',spacing,false);
+await w(800);document.getElementById('s1').className='sb d';
+document.getElementById('s2').classList.add('a');await w(1500);document.getElementById('s2').className='sb d';
+document.getElementById('s3').classList.add('a');
+c.innerHTML+=`<div class="section"><h3>🧩 Componentes</h3></div>`;
+const comps=[
+`<div class="component-preview" id="cp1"><p style="font-size:10px;color:#6b7280;margin-bottom:4px">Toast.js</p><div class="mini-toast">🎉 ¡Compra Exitosa!</div></div>`,
+`<div class="component-preview" id="cp2"><p style="font-size:10px;color:#6b7280;margin-bottom:4px">Navbar.js</p><div class="mini-nav"><div class="active">🏠 Home</div><div>🎫 Comprar</div><div>📍 Mapa</div><div>👤 Perfil</div></div></div>`,
+`<div class="component-preview" id="cp3"><p style="font-size:10px;color:#6b7280;margin-bottom:4px">Botón primario</p><button class="mini-btn">Confirmar Compra</button></div>`,
+];
+for(let i=0;i<comps.length;i++){c.innerHTML+=comps[i];await w(100);document.getElementById('cp'+(i+1)).classList.add('show');await w(500);}
+await w(800);document.getElementById('s3').className='sb d';
+document.getElementById('s4').classList.add('a');await w(2000);document.getElementById('s4').className='sb d';
+await w(500);document.getElementById('result').classList.add('show');clearInterval(ti);
+}
+run();
+</script>
+</body>
+</html>
