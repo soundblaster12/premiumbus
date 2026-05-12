@@ -42,24 +42,17 @@ class AuthServiceWrapper {
     const existingUsers = this._getStoredUsers();
     if (existingUsers.length === 0) {
       const defaultUsers = [
-        {
-          id: 1,
-          nombre: 'Administrador',
-          correo: 'admin@premiumbus.com',
-          password: 'admin123',
-          rol: 'admin',
-          authProvider: 'email',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 2,
-          nombre: 'Juan Pérez',
-          correo: 'juan@correo.com',
-          password: 'usuario123',
-          rol: 'user',
-          authProvider: 'email',
-          createdAt: new Date().toISOString(),
-        },
+        { id: 1, nombre: 'Administrador Principal', correo: 'admin@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 2, nombre: 'Admin Operaciones', correo: 'admin2@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 3, nombre: 'Admin Finanzas', correo: 'admin3@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 4, nombre: 'Admin Soporte', correo: 'admin4@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 5, nombre: 'Admin Rutas', correo: 'admin5@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 6, nombre: 'Admin Recursos', correo: 'admin6@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 7, nombre: 'Admin Marketing', correo: 'admin7@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 8, nombre: 'Admin Seguridad', correo: 'admin8@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 9, nombre: 'Admin Calidad', correo: 'admin9@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 10, nombre: 'Admin Regional', correo: 'admin10@premiumbus.com', password: 'admin123', rol: 'admin', authProvider: 'email', createdAt: new Date().toISOString() },
+        { id: 11, nombre: 'Juan Pérez', correo: 'juan@correo.com', password: 'usuario123', rol: 'user', authProvider: 'email', createdAt: new Date().toISOString() },
       ];
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(defaultUsers));
     }
@@ -413,8 +406,9 @@ class AuthServiceWrapper {
       return { success: false, error: 'Este correo electrónico ya está registrado.' };
     }
 
+    const maxId = users.reduce((max, u) => Math.max(max, u.id || 0), 0);
     const newUser = {
-      id: users.length + 1,
+      id: maxId + 1,
       nombre,
       correo: correo.toLowerCase(),
       password,
@@ -475,8 +469,9 @@ class AuthServiceWrapper {
 
     if (!user) {
       // Create new user
+      const maxId = users.reduce((max, u) => Math.max(max, u.id || 0), 0);
       user = {
-        id: users.length + 1,
+        id: maxId + 1,
         nombre,
         correo,
         password: crypto.randomUUID?.() || Math.random().toString(36),

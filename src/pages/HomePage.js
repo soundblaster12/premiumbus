@@ -8,6 +8,7 @@ import { AuthService } from '../services/AuthService.js';
 import { DataService } from '../services/DataService.js';
 import { router } from '../services/Router.js';
 import { renderNavbar, attachNavbarListeners } from '../components/Navbar.js';
+import { showToast } from '../components/Toast.js';
 
 export async function renderHomePage() {
   const container = document.createElement('div');
@@ -85,7 +86,19 @@ function renderAdminHome(firstName, trips) {
     <div class="home-page__actions">
       <div class="quick-action quick-action--green" id="action-drivers" style="flex:1;">
         <div class="quick-action__icon">🧑‍✈️</div>
-        <span class="quick-action__label">Conductores en Servicio</span>
+        <span class="quick-action__label">Conductores</span>
+      </div>
+      <div class="quick-action quick-action--blue" id="action-admin-panel" style="flex:1;">
+        <div class="quick-action__icon">⚙️</div>
+        <span class="quick-action__label">Panel Admin</span>
+      </div>
+      <div class="quick-action quick-action--orange" id="action-admin-export" style="flex:1;">
+        <div class="quick-action__icon">📤</div>
+        <span class="quick-action__label">Exportar</span>
+      </div>
+      <div class="quick-action quick-action--purple" id="action-admin-profile" style="flex:1;">
+        <div class="quick-action__icon">👤</div>
+        <span class="quick-action__label">Mi Perfil</span>
       </div>
     </div>
 
@@ -112,6 +125,44 @@ function renderAdminHome(firstName, trips) {
             <p class="stat-card__label">Rutas</p>
             <p class="stat-card__value">${trips.length}</p>
             <p class="stat-card__change" style="color:var(--color-accent-orange);">En operación</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: var(--space-3) var(--space-5);">
+        <div class="section-header">
+          <h2 class="section-header__title">💰 Resumen Financiero</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);">
+          <div class="stat-card">
+            <p class="stat-card__label">Ingresos</p>
+            <p class="stat-card__value" style="color:var(--color-accent-green-dark);">$${getAdminRevenue()}</p>
+            <p class="stat-card__change" style="color:var(--color-accent-green);">MXN Total</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-card__label">Boletos</p>
+            <p class="stat-card__value">${getAdminPurchaseCount()}</p>
+            <p class="stat-card__change" style="color:var(--color-primary-500);">Vendidos</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 0 var(--space-5);">
+        <div class="section-header">
+          <h2 class="section-header__title">🖥️ Estado del Sistema</h2>
+        </div>
+        <div style="background: var(--color-gray-50); border-radius: var(--radius-lg); padding: var(--space-4); border: 2px solid var(--color-gray-100); margin-bottom: var(--space-3);">
+          <div style="display:flex;justify-content:space-between;padding:var(--space-2) 0;border-bottom:1px solid var(--color-gray-200);">
+            <span style="font-size:var(--font-size-xs);color:var(--color-gray-500);">🟢 Backend</span>
+            <span style="font-size:var(--font-size-xs);font-weight:700;color:var(--color-accent-green);">localStorage (Demo)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:var(--space-2) 0;border-bottom:1px solid var(--color-gray-200);">
+            <span style="font-size:var(--font-size-xs);color:var(--color-gray-500);">📱 Plataforma</span>
+            <span style="font-size:var(--font-size-xs);font-weight:700;color:var(--color-primary-700);">PWA v4.0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:var(--space-2) 0;">
+            <span style="font-size:var(--font-size-xs);color:var(--color-gray-500);">📊 Usuarios</span>
+            <span style="font-size:var(--font-size-xs);font-weight:700;color:var(--color-gray-800);">${getAdminUserCount()} registrados</span>
           </div>
         </div>
       </div>
@@ -265,6 +316,11 @@ function renderActiveTripBanner(activeTrip) {
 function attachHomeListeners(isAdmin, trips) {
   if (isAdmin) {
     document.getElementById('action-drivers')?.addEventListener('click', () => router.navigate('admin'));
+    document.getElementById('action-admin-panel')?.addEventListener('click', () => router.navigate('admin'));
+    document.getElementById('action-admin-profile')?.addEventListener('click', () => router.navigate('profile'));
+    document.getElementById('action-admin-export')?.addEventListener('click', () => {
+      exportAdminCSV();
+    });
     return;
   }
 
@@ -287,5 +343,69 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
   } catch {
     return '--';
+  }
+}
+
+/* ── Admin Data Helpers ──────────────────────── */
+
+function getAdminRevenue() {
+  try {
+    const purchases = JSON.parse(localStorage.getItem('premiumbus_purchases') || '[]');
+    const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
+    const total = [...purchases, ...history].reduce((s, p) => s + (p.precio || 0), 0);
+    return total.toFixed(0);
+  } catch { return '0'; }
+}
+
+function getAdminPurchaseCount() {
+  try {
+    const purchases = JSON.parse(localStorage.getItem('premiumbus_purchases') || '[]');
+    const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
+    return purchases.length + history.length;
+  } catch { return 0; }
+}
+
+function getAdminUserCount() {
+  try {
+    return JSON.parse(localStorage.getItem('premiumbus_users') || '[]').length;
+  } catch { return 0; }
+}
+
+function exportAdminCSV() {
+  try {
+    const purchases = JSON.parse(localStorage.getItem('premiumbus_purchases') || '[]');
+    const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
+    const allData = [...purchases, ...history];
+
+    if (allData.length === 0) {
+      showToast('No hay datos para exportar.', 'info');
+      return;
+    }
+
+    const headers = ['Folio', 'Ruta', 'Origen', 'Destino', 'Asiento', 'Precio', 'Fecha Compra', 'Estado', 'Usuario ID'];
+    const rows = allData.map(p => [
+      p.id || '', p.nombreRuta || '', p.origen || '', p.destino || '',
+      p.asiento || '', p.precio?.toFixed(2) || '0.00',
+      p.fechaCompra || '', p.status || 'unknown', p.usuarioId || '',
+    ]);
+
+    const csvContent = [headers, ...rows].map(row =>
+      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `PremiumBus_Reporte_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showToast(`📤 Reporte exportado: ${allData.length} registros.`, 'success');
+  } catch (error) {
+    showToast('Error al exportar datos.', 'error');
+    console.error('[Export] Error:', error);
   }
 }

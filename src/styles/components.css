@@ -74,9 +74,26 @@
   color: var(--color-gray-400);
 }
 .input-wrapper__action {
-  color: var(--color-gray-400);
+  color: var(--color-gray-900);
   padding: var(--space-2);
   cursor: pointer;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+.input-wrapper__action:hover {
+  opacity: 0.7;
+}
+.input-wrapper__action svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--color-gray-900);
 }
 
 /* ── Select Wrapper ──────────────────────────────── */
@@ -801,4 +818,168 @@
 .active-route-warning__icon {
   font-size: 28px;
   flex-shrink: 0;
+}
+
+/* ── Payment Method Selector ─────────────────── */
+.payment-method-selector {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.payment-method-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  background: var(--color-gray-50);
+  cursor: pointer;
+  transition: all var(--transition-bounce);
+  position: relative;
+}
+.payment-method-card:hover {
+  border-color: var(--color-primary-300);
+  background: var(--color-primary-50);
+}
+.payment-method-card--active {
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-50);
+  box-shadow: var(--shadow-glow-blue);
+}
+.payment-method-card--active::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary-500);
+  color: white;
+  font-size: 11px;
+  font-weight: var(--font-weight-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.payment-method-card__icon {
+  font-size: 28px;
+}
+.payment-method-card__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-700);
+  text-align: center;
+}
+.payment-method-card--active .payment-method-card__label {
+  color: var(--color-primary-700);
+}
+
+/* ── Card Form ─────────────────────────────────── */
+.card-form {
+  background: var(--color-gray-50);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  border: 2px solid var(--color-gray-200);
+  margin-bottom: var(--space-4);
+  animation: slideInUp 0.3s ease;
+}
+.card-form__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-700);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.card-form__row {
+  display: flex;
+  gap: var(--space-3);
+}
+.card-form__row .input-group {
+  flex: 1;
+}
+.card-form__brands {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-bottom: var(--space-3);
+  justify-content: center;
+}
+.card-form__brand {
+  width: 40px;
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid var(--color-gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: var(--font-weight-black);
+  background: white;
+}
+.card-form__brand--visa { color: #1a1f71; }
+.card-form__brand--mc { color: #eb001b; }
+.card-form__brand--amex { color: #006fcf; }
+
+/* ── Card type toggle ────────────────────────── */
+.card-type-toggle {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.card-type-btn {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-500);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+.card-type-btn--active {
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+.card-type-btn:hover:not(.card-type-btn--active) {
+  border-color: var(--color-gray-300);
+  background: var(--color-gray-100);
+}
+
+/* ── Admin Search Input ──────────────────────── */
+.search-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  color: var(--color-gray-800);
+  background: var(--color-white);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+  box-sizing: border-box;
+}
+.search-input:focus {
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+.search-input::placeholder {
+  color: var(--color-gray-400);
+}
+
+/* ── Settings Action Buttons ─────────────────── */
+.profile-page__action-btn[id*="settings-"] {
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
 }

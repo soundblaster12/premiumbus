@@ -229,7 +229,7 @@ async function initializeApp() {
   const platform = detectPlatform();
 
   console.log(
-    '%c🚌 PremiumBus v3.0 — San Luis Potosí',
+    '%c🚌 PremiumBus v4.0 — San Luis Potosí',
     'color: #2b5ea7; font-size: 14px; font-weight: bold;'
   );
   console.log(

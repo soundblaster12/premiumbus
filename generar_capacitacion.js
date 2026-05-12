@@ -167,9 +167,13 @@ function seccionCronograma() {
   ];
 }
 
-function moduloPracticaGuiada(titulo, objetivo, contenidoTeorico, pasos) {
+function moduloPracticaGuiada(titulo, duracion, objetivo, contenidoTeorico, pasos) {
   return [
     heading(titulo, HeadingLevel.HEADING_2),
+    new Paragraph({
+      spacing: { after: 100 },
+      children: [new TextRun({ text: `Duración estimada: ${duracion}`, bold: true, size: 22, font: 'Calibri', color: AZUL })],
+    }),
     heading('Objetivo:', HeadingLevel.HEADING_3),
     paragraph(objetivo),
     heading('Contenido teórico:', HeadingLevel.HEADING_3),
@@ -182,11 +186,13 @@ function moduloPracticaGuiada(titulo, objetivo, contenidoTeorico, pasos) {
 
 function seccionModulos() {
   return [
-    heading('4. Contenido de los Módulos'),
+    heading('4. Contenido de los Módulos (Etapas de Capacitación)'),
+    paragraph('El programa está estructurado en etapas o módulos específicos para facilitar el aprendizaje progresivo. Al final de la capacitación se detallan las horas invertidas.'),
 
     // Módulo 1
     ...moduloPracticaGuiada(
       'Módulo 1: Introducción y Registro de Usuario',
+      '2 horas',
       'El usuario aprenderá a instalar la aplicación y crear su cuenta.',
       [
         '¿Qué es PremiumBus? Presentación del sistema y sus beneficios.',
@@ -209,6 +215,7 @@ function seccionModulos() {
     // Módulo 2
     ...moduloPracticaGuiada(
       'Módulo 2: Navegación e Interfaz',
+      '1.5 horas',
       'El usuario conocerá la estructura de navegación y las pantallas principales.',
       [
         'Estructura de la aplicación: barra de navegación inferior con iconos.',
@@ -238,6 +245,7 @@ function seccionModulos() {
     // Módulo 3
     ...moduloPracticaGuiada(
       'Módulo 3: Consulta de Rutas y Mapas',
+      '2 horas',
       'El usuario aprenderá a buscar rutas, consultar horarios y visualizar el recorrido en el mapa.',
       [
         'Listado de rutas: nombre, origen, destino, hora de salida y precio.',
@@ -258,6 +266,7 @@ function seccionModulos() {
     // Módulo 4
     ...moduloPracticaGuiada(
       'Módulo 4: Compra de Boletos',
+      '2 horas',
       'El usuario aprenderá el proceso completo de compra de un boleto de transporte.',
       [
         'Selección de ruta y fecha de viaje.',
@@ -278,6 +287,7 @@ function seccionModulos() {
     // Módulo 5
     ...moduloPracticaGuiada(
       'Módulo 5: Perfil, Historial y Código QR',
+      '1.5 horas',
       'El usuario aprenderá a gestionar su perfil, consultar el historial y usar sus boletos QR.',
       [
         'Edición del nombre de usuario desde el perfil.',
@@ -297,10 +307,11 @@ function seccionModulos() {
 
     // Módulo 6
     ...moduloPracticaGuiada(
-      'Módulo 6: Panel de Administración (Solo Administradores)',
+      'Módulo 6: Panel de Administración',
+      '2 horas',
       'El administrador aprenderá a gestionar usuarios y supervisar las operaciones del sistema.',
       [
-        'Acceso al panel: credenciales de administrador (admin@premiumbus.com).',
+        'Acceso al panel mediante las cuentas exclusivas de administrador.',
         'Listado de usuarios registrados y sus roles.',
         'Supervisión de compras realizadas.',
         'Gestión de rutas y disponibilidad.',
@@ -313,23 +324,128 @@ function seccionModulos() {
       ]
     ),
 
-    heading('Credenciales de administrador por defecto:', HeadingLevel.HEADING_3),
-    makeTable(['Campo', 'Valor'], [
-      ['Correo', 'admin@premiumbus.com'],
-      ['Contraseña', 'admin123'],
+    new Paragraph({ text: '' }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 200 },
+      children: [new TextRun({ text: 'TOTAL DE HORAS DE CAPACITACIÓN: 11 Horas (más 1 hora de evaluación, Total: 12 Horas)', bold: true, size: 24, font: 'Calibri', color: AZUL2 })],
+    }),
+  ];
+}
+
+function seccionInstalacion() {
+  return [
+    new Paragraph({ children: [new PageBreak()] }),
+    heading('5. Instalacion del Sistema, Base de Datos y Dispositivos'),
+    paragraph('Esta seccion describe el proceso completo de instalacion del sistema PremiumBus en el entorno del cliente, abarcando desde la configuración del servidor, la base de datos y la instalacion en cada tipo de dispositivo (Android, iOS y PC).'),
+
+    heading('5.1 Requisitos Previos del Servidor', HeadingLevel.HEADING_2),
+    ...[
+      'XAMPP instalado en el equipo servidor (incluye Apache y MySQL).',
+      'Sistema operativo Windows 7, 8, 10 u 11.',
+      '50 MB de espacio libre en disco.',
+      'Permisos de administrador en el equipo.',
+      'Conexion a la red local (para acceso desde dispositivos moviles).',
+    ].map(bulletItem),
+
+    heading('5.2 Contenido de la Memoria USB', HeadingLevel.HEADING_2),
+    paragraph('La memoria USB entregada al cliente contiene los siguientes archivos:'),
+    makeTable(['Archivo', 'Descripcion'], [
+      ['Instalador_PremiumBus.hta', 'Asistente de instalacion ejecutable (doble clic para abrir)'],
+      ['Programa_Capacitacion_PremiumBus.docx', 'Este documento de capacitacion'],
+      ['src/', 'Codigo fuente de la aplicacion web (frontend)'],
+      ['api/', 'Codigo del servidor API (backend PHP)'],
+      ['setup_db.php', 'Script de configuracion automatica de la base de datos'],
+      ['index.html', 'Punto de entrada de la aplicacion'],
+    ]),
+    new Paragraph({ text: '' }),
+
+    heading('5.3 Proceso de Instalacion con el Asistente', HeadingLevel.HEADING_2),
+    paragraph('El instalador (Instalador_PremiumBus.hta) es una aplicacion Windows que guia al usuario por 4 pasos (Bienvenida, Configuración, Instalación, y Finalización). Este asistente copiará los archivos a XAMPP y preparará todo automáticamente.'),
+
+    heading('5.4 Funcionamiento y Configuración de la Base de Datos', HeadingLevel.HEADING_2),
+    paragraph('El sistema PremiumBus utiliza una base de datos relacional MySQL alojada en el servidor local (XAMPP). Esta base de datos es el núcleo del sistema, encargada de almacenar de forma persistente y segura las rutas, usuarios, boletos adquiridos y las transacciones.'),
+    paragraph('Despues de la instalacion con el asistente, es necesario ejecutar la configuracion inicial de la base de datos:'),
+    makeTable(['Paso', 'Accion', 'Resultado'], [
+      ['1', 'Abrir http://localhost/PremiumBus/setup_db.php', 'Se muestra el formulario de configuracion de BD'],
+      ['2', 'Ingresar credenciales de MySQL', 'Host, usuario y contrasena'],
+      ['3', 'Clic en "Configurar Base de Datos"', 'Se crean las tablas y se insertan los datos iniciales'],
+      ['4', 'Verificar mensaje de exito', 'Se generan las rutas y se crean las 10 cuentas de administrador'],
+    ]),
+    new Paragraph({ text: '' }),
+
+    heading('5.5 Respaldo y Restauración de la Base de Datos (Backup)', HeadingLevel.HEADING_2),
+    paragraph('Para prevenir la pérdida de datos y evitar que el cliente tenga que volver a capturar la información si comete un error grave, se recomienda realizar respaldos periódicos mediante phpMyAdmin.'),
+    heading('Pasos para realizar un respaldo (Exportar):', HeadingLevel.HEADING_3),
+    ...[
+      '1. Abrir el navegador e ingresar a http://localhost/phpmyadmin',
+      '2. Seleccionar la base de datos "premiumbus" en el panel izquierdo.',
+      '3. Hacer clic en la pestaña superior "Exportar".',
+      '4. Elegir el método "Rápido" y formato "SQL". Hacer clic en "Exportar" y guardar el archivo .sql en un lugar seguro.',
+    ].map(bulletItem),
+    heading('Pasos para restaurar la base de datos (Importar):', HeadingLevel.HEADING_3),
+    ...[
+      '1. Abrir phpMyAdmin y seleccionar la base de datos "premiumbus".',
+      '2. (Opcional) Eliminar las tablas actuales si se desea una restauración limpia.',
+      '3. Hacer clic en la pestaña "Importar".',
+      '4. Seleccionar el archivo de respaldo (.sql) guardado previamente.',
+      '5. Hacer clic en "Importar" al final de la página. El sistema recuperará su estado anterior.',
+    ].map(bulletItem),
+
+    heading('5.6 Instalacion de la Aplicación en Dispositivos (Android, iOS y PC)', HeadingLevel.HEADING_2),
+    paragraph('La plataforma funciona como una Aplicación Web Progresiva (PWA), lo que permite su instalación en diversos dispositivos sin depender de las tiendas de aplicaciones.'),
+    
+    heading('A) Instalación en Android', HeadingLevel.HEADING_3),
+    ...[
+      '1. Conectarse a la red WiFi local del servidor.',
+      '2. Abrir el navegador Google Chrome.',
+      '3. Ingresar la dirección IP del servidor (ej: http://192.168.1.100/PremiumBus/).',
+      '4. Tocar "Instalar" en el banner inferior que aparece, o ir al menú de Chrome (tres puntos) y seleccionar "Añadir a la pantalla de inicio".',
+    ].map(bulletItem),
+
+    heading('B) Instalación en iOS (iPhone/iPad)', HeadingLevel.HEADING_3),
+    ...[
+      '1. Conectarse a la red WiFi local del servidor.',
+      '2. Abrir el navegador Safari.',
+      '3. Ingresar la dirección IP del servidor.',
+      '4. Tocar el icono de "Compartir" (el cuadro con una flecha hacia arriba) en la barra inferior.',
+      '5. Seleccionar la opción "Agregar a inicio" (Add to Home Screen) y confirmar.',
+    ].map(bulletItem),
+
+    heading('C) Instalación en PC (Windows/Mac)', HeadingLevel.HEADING_3),
+    ...[
+      '1. Abrir Google Chrome o Microsoft Edge en cualquier computadora de la red.',
+      '2. Ingresar la dirección IP del servidor o "localhost" si es la misma máquina.',
+      '3. Hacer clic en el icono de instalación (una pantalla con una flecha) que aparece a la derecha de la barra de direcciones.',
+      '4. Confirmar la instalación. La aplicación se abrirá en su propia ventana y creará un acceso directo.',
+    ].map(bulletItem),
+
+    heading('5.7 Cuentas de Administrador Exclusivas', HeadingLevel.HEADING_2),
+    paragraph('El sistema genera automáticamente 10 cuentas exclusivas para uso administrativo, permitiendo que múltiples gestores administren PremiumBus. Todas las contraseñas iniciales son "admin123" y deben ser cambiadas en el primer inicio de sesión:'),
+    makeTable(['Cuenta #', 'Correo de Administrador', 'Rol'], [
+      ['Admin 1', 'admin1@premiumbus.com', 'Administrador Global'],
+      ['Admin 2', 'admin2@premiumbus.com', 'Administrador Global'],
+      ['Admin 3', 'admin3@premiumbus.com', 'Administrador Global'],
+      ['Admin 4', 'admin4@premiumbus.com', 'Administrador Global'],
+      ['Admin 5', 'admin5@premiumbus.com', 'Administrador Global'],
+      ['Admin 6', 'admin6@premiumbus.com', 'Administrador Global'],
+      ['Admin 7', 'admin7@premiumbus.com', 'Administrador Global'],
+      ['Admin 8', 'admin8@premiumbus.com', 'Administrador Global'],
+      ['Admin 9', 'admin9@premiumbus.com', 'Administrador Global'],
+      ['Admin 10', 'admin10@premiumbus.com', 'Administrador Global'],
     ]),
     new Paragraph({ text: '' }),
     new Paragraph({
-      children: [new TextRun({ text: '⚠️ IMPORTANTE: Cambiar la contraseña del administrador después de la primera sesión.', bold: true, size: 22, font: 'Calibri', color: 'EF4444' })],
+      children: [new TextRun({ text: '⚠️ IMPORTANTE: Cambiar las contraseñas de las cuentas de administrador después de la primera sesión para asegurar el sistema.', bold: true, size: 22, font: 'Calibri', color: 'EF4444' })],
     }),
   ];
 }
 
 function seccionEvaluacion() {
   return [
-    heading('5. Evaluación de la Capacitación'),
+    heading('6. Evaluacion de la Capacitacion'),
     paragraph('Al finalizar el programa, se aplicará una evaluación práctica para verificar que los usuarios dominan las funcionalidades del sistema.'),
-    heading('5.1 Evaluación Práctica', HeadingLevel.HEADING_2),
+    heading('6.1 Evaluacion Practica', HeadingLevel.HEADING_2),
     paragraph('Cada participante deberá completar las siguientes tareas sin asistencia:'),
     makeTable(['#', 'Tarea', 'Criterio de Éxito', 'Puntos'], [
       ['1', 'Registrarse en el sistema', 'Cuenta creada exitosamente', '15'],
@@ -341,7 +457,7 @@ function seccionEvaluacion() {
       ['7', 'Navegar entre todas las secciones', 'Todas las pantallas accesibles', '15'],
     ]),
     new Paragraph({ text: '' }),
-    heading('5.2 Escala de Evaluación', HeadingLevel.HEADING_2),
+    heading('6.2 Escala de Evaluacion', HeadingLevel.HEADING_2),
     makeTable(['Rango', 'Calificación', 'Resultado'], [
       ['90-100', 'Excelente', 'Aprobado — Usuario autónomo'],
       ['70-89', 'Bueno', 'Aprobado — Requiere práctica adicional'],
@@ -354,14 +470,14 @@ function seccionEvaluacion() {
 
 function seccionRequisitos() {
   return [
-    heading('6. Requisitos Técnicos'),
-    heading('6.1 Para los Participantes', HeadingLevel.HEADING_2),
+    heading('7. Requisitos Tecnicos'),
+    heading('7.1 Para los Participantes', HeadingLevel.HEADING_2),
     ...[
       'Dispositivo móvil con Android 4.0 o superior.',
       'Conexión a internet WiFi (se proporcionará durante la capacitación).',
       'Navegador web actualizado (Chrome recomendado).',
     ].map(bulletItem),
-    heading('6.2 Para el Instructor', HeadingLevel.HEADING_2),
+    heading('7.2 Para el Instructor', HeadingLevel.HEADING_2),
     ...[
       'Computadora con proyector para demostración.',
       'Servidor con XAMPP/WAMP configurado y base de datos cargada.',
@@ -373,7 +489,7 @@ function seccionRequisitos() {
 
 function seccionSoporte() {
   return [
-    heading('7. Soporte Post-Capacitación'),
+    heading('8. Soporte Post-Capacitacion'),
     paragraph('Después de la capacitación, los usuarios contarán con los siguientes recursos de apoyo:'),
     makeTable(['Recurso', 'Descripción', 'Disponibilidad'], [
       ['Guía Rápida', 'Documento PDF con pasos resumidos', 'USB entregado'],
@@ -395,7 +511,7 @@ function seccionGuiaRapida() {
     ['Seguimiento En Vivo', "Perfil → Viaje Activo → 'En Vivo' → Ver mapa GPS"],
   ];
   return [
-    heading('8. Guía Rápida de Referencia'),
+    heading('9. Guia Rapida de Referencia'),
     paragraph('Resumen de las acciones más frecuentes para consulta rápida:'),
     ...guia.flatMap(([titulo, desc]) => [
       heading(titulo + ':', HeadingLevel.HEADING_3),
@@ -407,7 +523,7 @@ function seccionGuiaRapida() {
 function seccionFirmas() {
   return [
     new Paragraph({ children: [new PageBreak()] }),
-    heading('9. Firmas de Conformidad'),
+    heading('10. Firmas de Conformidad'),
     paragraph('Con la firma de este documento, los abajo firmantes confirman haber recibido la capacitación completa del sistema PremiumBus.'),
     new Paragraph({ text: '' }),
     makeTable(['Nombre del Participante', 'Firma', 'Fecha'], [
@@ -478,6 +594,7 @@ async function main() {
         ...seccionAlcance(),
         ...seccionCronograma(),
         ...seccionModulos(),
+        ...seccionInstalacion(),
         ...seccionEvaluacion(),
         ...seccionRequisitos(),
         ...seccionSoporte(),

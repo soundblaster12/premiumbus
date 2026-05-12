@@ -2,7 +2,7 @@
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252">
-<title>PremiumBus - Asistente de Instalacion</title>
+<title>PremiumBus - Asistente de Instalacion v2.0</title>
 <HTA:APPLICATION
   ID="InstaladorPB"
   APPLICATIONNAME="PremiumBus Installer"
@@ -438,7 +438,7 @@ function retryInstall() {
 <td class="sidebar-cell">
   <div class="sidebar-inner">
     <div class="sb-brand">PremiumBus</div>
-    <div class="sb-version">Instalador v1.0</div>
+    <div class="sb-version">Instalador v2.0</div>
 
     <div class="sb-item active" id="nav1">1. Bienvenida</div>
     <div class="sb-item" id="nav2">2. Configuracion</div>
@@ -467,11 +467,24 @@ function retryInstall() {
       <!-- PAGE 1 -->
       <div id="page1">
         <p style="line-height:1.7; margin-bottom:14px; color:#4b5563;">
-          Este asistente le guiara en la instalacion del sistema <b>PremiumBus</b>
+          Este asistente le guiara en la instalacion del sistema <b>PremiumBus v2.0</b>
           en su computadora. Se copiaran los archivos necesarios al servidor web
           local (XAMPP) y se configurara la conexion a la base de datos MySQL.
         </p>
-        <p style="font-weight:600; color:#374151; margin-bottom:8px;">Requisitos previos:</p>
+        <p style="font-weight:600; color:#374151; margin-bottom:8px;">Novedades v2.0:</p>
+
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Pago con tarjeta de credito y debito</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Toggle de visibilidad de contrasena</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Perfil con informacion de cuenta detallada</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Actualizacion de viajes en tiempo real</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Cambiar contrasena desde perfil</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Eliminar cuenta de usuario</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Dashboard admin con analiticas de ingresos</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Exportar datos a CSV</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Busqueda de usuarios en panel admin</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> 10 cuentas de administrador preconfiguradas</div>
+
+        <p style="font-weight:600; color:#374151; margin-bottom:8px; margin-top:14px;">Requisitos previos:</p>
 
         <div class="cl-item"><span class="cl-ico cl-wait">[ ]</span> XAMPP instalado (Apache + MySQL)</div>
         <div class="cl-item"><span class="cl-ico cl-wait">[ ]</span> 50 MB de espacio libre en disco</div>
@@ -542,14 +555,17 @@ function retryInstall() {
         <div class="result-icon">&#10004;</div>
         <div class="result-title">Instalacion Completada</div>
         <div class="result-text">
-          PremiumBus ha sido instalado correctamente en su servidor local.<br>
+          PremiumBus v2.0 ha sido instalado correctamente en su servidor local.<br>
           Configure la base de datos y comience a usar la aplicacion.
         </div>
         <div class="cred-box">
-          <b>Credenciales de Administrador:</b><br><br>
+          <b>Credenciales de Administrador Principal:</b><br><br>
           <b>Correo:</b> admin@premiumbus.com<br>
           <b>Contrasena:</b> admin123<br><br>
-          <span style="font-size:10px; color:#047857;">* Cambie la contrasena despues del primer inicio de sesion.</span>
+          <b>Administradores adicionales (2-10):</b><br>
+          <span style="font-size:11px;">admin2@premiumbus.com a admin10@premiumbus.com</span><br>
+          <span style="font-size:11px;">Contrasena: admin123</span><br><br>
+          <span style="font-size:10px; color:#047857;">* Cambie las contrasenas despues del primer inicio de sesion.</span>
         </div>
         <table style="width:100%; border-collapse:collapse;"><tr>
           <td style="width:50%; padding-right:5px;">

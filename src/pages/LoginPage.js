@@ -100,6 +100,9 @@ export async function renderLoginPage() {
           <div class="input-wrapper">
             <span class="input-wrapper__icon">${Icons.lock}</span>
             <input type="password" id="social-password" placeholder="Contraseña" autocomplete="current-password"/>
+            <button type="button" class="input-wrapper__action" id="social-toggle-password" aria-label="Mostrar contraseña">
+              ${Icons.eye}
+            </button>
           </div>
         </div>
         <p style="text-align:center;font-size:var(--font-size-xs);color:var(--color-gray-400);margin-bottom:var(--space-3);" id="social-auto-name"></p>
@@ -170,12 +173,18 @@ export async function renderLoginPage() {
           <div class="input-wrapper">
             <span class="input-wrapper__icon">${Icons.lock}</span>
             <input type="password" id="reset-new-password" placeholder="Nueva contraseña (mín. 6 caracteres)"/>
+            <button type="button" class="input-wrapper__action" id="reset-toggle-new-password" aria-label="Mostrar contraseña">
+              ${Icons.eye}
+            </button>
           </div>
         </div>
         <div class="input-group">
           <div class="input-wrapper">
             <span class="input-wrapper__icon">${Icons.lock}</span>
             <input type="password" id="reset-confirm-password" placeholder="Confirmar nueva contraseña"/>
+            <button type="button" class="input-wrapper__action" id="reset-toggle-confirm-password" aria-label="Mostrar contraseña">
+              ${Icons.eye}
+            </button>
           </div>
         </div>
         <button class="btn btn--primary btn--full btn--lg" id="reset-submit" type="button">
@@ -196,16 +205,9 @@ export async function renderLoginPage() {
 
 function attachLoginListeners() {
   const form = document.getElementById('login-form');
-  const toggleBtn = document.getElementById('login-toggle-password');
-  const passwordInput = document.getElementById('login-password');
 
-  if (toggleBtn && passwordInput) {
-    toggleBtn.addEventListener('click', () => {
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      toggleBtn.innerHTML = isPassword ? Icons.eyeOff : Icons.eye;
-    });
-  }
+  // Toggle password visibility (login form)
+  setupPasswordToggle('login-toggle-password', 'login-password');
 
   // Email/Password Login
   if (form) {
@@ -271,6 +273,9 @@ function openSocialLoginModal(provider) {
 }
 
 function attachSocialLoginModalListeners() {
+  // Toggle password visibility in social modal
+  setupPasswordToggle('social-toggle-password', 'social-password');
+
   // Auto-generate name preview as user types email (only for new accounts)
   document.getElementById('social-email')?.addEventListener('input', (e) => {
     const email = e.target.value.trim();
@@ -338,6 +343,10 @@ function attachSocialLoginModalListeners() {
 
 function attachForgotPasswordListeners() {
   let resetEmail = '';
+
+  // Toggle password visibility in reset password modal
+  setupPasswordToggle('reset-toggle-new-password', 'reset-new-password');
+  setupPasswordToggle('reset-toggle-confirm-password', 'reset-confirm-password');
 
   document.getElementById('login-forgot')?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -471,6 +480,26 @@ function attachForgotPasswordListeners() {
         document.getElementById(modalId).style.display = 'none';
       }
     });
+  });
+}
+
+/* ── Password Toggle Utility ─────────────────── */
+
+/**
+ * Conecta un botón de toggle con su campo de contraseña.
+ * Cambia el tipo del input entre 'password' y 'text'
+ * y alterna el ícono entre ojo abierto y cerrado.
+ */
+function setupPasswordToggle(toggleButtonId, passwordInputId) {
+  const toggleBtn = document.getElementById(toggleButtonId);
+  const passwordInput = document.getElementById(passwordInputId);
+
+  if (!toggleBtn || !passwordInput) return;
+
+  toggleBtn.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    toggleBtn.innerHTML = isPassword ? Icons.eyeOff : Icons.eye;
   });
 }
 

@@ -85,6 +85,9 @@ export async function renderRegisterPage() {
             autocomplete="new-password"
             required
           />
+          <button type="button" class="input-wrapper__action" id="register-toggle-confirm" aria-label="Mostrar contraseña">
+            ${Icons.eye}
+          </button>
         </div>
       </div>
 
@@ -118,6 +121,17 @@ function attachRegisterListeners() {
       const isPassword = passwordInput.type === 'password';
       passwordInput.type = isPassword ? 'text' : 'password';
       toggleBtn.innerHTML = isPassword ? Icons.eyeOff : Icons.eye;
+    });
+  }
+
+  // Toggle confirm password visibility
+  const toggleConfirmBtn = document.getElementById('register-toggle-confirm');
+  const confirmInput = document.getElementById('register-confirm');
+  if (toggleConfirmBtn && confirmInput) {
+    toggleConfirmBtn.addEventListener('click', () => {
+      const isPassword = confirmInput.type === 'password';
+      confirmInput.type = isPassword ? 'text' : 'password';
+      toggleConfirmBtn.innerHTML = isPassword ? Icons.eyeOff : Icons.eye;
     });
   }
 
