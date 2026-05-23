@@ -2,7 +2,7 @@
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252">
-<title>PremiumBus - Asistente de Instalacion v2.0</title>
+<title>PremiumBus - Asistente de Instalacion v5.0</title>
 <HTA:APPLICATION
   ID="InstaladorPB"
   APPLICATIONNAME="PremiumBus Installer"
@@ -438,7 +438,7 @@ function retryInstall() {
 <td class="sidebar-cell">
   <div class="sidebar-inner">
     <div class="sb-brand">PremiumBus</div>
-    <div class="sb-version">Instalador v2.0</div>
+    <div class="sb-version">Instalador v5.0</div>
 
     <div class="sb-item active" id="nav1">1. Bienvenida</div>
     <div class="sb-item" id="nav2">2. Configuracion</div>
@@ -467,22 +467,28 @@ function retryInstall() {
       <!-- PAGE 1 -->
       <div id="page1">
         <p style="line-height:1.7; margin-bottom:14px; color:#4b5563;">
-          Este asistente le guiara en la instalacion del sistema <b>PremiumBus v2.0</b>
+          Este asistente le guiara en la instalacion del sistema <b>PremiumBus v5.0</b>
           en su computadora. Se copiaran los archivos necesarios al servidor web
           local (XAMPP) y se configurara la conexion a la base de datos MySQL.
         </p>
-        <p style="font-weight:600; color:#374151; margin-bottom:8px;">Novedades v2.0:</p>
+        <p style="font-weight:600; color:#374151; margin-bottom:8px;">Novedades v5.0:</p>
 
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Pago con tarjeta de credito y debito</div>
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Toggle de visibilidad de contrasena</div>
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Perfil con informacion de cuenta detallada</div>
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Actualizacion de viajes en tiempo real</div>
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Cambiar contrasena desde perfil</div>
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Eliminar cuenta de usuario</div>
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Dashboard admin con analiticas de ingresos</div>
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Exportar datos a CSV</div>
-        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Busqueda de usuarios en panel admin</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Admin principal puede eliminar usuarios y otros admins</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Exportacion Excel .xlsx real con 6 hojas de auditoria (SheetJS)</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> CRUD completo de conductores (agregar/eliminar/asignar rutas)</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Mapa GPS estilo Uber con tema oscuro y colores neon</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Buscador avanzado con algoritmo fuzzy scoring</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Filtros por rol (Todos/Usuarios/Admins) en panel admin</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Resaltado de texto coincidente en resultados de busqueda</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Marcadores con efecto glow neon en mapa oscuro</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Controles flotantes estilo rideshare sobre el mapa</div>
         <div class="cl-item"><span class="cl-ico cl-ok">+</span> 10 cuentas de administrador preconfiguradas</div>
+
+        <p style="font-weight:600; color:#374151; margin-bottom:8px; margin-top:14px;">Versiones anteriores incluidas:</p>
+
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Pago con tarjeta, perfil con foto, GPS en vivo, QR de boletos</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Dashboard admin con analiticas, cambio de contrasena, eliminar cuenta</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> PWA instalable en iOS/Android, modo offline con sincronizacion</div>
 
         <p style="font-weight:600; color:#374151; margin-bottom:8px; margin-top:14px;">Requisitos previos:</p>
 
@@ -555,7 +561,7 @@ function retryInstall() {
         <div class="result-icon">&#10004;</div>
         <div class="result-title">Instalacion Completada</div>
         <div class="result-text">
-          PremiumBus v2.0 ha sido instalado correctamente en su servidor local.<br>
+          PremiumBus v5.0 ha sido instalado correctamente en su servidor local.<br>
           Configure la base de datos y comience a usar la aplicacion.
         </div>
         <div class="cred-box">
@@ -566,6 +572,14 @@ function retryInstall() {
           <span style="font-size:11px;">admin2@premiumbus.com a admin10@premiumbus.com</span><br>
           <span style="font-size:11px;">Contrasena: admin123</span><br><br>
           <span style="font-size:10px; color:#047857;">* Cambie las contrasenas despues del primer inicio de sesion.</span>
+        </div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:9px 12px; font-size:11px; color:#1e40af; margin-bottom:12px;">
+          <b>Nuevas funcionalidades v5.0:</b><br>
+          - Panel Admin: pestana Conductores para agregar/eliminar conductores<br>
+          - Admin puede eliminar usuarios desde Perfil y Panel Admin<br>
+          - Exportar Excel .xlsx con 6 hojas (Compras, Historial, Usuarios, Rutas, Conductores, Resumen)<br>
+          - Mapa GPS con tema oscuro estilo Uber y rutas color cyan neon<br>
+          - Buscador avanzado con algoritmo fuzzy y filtros por rol
         </div>
         <table style="width:100%; border-collapse:collapse;"><tr>
           <td style="width:50%; padding-right:5px;">

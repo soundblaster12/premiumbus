@@ -69,42 +69,42 @@ export async function renderTripsPage() {
       </div>
     ` : ''}
 
-    <div class="trips-page__map uber-map-wrapper">
+    <div class="trips-page__map">
       <div class="map-container" id="trip-map-container">
         <div id="trip-map" style="width:100%;height:100%;"></div>
-        
-        <!-- Floating controls over the map -->
-        <div class="uber-map__controls">
-          <button class="uber-map__control-btn uber-map__control-btn--live" id="btn-live">
-            <span>📍</span> En Vivo
-          </button>
-          <button class="uber-map__control-btn" id="btn-my-location">
-            <span>🧭</span> Mi GPS
-          </button>
-          ${AuthService.isAdmin() ? '' : `<button class="uber-map__control-btn uber-map__control-btn--buy" id="trips-buy-ticket">
-            <span>🎫</span> Comprar
-          </button>`}
-          ${activeTrip && !AuthService.isAdmin() ? `<button class="uber-map__control-btn uber-map__control-btn--finish" id="btn-finish-trip">
-            <span>🏁</span> Finalizar
-          </button>` : ''}
-        </div>
 
-        <!-- Live badge floating -->
+        <!-- Live badge floating on map -->
         <div class="uber-map__live-badge" id="live-badge" style="display:none;">
           <span class="uber-map__live-dot"></span> EN VIVO
         </div>
       </div>
+    </div>
 
-      <!-- Floating ETA panel (Uber-style pill) -->
-      <div id="eta-panel-wrapper" style="display:none;">
-        <div class="uber-eta-pill">
-          <div class="uber-eta-pill__icon">🚌</div>
-          <div class="uber-eta-pill__info">
-            <p class="uber-eta-pill__title" id="eta-next-stop">Próxima parada: —</p>
-            <p class="uber-eta-pill__route" id="eta-route-name">—</p>
-          </div>
-          <div class="uber-eta-pill__time" id="eta-time">—</div>
+    <!-- Control Buttons (below the map) -->
+    <div class="trips-page__live-controls">
+      <button class="btn btn--danger btn--sm" id="btn-live" style="flex:1;">
+        📍 En Vivo
+      </button>
+      <button class="btn btn--secondary btn--sm" id="btn-my-location" style="flex:1;">
+        🧭 Mi Ubicación
+      </button>
+      ${AuthService.isAdmin() ? '' : `<button class="btn btn--success btn--sm" id="trips-buy-ticket" style="flex:1;">
+        🎫 Comprar
+      </button>`}
+      ${activeTrip && !AuthService.isAdmin() ? `<button class="btn btn--orange btn--sm" id="btn-finish-trip" style="flex:1;">
+        🏁 Finalizar Ruta
+      </button>` : ''}
+    </div>
+
+    <!-- ETA Panel -->
+    <div id="eta-panel-wrapper" style="display:none;">
+      <div class="eta-panel">
+        <span class="eta-panel__icon">🚌</span>
+        <div class="eta-panel__info">
+          <p class="eta-panel__title" id="eta-next-stop">Próxima parada: —</p>
+          <p class="eta-panel__subtitle" id="eta-route-name">—</p>
         </div>
+        <span class="eta-panel__time" id="eta-time">—</span>
       </div>
     </div>
 
@@ -337,8 +337,8 @@ function attachTripsListeners(trips, activeTrip) {
 
     if (isLiveMode) {
       btn.textContent = '⏹ Detener';
-      btn.className = 'uber-map__control-btn uber-map__control-btn--stop';
-      badge.style.display = 'flex';
+      btn.className = 'btn btn--orange btn--sm';
+      badge.style.display = 'inline-flex';
       etaPanel.style.display = 'block';
 
       // Start Uber-style bus simulation
@@ -353,7 +353,7 @@ function attachTripsListeners(trips, activeTrip) {
       updateETA(selectedTrip);
     } else {
       btn.textContent = '📍 En Vivo';
-      btn.className = 'uber-map__control-btn uber-map__control-btn--live';
+      btn.className = 'btn btn--danger btn--sm';
       badge.style.display = 'none';
       etaPanel.style.display = 'none';
       MapService.stopBusSimulation('trip-map');
@@ -420,7 +420,7 @@ function attachTripsListeners(trips, activeTrip) {
         isLiveMode = false;
         MapService.stopBusSimulation('trip-map');
         const btn = document.getElementById('btn-live');
-        if (btn) { btn.textContent = '📍 En Vivo'; btn.className = 'uber-map__control-btn uber-map__control-btn--live'; }
+        if (btn) { btn.textContent = '📍 En Vivo'; btn.className = 'btn btn--danger btn--sm'; }
         document.getElementById('live-badge').style.display = 'none';
         document.getElementById('eta-panel-wrapper').style.display = 'none';
       }

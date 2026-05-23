@@ -285,7 +285,7 @@
 }
 .map-container {
   height: 340px;
-  background: #0a0e17;
+  background: var(--color-gray-100);
   position: relative;
 }
 .map-container #trip-map { border-radius: 0; }

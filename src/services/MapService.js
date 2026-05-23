@@ -50,9 +50,8 @@ class MapServiceWrapper {
       attributionControl: false,
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
     }).addTo(map);
 
     L.control.zoom({ position: 'topright' }).addTo(map);
@@ -145,16 +144,16 @@ class MapServiceWrapper {
 
     const busMarker = L.marker(denseRoute[0], { icon: busIcon, zIndexOffset: 1000 }).addTo(map);
 
-    // Trail polyline (recorrido en verde neón)
+    // Trail polyline (recorrido en azul neón)
     const trailLine = L.polyline([], {
-      color: '#00E676',
+      color: '#0080FF',
       weight: 6,
       opacity: 0.9,
     }).addTo(map);
 
-    // Trail glow (efecto luminoso)
+    // Trail glow (efecto luminoso azul)
     const trailGlow = L.polyline([], {
-      color: '#00E676',
+      color: '#0080FF',
       weight: 14,
       opacity: 0.2,
     }).addTo(map);
