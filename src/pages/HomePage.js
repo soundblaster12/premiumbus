@@ -6,6 +6,7 @@
 
 import { AuthService } from '../services/AuthService.js';
 import { DataService } from '../services/DataService.js';
+import { ExcelService } from '../services/ExcelService.js';
 import { router } from '../services/Router.js';
 import { renderNavbar, attachNavbarListeners } from '../components/Navbar.js';
 import { showToast } from '../components/Toast.js';
@@ -318,8 +319,8 @@ function attachHomeListeners(isAdmin, trips) {
     document.getElementById('action-drivers')?.addEventListener('click', () => router.navigate('admin'));
     document.getElementById('action-admin-panel')?.addEventListener('click', () => router.navigate('admin'));
     document.getElementById('action-admin-profile')?.addEventListener('click', () => router.navigate('profile'));
-    document.getElementById('action-admin-export')?.addEventListener('click', () => {
-      exportAdminCSV();
+    document.getElementById('action-admin-export')?.addEventListener('click', async () => {
+      await exportAdminExcel();
     });
     return;
   }
@@ -371,39 +372,31 @@ function getAdminUserCount() {
   } catch { return 0; }
 }
 
-function exportAdminCSV() {
+async function exportAdminExcel() {
   try {
-    const purchases = JSON.parse(localStorage.getItem('premiumbus_purchases') || '[]');
-    const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
-    const allData = [...purchases, ...history];
-
-    if (allData.length === 0) {
-      showToast('No hay datos para exportar.', 'info');
-      return;
-    }
-
-    const headers = ['Folio', 'Ruta', 'Origen', 'Destino', 'Asiento', 'Precio', 'Fecha Compra', 'Estado', 'Usuario ID'];
-    const rows = allData.map(p => [
-      p.id || '', p.nombreRuta || '', p.origen || '', p.destino || '',
-      p.asiento || '', p.precio?.toFixed(2) || '0.00',
-      p.fechaCompra || '', p.status || 'unknown', p.usuarioId || '',
+    const [users, purchases, trips, drivers] = await Promise.all([
+      AuthService.getAllUsers(),
+      DataService.getAllPurchases(),
+      DataService.getTrips(),
+      DataService.getDrivers(),
     ]);
+    const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
 
-    const csvContent = [headers, ...rows].map(row =>
-      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
+    showToast('📊 Generando reporte Excel...', 'info');
 
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `PremiumBus_Reporte_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const result = await ExcelService.exportAuditReport({
+      purchases,
+      history,
+      users,
+      trips,
+      drivers,
+    });
 
-    showToast(`📤 Reporte exportado: ${allData.length} registros.`, 'success');
+    if (result.success) {
+      showToast(`📊 Excel exportado: ${result.recordCount} registros en 6 hojas.`, 'success');
+    } else {
+      showToast(result.error || 'Error al exportar Excel.', 'error');
+    }
   } catch (error) {
     showToast('Error al exportar datos.', 'error');
     console.error('[Export] Error:', error);

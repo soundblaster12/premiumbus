@@ -50,8 +50,9 @@ class MapServiceWrapper {
       attributionControl: false,
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
     }).addTo(map);
 
     L.control.zoom({ position: 'topright' }).addTo(map);
@@ -64,11 +65,20 @@ class MapServiceWrapper {
       const routeCoords = stops.map((s) => [s.lat, s.lng]);
 
       L.polyline(routeCoords, {
-        color: '#2b6dd6',
+        color: '#00D4FF',
         weight: 5,
-        opacity: 0.8,
+        opacity: 0.9,
         smoothFactor: 1,
         dashArray: null,
+        className: 'route-glow',
+      }).addTo(map);
+
+      // Glow duplicate (wider, subtle)
+      L.polyline(routeCoords, {
+        color: '#00D4FF',
+        weight: 12,
+        opacity: 0.2,
+        smoothFactor: 1,
       }).addTo(map);
 
       // Add stop markers
@@ -78,11 +88,11 @@ class MapServiceWrapper {
 
         let iconHtml;
         if (isOrigin) {
-          iconHtml = '<div style="background:#34c759;color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">🟢</div>';
+          iconHtml = '<div style="background:#00E676;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:3px solid rgba(0,230,118,0.4);box-shadow:0 0 16px rgba(0,230,118,0.6), 0 2px 8px rgba(0,0,0,0.4);">🟢</div>';
         } else if (isDestination) {
-          iconHtml = '<div style="background:#ff3b30;color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">🔴</div>';
+          iconHtml = '<div style="background:#FF1744;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:3px solid rgba(255,23,68,0.4);box-shadow:0 0 16px rgba(255,23,68,0.6), 0 2px 8px rgba(0,0,0,0.4);">🔴</div>';
         } else {
-          iconHtml = `<div style="background:#2b6dd6;color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">${index + 1}</div>`;
+          iconHtml = `<div style="background:#00D4FF;color:#0a0e17;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:2px solid rgba(0,212,255,0.4);box-shadow:0 0 12px rgba(0,212,255,0.5), 0 2px 6px rgba(0,0,0,0.3);">${index + 1}</div>`;
         }
 
         const icon = L.divIcon({
@@ -135,18 +145,25 @@ class MapServiceWrapper {
 
     const busMarker = L.marker(denseRoute[0], { icon: busIcon, zIndexOffset: 1000 }).addTo(map);
 
-    // Trail polyline (línea recorrida en verde)
+    // Trail polyline (recorrido en verde neón)
     const trailLine = L.polyline([], {
-      color: '#34c759',
+      color: '#00E676',
       weight: 6,
       opacity: 0.9,
     }).addTo(map);
 
-    // Remaining route (gris tenue)
+    // Trail glow (efecto luminoso)
+    const trailGlow = L.polyline([], {
+      color: '#00E676',
+      weight: 14,
+      opacity: 0.2,
+    }).addTo(map);
+
+    // Remaining route (gris tenue sobre fondo oscuro)
     const remainingLine = L.polyline(denseRoute, {
-      color: '#aaa',
+      color: '#555',
       weight: 4,
-      opacity: 0.4,
+      opacity: 0.5,
       dashArray: '8 6',
     }).addTo(map);
 
@@ -172,6 +189,7 @@ class MapServiceWrapper {
       // Actualizar trail
       trailCoords.push(pos);
       trailLine.setLatLngs(trailCoords);
+      trailGlow.setLatLngs(trailCoords);
 
       // Seguir al bus con el mapa (estilo Uber: suave, sin saltos)
       map.panTo(pos, { animate: true, duration: 0.3, noMoveStart: true });

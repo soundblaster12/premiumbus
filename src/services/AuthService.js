@@ -309,6 +309,56 @@ class AuthServiceWrapper {
     return this._getStoredUsers().map(this._toProfile);
   }
 
+  /**
+   * Elimina un usuario por ID (solo admin principal id:1).
+   * Limpia compras, historial y fotos asociadas.
+   * @param {number|string} targetUserId - ID del usuario a eliminar
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async deleteUserById(targetUserId) {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || currentUser.id !== 1) {
+      return { success: false, error: 'Solo el administrador principal puede eliminar usuarios.' };
+    }
+
+    if (Number(targetUserId) === 1) {
+      return { success: false, error: 'No puedes eliminar la cuenta del administrador principal.' };
+    }
+
+    const users = this._getStoredUsers();
+    const userIndex = users.findIndex(u => Number(u.id) === Number(targetUserId));
+    if (userIndex === -1) {
+      return { success: false, error: 'Usuario no encontrado.' };
+    }
+
+    // Eliminar usuario
+    users.splice(userIndex, 1);
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+
+    // Limpiar compras del usuario eliminado
+    try {
+      const purchases = JSON.parse(localStorage.getItem('premiumbus_purchases') || '[]');
+      const filteredPurchases = purchases.filter(p => Number(p.usuarioId) !== Number(targetUserId));
+      localStorage.setItem('premiumbus_purchases', JSON.stringify(filteredPurchases));
+    } catch { /* silent */ }
+
+    // Limpiar historial del usuario eliminado
+    try {
+      const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
+      const filteredHistory = history.filter(h => Number(h.usuarioId) !== Number(targetUserId));
+      localStorage.setItem('premiumbus_history', JSON.stringify(filteredHistory));
+    } catch { /* silent */ }
+
+    // Limpiar foto de perfil del usuario eliminado
+    try {
+      const photos = JSON.parse(localStorage.getItem('premiumbus_profile_photos') || '{}');
+      delete photos[targetUserId];
+      localStorage.setItem('premiumbus_profile_photos', JSON.stringify(photos));
+    } catch { /* silent */ }
+
+    return { success: true };
+  }
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // PRIVADO — API MySQL
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

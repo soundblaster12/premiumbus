@@ -9,6 +9,7 @@
 
 import { AuthService } from '../services/AuthService.js';
 import { DataService } from '../services/DataService.js';
+import { ExcelService } from '../services/ExcelService.js';
 import { router } from '../services/Router.js';
 import { Icons } from '../components/Icons.js';
 import { renderNavbar, attachNavbarListeners } from '../components/Navbar.js';
@@ -217,8 +218,17 @@ function renderAdminSection(allUsers, allPurchases, allTrips) {
     .slice(0, 5);
 
   const userRows = allUsers.length > 0
-    ? allUsers.map((u, i) => `
-      <div class="user-list-card" style="animation: slideInRight 0.2s ease ${i * 0.03}s both;" data-user-search="${(u.nombre || '').toLowerCase()} ${(u.correo || '').toLowerCase()}">
+    ? allUsers.map((u, i) => {
+      const currentUser = AuthService.getCurrentUser();
+      const isPrincipalAdmin = currentUser?.id === 1;
+      const canDelete = isPrincipalAdmin && u.id !== 1;
+      return `
+      <div class="user-list-card" style="animation: slideInRight 0.2s ease ${i * 0.03}s both;"
+           data-user-search="${(u.nombre || '').toLowerCase()} ${(u.correo || '').toLowerCase()}"
+           data-user-role="${u.rol}"
+           data-user-name="${u.nombre || ''}"
+           data-user-email="${u.correo || ''}"
+           data-user-id="${u.id}">
         <div class="user-list-card__avatar">
           ${u.nombre?.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || 'U'}
         </div>
@@ -226,11 +236,14 @@ function renderAdminSection(allUsers, allPurchases, allTrips) {
           <span class="user-list-card__name">${u.nombre || 'Sin nombre'}</span>
           <span class="user-list-card__email">${u.correo}</span>
         </div>
-        <div class="user-list-card__meta">
+        <div class="user-list-card__meta" style="display:flex;align-items:center;gap:var(--space-2);">
           <span class="badge ${u.rol === 'admin' ? 'badge--warning' : 'badge--success'}">${u.rol}</span>
+          ${canDelete
+            ? `<button class="btn btn--danger btn--sm profile-delete-user-btn" data-user-id="${u.id}" data-user-name="${u.nombre}" style="padding:6px 10px;font-size:12px;">🗑️</button>`
+            : ''}
         </div>
       </div>
-    `).join('')
+    `}).join('')
     : `<p style="text-align:center;color:var(--color-gray-400);padding:var(--space-6);">Sin usuarios registrados</p>`;
 
   return `
@@ -334,15 +347,43 @@ function renderAdminSection(allUsers, allPurchases, allTrips) {
       </div>
     ` : ''}
 
-    <!-- Users List -->
+    <!-- Users List with Advanced Search -->
     <div class="profile-page__section">
       <div class="section-header">
         <h2 class="section-header__title">👥 Usuarios Registrados</h2>
-        <span class="profile-page__count-badge">${allUsers.length}</span>
+        <span class="profile-page__count-badge" id="user-search-count">${allUsers.length}</span>
       </div>
-      <div style="margin-bottom:var(--space-3);">
-        <input type="text" class="search-input" id="admin-user-search" placeholder="🔍 Buscar usuario..." />
+
+      <!-- Advanced Search Bar -->
+      <div class="admin-search-box" style="margin-bottom:var(--space-3);">
+        <div class="admin-search-box__input-wrapper">
+          <span class="admin-search-box__icon">🔍</span>
+          <input type="text" class="admin-search-box__input" id="admin-user-search"
+                 placeholder="Buscar por nombre, correo o ID..."
+                 autocomplete="off" />
+          <button class="admin-search-box__clear" id="admin-search-clear" style="display:none;" title="Limpiar búsqueda">✕</button>
+        </div>
+
+        <!-- Role Filter Pills -->
+        <div class="admin-search-box__filters">
+          <button class="admin-search-box__pill admin-search-box__pill--active" data-filter="all">Todos (${allUsers.length})</button>
+          <button class="admin-search-box__pill" data-filter="user">👤 Usuarios (${regularUsers.length})</button>
+          <button class="admin-search-box__pill" data-filter="admin">⚙️ Admins (${adminUsers.length})</button>
+        </div>
+
+        <!-- Search Results Info -->
+        <div class="admin-search-box__results" id="search-results-info" style="display:none;">
+          <span id="search-results-text"></span>
+        </div>
       </div>
+
+      <!-- No Results State -->
+      <div class="admin-search-box__empty" id="search-no-results" style="display:none;">
+        <span style="font-size:48px;display:block;margin-bottom:var(--space-3);">🔍</span>
+        <p style="font-weight:var(--font-weight-bold);color:var(--color-gray-700);margin-bottom:var(--space-1);">Sin resultados</p>
+        <p style="font-size:var(--font-size-xs);color:var(--color-gray-500);" id="search-no-results-hint">Intenta con otro término de búsqueda.</p>
+      </div>
+
       <div class="profile-page__users-list" id="users-list">
         ${userRows}
       </div>
@@ -384,45 +425,31 @@ function renderSettingsSection(isAdmin) {
 
 /* ── Export Purchases CSV (Admin) ────────────── */
 
-function exportPurchasesAsCSV() {
+async function exportPurchasesAsExcel() {
   try {
-    const purchases = JSON.parse(localStorage.getItem('premiumbus_purchases') || '[]');
-    const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
-    const allData = [...purchases, ...history];
-
-    if (allData.length === 0) {
-      showToast('No hay datos para exportar.', 'info');
-      return;
-    }
-
-    const headers = ['Folio', 'Ruta', 'Origen', 'Destino', 'Asiento', 'Precio', 'Fecha Compra', 'Estado', 'Usuario ID'];
-    const rows = allData.map(p => [
-      p.id || '',
-      p.nombreRuta || p.nombre_ruta || '',
-      p.origen || '',
-      p.destino || '',
-      p.asiento || '',
-      p.precio?.toFixed(2) || '0.00',
-      p.fechaCompra || '',
-      p.status || 'unknown',
-      p.usuarioId || '',
+    const [users, purchases, trips, drivers] = await Promise.all([
+      AuthService.getAllUsers(),
+      DataService.getAllPurchases(),
+      DataService.getTrips(),
+      DataService.getDrivers(),
     ]);
+    const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
 
-    const csvContent = [headers, ...rows].map(row =>
-      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
+    showToast('📊 Generando reporte Excel...', 'info');
 
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `PremiumBus_Reporte_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const result = await ExcelService.exportAuditReport({
+      purchases,
+      history,
+      users,
+      trips,
+      drivers,
+    });
 
-    showToast(`📤 Reporte exportado: ${allData.length} registros.`, 'success');
+    if (result.success) {
+      showToast(`📊 Excel exportado: ${result.recordCount} registros.`, 'success');
+    } else {
+      showToast(result.error || 'Error al exportar Excel.', 'error');
+    }
   } catch (error) {
     showToast('Error al exportar datos.', 'error');
     console.error('[Export] Error:', error);
@@ -626,17 +653,234 @@ function attachProfileListeners(user, isAdmin) {
       router.navigate('profile');
     });
 
-    // Export purchases as CSV
-    document.getElementById('admin-export-btn')?.addEventListener('click', () => {
-      exportPurchasesAsCSV();
+    // Export purchases as Excel
+    document.getElementById('admin-export-btn')?.addEventListener('click', async () => {
+      await exportPurchasesAsExcel();
     });
 
-    // User search filter
-    document.getElementById('admin-user-search')?.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase();
-      document.querySelectorAll('.user-list-card[data-user-search]').forEach(card => {
-        const searchText = card.dataset.userSearch || '';
-        card.style.display = searchText.includes(query) ? 'flex' : 'none';
+    // Delete user buttons (admin only)
+    document.querySelectorAll('.profile-delete-user-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const userName = btn.dataset.userName;
+
+        const confirmed = confirm(`¿Estás seguro de eliminar a "${userName}"?\n\nEsta acción es irreversible.`);
+        if (!confirmed) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '⏳';
+
+        const result = await AuthService.deleteUserById(userId);
+        if (result.success) {
+          showToast(`✅ Usuario "${userName}" eliminado.`, 'success');
+          router.navigate('profile');
+        } else {
+          showToast(result.error || 'Error al eliminar.', 'error');
+          btn.disabled = false;
+          btn.innerHTML = '🗑️';
+        }
+      });
+    });
+
+    // ── Advanced User Search Algorithm ────────────
+    const searchInput = document.getElementById('admin-user-search');
+    const searchClear = document.getElementById('admin-search-clear');
+    const searchResultsInfo = document.getElementById('search-results-info');
+    const searchResultsText = document.getElementById('search-results-text');
+    const searchNoResults = document.getElementById('search-no-results');
+    const searchNoResultsHint = document.getElementById('search-no-results-hint');
+    const searchCountBadge = document.getElementById('user-search-count');
+    const userCards = document.querySelectorAll('.user-list-card[data-user-search]');
+    let activeRoleFilter = 'all';
+
+    /**
+     * Normaliza texto para búsqueda: elimina acentos y convierte a minúsculas.
+     * @param {string} text
+     * @returns {string}
+     */
+    function normalizeText(text) {
+      return (text || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    }
+
+    /**
+     * Algoritmo de búsqueda por tokens con scoring.
+     * Cada token del query se busca en nombre, correo e id.
+     * Score = suma de coincidencias ponderadas.
+     *   - Coincidencia exacta de nombre: +10
+     *   - Nombre empieza con token: +7
+     *   - Nombre contiene token: +4
+     *   - Correo contiene token: +3
+     *   - ID coincide: +5
+     * @param {string} query
+     * @param {{name: string, email: string, id: string}} userData
+     * @returns {number} score (0 = no match)
+     */
+    function computeSearchScore(query, userData) {
+      if (!query) return 1; // Sin búsqueda = mostrar todo
+
+      const tokens = normalizeText(query).split(/\s+/).filter(Boolean);
+      if (tokens.length === 0) return 1;
+
+      const normName = normalizeText(userData.name);
+      const normEmail = normalizeText(userData.email);
+      const normId = String(userData.id || '');
+      let totalScore = 0;
+
+      for (const token of tokens) {
+        let tokenScore = 0;
+
+        // Nombre: coincidencia exacta
+        if (normName === token) {
+          tokenScore += 10;
+        } else if (normName.startsWith(token)) {
+          tokenScore += 7;
+        } else {
+          // Buscar en cada palabra del nombre
+          const nameWords = normName.split(/\s+/);
+          for (const word of nameWords) {
+            if (word.startsWith(token)) { tokenScore += 6; break; }
+            if (word.includes(token)) { tokenScore += 4; break; }
+          }
+          if (tokenScore === 0 && normName.includes(token)) {
+            tokenScore += 3;
+          }
+        }
+
+        // Correo
+        if (normEmail.includes(token)) {
+          tokenScore += 3;
+        }
+
+        // ID
+        if (normId === token) {
+          tokenScore += 5;
+        }
+
+        // Si ningún token hace match, no es resultado
+        if (tokenScore === 0) return 0;
+        totalScore += tokenScore;
+      }
+
+      return totalScore;
+    }
+
+    /**
+     * Resalta el texto que coincide con la búsqueda.
+     * @param {string} originalText
+     * @param {string} query
+     * @returns {string} HTML con <mark> tags
+     */
+    function highlightMatch(originalText, query) {
+      if (!query || !originalText) return originalText;
+      const tokens = normalizeText(query).split(/\s+/).filter(Boolean);
+      if (tokens.length === 0) return originalText;
+
+      let result = originalText;
+      for (const token of tokens) {
+        const regex = new RegExp(`(${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        result = result.replace(regex, '<mark style="background:#00D4FF33;color:var(--color-primary-700);border-radius:2px;padding:0 2px;">$1</mark>');
+      }
+      return result;
+    }
+
+    /**
+     * Ejecuta la búsqueda y actualiza la UI.
+     */
+    function executeSearch() {
+      const query = searchInput?.value || '';
+      const normalizedQuery = normalizeText(query);
+      let visibleCount = 0;
+      const scoredCards = [];
+
+      userCards.forEach(card => {
+        const role = card.dataset.userRole || '';
+        const name = card.dataset.userName || '';
+        const email = card.dataset.userEmail || '';
+        const id = card.dataset.userId || '';
+
+        // Filtro de rol
+        if (activeRoleFilter !== 'all' && role !== activeRoleFilter) {
+          card.style.display = 'none';
+          card.style.order = '';
+          return;
+        }
+
+        // Algoritmo de búsqueda con scoring
+        const score = computeSearchScore(query, { name, email, id });
+
+        if (score > 0) {
+          card.style.display = 'flex';
+          visibleCount++;
+          scoredCards.push({ card, score });
+
+          // Resaltar texto coincidente
+          const nameEl = card.querySelector('.user-list-card__name');
+          const emailEl = card.querySelector('.user-list-card__email');
+          if (nameEl) nameEl.innerHTML = highlightMatch(name || 'Sin nombre', query);
+          if (emailEl) emailEl.innerHTML = highlightMatch(email, query);
+        } else {
+          card.style.display = 'none';
+          card.style.order = '';
+        }
+      });
+
+      // Ordenar por relevancia (score más alto primero)
+      scoredCards.sort((a, b) => b.score - a.score);
+      scoredCards.forEach((item, index) => {
+        item.card.style.order = String(index);
+      });
+
+      // Actualizar UI de resultados
+      if (searchCountBadge) searchCountBadge.textContent = visibleCount;
+
+      if (normalizedQuery) {
+        searchClear.style.display = 'flex';
+        searchResultsInfo.style.display = 'block';
+        searchResultsText.innerHTML = `<strong>${visibleCount}</strong> resultado${visibleCount !== 1 ? 's' : ''} para "<em>${query}</em>"`;
+      } else {
+        searchClear.style.display = 'none';
+        searchResultsInfo.style.display = 'none';
+
+        // Restaurar texto original (sin highlight)
+        userCards.forEach(card => {
+          const nameEl = card.querySelector('.user-list-card__name');
+          const emailEl = card.querySelector('.user-list-card__email');
+          if (nameEl) nameEl.textContent = card.dataset.userName || 'Sin nombre';
+          if (emailEl) emailEl.textContent = card.dataset.userEmail || '';
+          card.style.order = '';
+        });
+      }
+
+      // Mostrar/ocultar estado vacío
+      if (visibleCount === 0 && (normalizedQuery || activeRoleFilter !== 'all')) {
+        searchNoResults.style.display = 'block';
+        searchNoResultsHint.textContent = normalizedQuery
+          ? `No se encontró "${query}" en ${activeRoleFilter === 'all' ? 'ningún usuario' : (activeRoleFilter === 'admin' ? 'administradores' : 'usuarios')}.`
+          : 'No hay usuarios en esta categoría.';
+        document.getElementById('users-list').style.display = 'none';
+      } else {
+        searchNoResults.style.display = 'none';
+        document.getElementById('users-list').style.display = '';
+      }
+    }
+
+    // Escuchar input de búsqueda
+    searchInput?.addEventListener('input', executeSearch);
+
+    // Botón limpiar búsqueda
+    searchClear?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      executeSearch();
+      searchInput?.focus();
+    });
+
+    // Filtros de rol
+    document.querySelectorAll('.admin-search-box__pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.admin-search-box__pill').forEach(p => p.classList.remove('admin-search-box__pill--active'));
+        pill.classList.add('admin-search-box__pill--active');
+        activeRoleFilter = pill.dataset.filter;
+        executeSearch();
       });
     });
   }

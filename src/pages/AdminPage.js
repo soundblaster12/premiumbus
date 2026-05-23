@@ -1,11 +1,13 @@
 /**
- * AdminPage.js — Administrative Panel v2
+ * AdminPage.js — Administrative Panel v3
  * Only accessible to users with role 'admin'.
- * Shows stats, user list, purchase history, and route management.
+ * Shows stats, user list with delete, purchase history, route management,
+ * and full CRUD for conductores (drivers).
  */
 
 import { AuthService } from '../services/AuthService.js';
 import { DataService } from '../services/DataService.js';
+import { ExcelService } from '../services/ExcelService.js';
 import { router } from '../services/Router.js';
 import { Icons } from '../components/Icons.js';
 import { renderNavbar, attachNavbarListeners } from '../components/Navbar.js';
@@ -21,10 +23,11 @@ export async function renderAdminPage() {
   activeTab = 'routes';
 
   // Fetch data in parallel
-  const [users, purchases, trips] = await Promise.all([
+  const [users, purchases, trips, drivers] = await Promise.all([
     AuthService.getAllUsers(),
     DataService.getAllPurchases(),
     DataService.getTrips(),
+    DataService.getDrivers(),
   ]);
 
   const totalRevenue = purchases.reduce((sum, p) => sum + p.precio, 0);
@@ -33,6 +36,9 @@ export async function renderAdminPage() {
     const occupied = t.asientosOcupados?.length || 0;
     return sum + occupied;
   }, 0);
+
+  const currentUser = AuthService.getCurrentUser();
+  const isPrincipalAdmin = currentUser?.id === 1;
 
   container.innerHTML = `
     <div class="admin-page__header">
@@ -67,6 +73,9 @@ export async function renderAdminPage() {
       <button class="admin-page__tab admin-page__tab--active" data-tab="routes" id="tab-routes">
         🚌 Rutas
       </button>
+      <button class="admin-page__tab" data-tab="drivers" id="tab-drivers">
+        🧑‍✈️ Conductores
+      </button>
       <button class="admin-page__tab" data-tab="users" id="tab-users">
         👥 Usuarios
       </button>
@@ -79,6 +88,13 @@ export async function renderAdminPage() {
       ${renderRoutesPanel(trips)}
     </div>
 
+    <!-- Export Excel Button -->
+    <div style="padding: 0 var(--space-5); margin-bottom: var(--space-3);">
+      <button class="btn btn--success btn--full btn--lg" id="admin-export-excel">
+        📊 Exportar Reporte Excel (.xlsx)
+      </button>
+    </div>
+
     <div class="admin-page__logout">
       <button class="btn btn--danger btn--full" id="admin-logout">
         <span style="width:18px;height:18px;">${Icons.logout}</span>
@@ -86,12 +102,47 @@ export async function renderAdminPage() {
       </button>
     </div>
 
+    <!-- Add Driver Modal -->
+    <div class="modal-overlay" id="add-driver-modal" style="display:none;">
+      <div class="modal">
+        <div class="modal__handle"></div>
+        <h2 class="modal__title">🧑‍✈️ Nuevo Conductor</h2>
+        <div class="input-group">
+          <label class="input-group__label">Nombre completo</label>
+          <div class="input-wrapper">
+            <span class="input-wrapper__icon">👤</span>
+            <input type="text" id="driver-name-input" placeholder="Nombre del conductor" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-group__label">Teléfono</label>
+          <div class="input-wrapper">
+            <span class="input-wrapper__icon">📞</span>
+            <input type="tel" id="driver-phone-input" placeholder="444-123-4567" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-group__label">Licencia</label>
+          <div class="input-wrapper">
+            <span class="input-wrapper__icon">🪪</span>
+            <input type="text" id="driver-license-input" placeholder="SLP-0001" />
+          </div>
+        </div>
+        <button class="btn btn--primary btn--full btn--lg" id="driver-save-btn" type="button">
+          ✅ Guardar Conductor
+        </button>
+        <button class="btn btn--secondary btn--full btn--md" id="driver-cancel-btn" type="button" style="margin-top:var(--space-3);">
+          Cancelar
+        </button>
+      </div>
+    </div>
+
     ${renderNavbar()}
   `;
 
   setTimeout(() => {
     attachNavbarListeners();
-    attachAdminListeners(users, purchases, trips);
+    attachAdminListeners(users, purchases, trips, drivers, isPrincipalAdmin);
   }, 0);
 
   return container;
@@ -170,7 +221,62 @@ function renderRoutesPanel(trips) {
   }).join('');
 }
 
-function renderUsersTable(users) {
+/* ── Drivers Panel ──────────────────────────────── */
+
+function renderDriversPanel(drivers) {
+  const addButton = `
+    <div style="padding: 0 0 var(--space-3);">
+      <button class="btn btn--primary btn--full btn--md" id="btn-add-driver">
+        ➕ Agregar Conductor
+      </button>
+    </div>
+  `;
+
+  if (drivers.length === 0) {
+    return `
+      ${addButton}
+      <div class="empty-state">
+        <p class="empty-state__title">Sin conductores</p>
+        <p class="empty-state__description">No hay conductores registrados aún.</p>
+      </div>
+    `;
+  }
+
+  const driverCards = drivers.map((driver, index) => {
+    const statusBadge = driver.activo
+      ? '<span class="live-badge" style="font-size:10px;">EN SERVICIO</span>'
+      : '<span class="badge badge--warning" style="font-size:10px;">DISPONIBLE</span>';
+
+    return `
+      <div class="driver-card" style="animation: slideInRight 0.3s ease ${index * 0.04}s both;" data-driver-id="${driver.id}">
+        <div class="driver-card__header">
+          <span class="driver-card__icon">🧑‍✈️</span>
+          <div class="driver-card__info">
+            <span class="driver-card__name">${driver.nombre}</span>
+            <span class="driver-card__route">🚌 ${driver.rutaAsignada || 'Sin asignar'}</span>
+          </div>
+          ${statusBadge}
+        </div>
+        <div class="driver-card__route-line">
+          <span>📞 ${driver.telefono || 'Sin teléfono'}</span>
+          <span style="color:var(--color-gray-400);">·</span>
+          <span>🪪 ${driver.licencia || 'Sin licencia'}</span>
+        </div>
+        <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2);">
+          <button class="btn btn--danger btn--sm driver-delete-btn" data-driver-id="${driver.id}" style="flex:1;">
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return addButton + driverCards;
+}
+
+/* ── Users Table with Delete ────────────────────── */
+
+function renderUsersTable(users, isPrincipalAdmin) {
   if (users.length === 0) {
     return `
       <div class="empty-state">
@@ -191,6 +297,14 @@ function renderUsersTable(users) {
             ${user.rol === 'admin' ? '⚙️ Admin' : '👤 Usuario'}
           </span>
         </td>
+        <td>
+          ${isPrincipalAdmin && user.id !== 1
+            ? `<button class="btn btn--danger btn--sm admin-delete-user-btn" data-user-id="${user.id}" data-user-name="${user.nombre}">
+                 🗑️
+               </button>`
+            : (user.id === 1 ? '<span style="font-size:var(--font-size-xs);color:var(--color-gray-400);">Principal</span>' : '')
+          }
+        </td>
       </tr>
     `
     )
@@ -203,6 +317,7 @@ function renderUsersTable(users) {
           <th>Nombre</th>
           <th>Correo</th>
           <th>Rol</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -250,7 +365,7 @@ function renderPurchasesTable(purchases) {
   `;
 }
 
-function attachAdminListeners(users, purchases, trips) {
+function attachAdminListeners(users, purchases, trips, drivers, isPrincipalAdmin) {
   // Tab switching
   document.querySelectorAll('.admin-page__tab').forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -270,8 +385,12 @@ function attachAdminListeners(users, purchases, trips) {
       if (wrapper) {
         if (tabName === 'routes') {
           wrapper.innerHTML = renderRoutesPanel(trips);
+        } else if (tabName === 'drivers') {
+          wrapper.innerHTML = renderDriversPanel(drivers);
+          attachDriverListeners(drivers);
         } else if (tabName === 'users') {
-          wrapper.innerHTML = renderUsersTable(users);
+          wrapper.innerHTML = renderUsersTable(users, isPrincipalAdmin);
+          attachDeleteUserListeners(users, purchases, trips, drivers, isPrincipalAdmin);
         } else {
           wrapper.innerHTML = renderPurchasesTable(purchases);
         }
@@ -279,11 +398,138 @@ function attachAdminListeners(users, purchases, trips) {
     });
   });
 
+  // Export Excel
+  document.getElementById('admin-export-excel')?.addEventListener('click', async () => {
+    const btn = document.getElementById('admin-export-excel');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn__spinner"></span> Generando...'; }
+
+    const history = JSON.parse(localStorage.getItem('premiumbus_history') || '[]');
+
+    const result = await ExcelService.exportAuditReport({
+      purchases,
+      history,
+      users,
+      trips,
+      drivers,
+    });
+
+    if (result.success) {
+      showToast(`📊 Excel exportado: ${result.recordCount} registros en 6 hojas.`, 'success');
+    } else {
+      showToast(result.error || 'Error al exportar Excel.', 'error');
+    }
+
+    if (btn) { btn.disabled = false; btn.innerHTML = '📊 Exportar Reporte Excel (.xlsx)'; }
+  });
+
   // Logout
   document.getElementById('admin-logout')?.addEventListener('click', async () => {
     await AuthService.logout();
     showToast('Sesión de administrador cerrada.', 'info');
     router.navigate('login');
+  });
+}
+
+/* ── Delete User Listeners ──────────────────────── */
+
+function attachDeleteUserListeners(users, purchases, trips, drivers, isPrincipalAdmin) {
+  document.querySelectorAll('.admin-delete-user-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const userId = btn.dataset.userId;
+      const userName = btn.dataset.userName;
+
+      const confirmed = confirm(`¿Estás seguro de eliminar a "${userName}"?\n\nEsta acción es irreversible. Se eliminarán todos sus datos, compras e historial.`);
+      if (!confirmed) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn__spinner"></span>';
+
+      const result = await AuthService.deleteUserById(userId);
+
+      if (result.success) {
+        showToast(`✅ Usuario "${userName}" eliminado correctamente.`, 'success');
+        // Refresh the admin page
+        router.navigate('admin');
+      } else {
+        showToast(result.error || 'Error al eliminar usuario.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '🗑️';
+      }
+    });
+  });
+}
+
+/* ── Driver Listeners ───────────────────────────── */
+
+function attachDriverListeners(drivers) {
+  // Add driver button
+  document.getElementById('btn-add-driver')?.addEventListener('click', () => {
+    document.getElementById('add-driver-modal').style.display = 'flex';
+  });
+
+  // Cancel driver modal
+  document.getElementById('driver-cancel-btn')?.addEventListener('click', () => {
+    document.getElementById('add-driver-modal').style.display = 'none';
+  });
+
+  // Close modal on overlay click
+  document.getElementById('add-driver-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'add-driver-modal') {
+      document.getElementById('add-driver-modal').style.display = 'none';
+    }
+  });
+
+  // Save driver
+  document.getElementById('driver-save-btn')?.addEventListener('click', async () => {
+    const nombre = document.getElementById('driver-name-input')?.value || '';
+    const telefono = document.getElementById('driver-phone-input')?.value || '';
+    const licencia = document.getElementById('driver-license-input')?.value || '';
+
+    if (!nombre.trim()) {
+      showToast('El nombre es obligatorio.', 'error');
+      return;
+    }
+
+    const saveBtn = document.getElementById('driver-save-btn');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<span class="btn__spinner"></span> Guardando...'; }
+
+    const result = await DataService.addDriver({ nombre, telefono, licencia });
+
+    if (result.success) {
+      showToast(`✅ Conductor "${nombre}" agregado.`, 'success');
+      document.getElementById('add-driver-modal').style.display = 'none';
+      // Refresh the page
+      router.navigate('admin');
+    } else {
+      showToast(result.error || 'Error al agregar conductor.', 'error');
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '✅ Guardar Conductor'; }
+    }
+  });
+
+  // Delete driver buttons
+  document.querySelectorAll('.driver-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const driverId = btn.dataset.driverId;
+      const driverCard = btn.closest('.driver-card');
+      const driverName = driverCard?.querySelector('.driver-card__name')?.textContent || 'conductor';
+
+      const confirmed = confirm(`¿Eliminar al conductor "${driverName}"?\n\nSi tiene una ruta asignada, quedará sin conductor.`);
+      if (!confirmed) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn__spinner"></span>';
+
+      const result = await DataService.deleteDriver(driverId);
+
+      if (result.success) {
+        showToast(`✅ Conductor "${driverName}" eliminado.`, 'success');
+        router.navigate('admin');
+      } else {
+        showToast(result.error || 'Error al eliminar conductor.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '🗑️ Eliminar';
+      }
+    });
   });
 }
 

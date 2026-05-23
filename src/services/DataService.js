@@ -14,6 +14,7 @@ const STORAGE_KEYS = {
   TRIPS: 'premiumbus_trips',
   PURCHASES: 'premiumbus_purchases',
   HISTORY: 'premiumbus_history',
+  DRIVERS: 'premiumbus_drivers',
 };
 
 /**
@@ -298,6 +299,7 @@ const SEED_TRIPS = [
 class DataServiceWrapper {
   constructor() {
     this._initializeSeedData();
+    this._initializeSeedDrivers();
     this._generateDailyTrips();
   }
 
@@ -314,6 +316,38 @@ class DataServiceWrapper {
     if (!localStorage.getItem(STORAGE_KEYS.HISTORY)) {
       localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify([]));
     }
+  }
+
+  /**
+   * Genera conductores iniciales a partir de los datos de las rutas seed.
+   * Solo se ejecuta una vez; los cambios posteriores persisten.
+   */
+  _initializeSeedDrivers() {
+    const storedDriversVersion = localStorage.getItem('premiumbus_drivers_version');
+    if (storedDriversVersion === 'v1') return;
+
+    const trips = this._getStoredTrips();
+    const uniqueDrivers = new Map();
+
+    trips.forEach(trip => {
+      const conductorName = trip.conductor;
+      if (conductorName && conductorName !== 'Sin asignar' && !uniqueDrivers.has(conductorName)) {
+        uniqueDrivers.set(conductorName, {
+          id: uniqueDrivers.size + 1,
+          nombre: conductorName,
+          telefono: `444-${String(100 + uniqueDrivers.size).padStart(3, '0')}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+          licencia: `SLP-${String(uniqueDrivers.size + 1).padStart(4, '0')}`,
+          rutaAsignadaId: trip.id,
+          rutaAsignada: trip.nombreRuta || trip.nombre_ruta,
+          activo: true,
+          fechaRegistro: new Date().toISOString(),
+        });
+      }
+    });
+
+    const driversArray = Array.from(uniqueDrivers.values());
+    localStorage.setItem(STORAGE_KEYS.DRIVERS, JSON.stringify(driversArray));
+    localStorage.setItem('premiumbus_drivers_version', 'v1');
   }
 
   /**
@@ -563,6 +597,124 @@ class DataServiceWrapper {
 
     await this._delay(300);
     return this._getStoredPurchases();
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // PÚBLICO — CRUD Conductores
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  /**
+   * Obtiene todos los conductores.
+   * @returns {Promise<Array>}
+   */
+  async getDrivers() {
+    await this._delay(100);
+    return this._getStoredDrivers();
+  }
+
+  /**
+   * Agrega un nuevo conductor.
+   * @param {{nombre: string, telefono: string, licencia: string}} driverData
+   * @returns {Promise<{success: boolean, driver?: Object, error?: string}>}
+   */
+  async addDriver(driverData) {
+    if (!driverData.nombre || !driverData.nombre.trim()) {
+      return { success: false, error: 'El nombre del conductor es obligatorio.' };
+    }
+
+    const drivers = this._getStoredDrivers();
+    const maxId = drivers.reduce((max, d) => Math.max(max, d.id || 0), 0);
+
+    const newDriver = {
+      id: maxId + 1,
+      nombre: driverData.nombre.trim(),
+      telefono: driverData.telefono?.trim() || '',
+      licencia: driverData.licencia?.trim() || '',
+      rutaAsignadaId: null,
+      rutaAsignada: 'Sin asignar',
+      activo: false,
+      fechaRegistro: new Date().toISOString(),
+    };
+
+    drivers.push(newDriver);
+    localStorage.setItem(STORAGE_KEYS.DRIVERS, JSON.stringify(drivers));
+
+    return { success: true, driver: newDriver };
+  }
+
+  /**
+   * Elimina un conductor por ID. Lo desasocia de su ruta.
+   * @param {number|string} driverId
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async deleteDriver(driverId) {
+    const drivers = this._getStoredDrivers();
+    const driverIndex = drivers.findIndex(d => Number(d.id) === Number(driverId));
+
+    if (driverIndex === -1) {
+      return { success: false, error: 'Conductor no encontrado.' };
+    }
+
+    const removedDriver = drivers[driverIndex];
+
+    // Desasociar de la ruta
+    if (removedDriver.rutaAsignadaId) {
+      const trips = this._getStoredTrips();
+      const tripIndex = trips.findIndex(t => t.id === removedDriver.rutaAsignadaId);
+      if (tripIndex !== -1) {
+        trips[tripIndex].conductor = 'Sin asignar';
+        localStorage.setItem(STORAGE_KEYS.TRIPS, JSON.stringify(trips));
+      }
+    }
+
+    drivers.splice(driverIndex, 1);
+    localStorage.setItem(STORAGE_KEYS.DRIVERS, JSON.stringify(drivers));
+
+    return { success: true };
+  }
+
+  /**
+   * Asigna un conductor a una ruta.
+   * @param {number|string} driverId
+   * @param {number|string} tripId
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async assignDriverToTrip(driverId, tripId) {
+    const drivers = this._getStoredDrivers();
+    const driverIndex = drivers.findIndex(d => Number(d.id) === Number(driverId));
+    if (driverIndex === -1) return { success: false, error: 'Conductor no encontrado.' };
+
+    const trips = this._getStoredTrips();
+    const tripIndex = trips.findIndex(t => Number(t.id) === Number(tripId));
+    if (tripIndex === -1) return { success: false, error: 'Ruta no encontrada.' };
+
+    // Desasignar conductor anterior de esta ruta
+    const prevDriverIndex = drivers.findIndex(d => Number(d.rutaAsignadaId) === Number(tripId));
+    if (prevDriverIndex !== -1 && prevDriverIndex !== driverIndex) {
+      drivers[prevDriverIndex].rutaAsignadaId = null;
+      drivers[prevDriverIndex].rutaAsignada = 'Sin asignar';
+      drivers[prevDriverIndex].activo = false;
+    }
+
+    // Asignar nuevo conductor
+    drivers[driverIndex].rutaAsignadaId = Number(tripId);
+    drivers[driverIndex].rutaAsignada = trips[tripIndex].nombreRuta || trips[tripIndex].nombre_ruta;
+    drivers[driverIndex].activo = true;
+
+    trips[tripIndex].conductor = drivers[driverIndex].nombre;
+
+    localStorage.setItem(STORAGE_KEYS.DRIVERS, JSON.stringify(drivers));
+    localStorage.setItem(STORAGE_KEYS.TRIPS, JSON.stringify(trips));
+
+    return { success: true };
+  }
+
+  _getStoredDrivers() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.DRIVERS) || '[]');
+    } catch {
+      return [];
+    }
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

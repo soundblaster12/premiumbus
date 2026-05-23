@@ -737,17 +737,17 @@
   background: var(--color-white);
 }
 
-/* ── Feature 3/5: Uber-style Bus Marker ────────── */
+/* ── Feature 3/5: Uber-style Bus Marker (Dark Theme) ── */
 .bus-marker--uber {
   width: 44px;
   height: 44px;
-  background: var(--color-primary-600);
+  background: linear-gradient(135deg, #00D4FF, #0091EA);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid white;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  border: 3px solid rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0,212,255,0.5), 0 4px 16px rgba(0,0,0,0.4);
   position: relative;
 }
 .bus-marker--uber span {
@@ -759,7 +759,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(43,109,214,0.3);
+  background: rgba(0, 212, 255, 0.3);
   animation: uberPulse 1.5s ease-out infinite;
   z-index: 1;
 }
