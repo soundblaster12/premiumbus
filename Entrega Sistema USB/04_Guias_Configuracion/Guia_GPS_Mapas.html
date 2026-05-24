@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía — GPS y Mapas Interactivos en PremiumBus</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;padding:40px 20px;color:#333}
+.doc{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1);padding:48px}
+h1{color:#1a3a6b;font-size:28px;margin-bottom:8px;border-bottom:3px solid #3b82f6;padding-bottom:12px}
+h2{color:#2b5ea7;font-size:20px;margin:32px 0 12px;padding-left:12px;border-left:4px solid #3b82f6}
+h3{color:#1a3a6b;font-size:16px;margin:20px 0 8px}
+p{line-height:1.7;margin-bottom:12px}
+.subtitle{color:#666;font-size:16px;margin-bottom:24px}
+.step{background:#eff6ff;border-radius:12px;padding:20px;margin:16px 0;border-left:4px solid #3b82f6}
+.warn{background:#fef3c7;border-left:4px solid #f59e0b;border-radius:12px;padding:16px;margin:16px 0}
+.info{background:#eff6ff;border-left:4px solid #3b82f6;border-radius:12px;padding:16px;margin:16px 0}
+.success{background:#d1fae5;border-left:4px solid #10b981;border-radius:12px;padding:16px;margin:16px 0}
+.code{background:#1e1e2e;color:#ced4da;border-radius:10px;padding:16px;font-family:Consolas,monospace;font-size:13px;margin:12px 0;overflow-x:auto;line-height:1.6}
+ul,ol{margin:8px 0 16px 24px;line-height:1.8}
+.footer{margin-top:40px;padding-top:20px;border-top:2px solid #e5e5e5;color:#888;font-size:13px;text-align:center}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th{background:#1a3a6b;color:#fff;padding:10px 14px;text-align:left}
+td{padding:8px 14px;border-bottom:1px solid #e5e5e5}
+@media print{body{padding:20px}.doc{box-shadow:none;padding:24px}}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>🗺️ Guía — GPS y Mapas Interactivos</h1>
+<p class="subtitle">Funcionamiento del sistema de mapas, geolocalización y simulación de buses en PremiumBus</p>
+
+<h2>Tecnología Utilizada</h2>
+<div class="info">
+<strong>Leaflet.js + OpenStreetMap (OSM)</strong><br>
+PremiumBus utiliza <strong>Leaflet.js</strong>, una librería open-source de mapas interactivos, conectada a los tiles gratuitos de <strong>OpenStreetMap</strong>. No requiere API key ni pagos, a diferencia de Google Maps.
+</div>
+
+<h2>Funcionalidades del Mapa</h2>
+
+<h3>1. 🗺️ Visualización de Rutas</h3>
+<p>Cada una de las 30 rutas urbanas de SLP se dibuja como una <strong>polyline</strong> (línea azul neón) sobre el mapa, conectando todas las paradas definidas.</p>
+<div class="code">
+// MapService.js — renderTrip()
+L.polyline(routeCoords, {
+  color: '#00D4FF',    // Azul neón
+  weight: 5,           // Grosor de línea
+  opacity: 0.9,        // Transparencia
+}).addTo(map);
+</div>
+
+<h3>2. 📍 Marcadores de Paradas</h3>
+<p>Cada parada se muestra con un marcador visual diferenciado:</p>
+<table>
+<tr><th>Tipo</th><th>Color</th><th>Icono</th><th>Descripción</th></tr>
+<tr><td>Origen</td><td>Verde (#00E676)</td><td>🟢</td><td>Punto de salida de la ruta</td></tr>
+<tr><td>Destino</td><td>Rojo (#FF1744)</td><td>🔴</td><td>Punto final de la ruta</td></tr>
+<tr><td>Intermedia</td><td>Azul (#00D4FF)</td><td>Número</td><td>Paradas intermedias numeradas</td></tr>
+</table>
+
+<h3>3. 🚌 Simulación de Bus en Tiempo Real (Modo "En Vivo")</h3>
+<p>El sistema simula el movimiento de un autobús a lo largo de la ruta seleccionada:</p>
+<ul>
+<li><strong>Interpolación densa:</strong> Se generan 80 puntos intermedios entre cada par de paradas para movimiento fluido</li>
+<li><strong>Trail visual:</strong> Una línea azul marca el recorrido ya completado</li>
+<li><strong>Seguimiento automático:</strong> El mapa sigue al bus automáticamente (estilo Uber)</li>
+<li><strong>Panel ETA:</strong> Muestra la próxima parada y el progreso estimado</li>
+<li><strong>Loop continuo:</strong> La simulación se repite automáticamente al finalizar</li>
+</ul>
+<div class="code">
+// Algoritmo de simulación (MapService.js — startBusSimulation)
+1. Obtener paradas de la ruta seleccionada
+2. Generar ruta densa interpolada (80 puntos por segmento)
+3. Crear marcador de bus con animación de pulso
+4. Cada 60ms: mover bus al siguiente punto
+5. Actualizar trail (recorrido completado)
+6. Mover mapa para seguir al bus (panTo animado)
+7. Detectar en qué parada se encuentra
+8. Al llegar al final → reiniciar loop
+</div>
+
+<h3>4. 📍 Geolocalización del Usuario (GPS Real)</h3>
+<p>El botón "Mi Ubicación" utiliza el GPS real del dispositivo:</p>
+<div class="code">
+// MapService.js — showUserPosition()
+navigator.geolocation.getCurrentPosition(
+  successCallback,    // Muestra marcador azul pulsante
+  errorCallback,      // Maneja errores de permisos
+  {
+    enableHighAccuracy: true,   // GPS de alta precisión
+    timeout: 15000,             // Espera máximo 15 segundos
+    maximumAge: 30000,          // Cache de 30 segundos
+  }
+);
+</div>
+
+<div class="warn">
+<strong>⚠️ Requisitos para GPS:</strong>
+<ul>
+<li>El dispositivo debe tener GPS habilitado</li>
+<li>El usuario debe permitir el acceso a la ubicación</li>
+<li>En PC/escritorio: usa la ubicación aproximada por WiFi</li>
+<li>En Android/iOS: usa el GPS de alta precisión del dispositivo</li>
+</ul>
+</div>
+
+<h3>5. 🔄 Tracking Continuo</h3>
+<p>El sistema también soporta <code>watchPosition()</code> para seguimiento continuo de la ubicación del usuario mientras se mueve.</p>
+
+<h2>Datos de las Rutas</h2>
+<p>Las 30 rutas están definidas con coordenadas reales de San Luis Potosí:</p>
+<div class="code">
+// Cada ruta contiene:
+{
+  nombre_ruta: "Ruta 1 - Saucito",
+  origen: "Col. Saucito",
+  destino: "Centro Histórico",
+  origen_lat: 22.1730,     // Coordenadas GPS reales
+  origen_lng: -100.9480,
+  destino_lat: 22.1565,
+  destino_lng: -100.9855,
+  paradas: [               // Array de paradas con coordenadas
+    { nombre: "Col. Saucito", lat: 22.173, lng: -100.948, tipo: "origen" },
+    { nombre: "Av. Industrias", lat: 22.169, lng: -100.955, minutos: 4 },
+    ...
+  ]
+}
+</div>
+
+<h2>Archivo Principal</h2>
+<div class="code">
+📂 src/services/MapService.js   ← Todo el código de mapas y GPS
+📂 src/pages/TripsPage.js       ← Página que usa el MapService
+</div>
+
+<div class="success">
+<strong>✅ No requiere configuración adicional.</strong> Leaflet.js y OpenStreetMap funcionan sin API key. El GPS funciona automáticamente en dispositivos compatibles.
+</div>
+
+<div class="footer">
+PremiumBus — Guía de GPS y Mapas Interactivos | Mayo 2026
+</div>
+</div>
+</body>
+</html>

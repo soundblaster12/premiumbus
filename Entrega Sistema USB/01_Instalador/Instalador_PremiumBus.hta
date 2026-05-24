@@ -1,0 +1,608 @@
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Type" content="text/html; charset=Windows-1252">
+<title>PremiumBus - Asistente de Instalacion v5.0</title>
+<HTA:APPLICATION
+  ID="InstaladorPB"
+  APPLICATIONNAME="PremiumBus Installer"
+  BORDER="dialog"
+  BORDERSTYLE="raised"
+  CAPTION="yes"
+  MAXIMIZEBUTTON="no"
+  MINIMIZEBUTTON="yes"
+  SHOWINTASKBAR="yes"
+  SINGLEINSTANCE="yes"
+  SYSMENU="yes"
+  SCROLL="no"
+  WINDOWSTATE="normal"
+  SELECTION="no"
+/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Segoe UI, Tahoma, sans-serif; background: #f0f2f5; overflow: hidden; font-size: 13px; }
+
+/* Main layout via table */
+.layout-table { width: 100%; height: 530px; border-collapse: collapse; }
+.layout-table td { vertical-align: top; }
+
+/* Sidebar */
+.sidebar-cell { width: 190px; background: #0d2137; padding: 0; }
+.sidebar-inner { padding: 24px 16px; height: 530px; }
+.sb-brand { font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
+.sb-version { font-size: 10px; color: #7ba4d4; margin-bottom: 28px; }
+.sb-item {
+  padding: 8px 10px;
+  margin-bottom: 3px;
+  color: #7ba4d4;
+  font-size: 12px;
+  border-left: 3px solid transparent;
+}
+.sb-item.active { color: #ffffff; font-weight: 600; background: #1a3a6b; border-left-color: #60a5fa; }
+.sb-item.done { color: #6ee7a0; border-left-color: #6ee7a0; }
+.sb-copy { position: absolute; bottom: 16px; left: 16px; font-size: 9px; color: #3d6a9e; }
+
+/* Content area */
+.content-cell { background: #f0f2f5; }
+.content-inner { height: 530px; display: block; }
+
+.c-header { background: #ffffff; border-bottom: 1px solid #dde1e6; padding: 18px 26px 14px; }
+.c-header h2 { font-size: 17px; color: #1a3a6b; font-weight: 700; margin: 0 0 3px 0; }
+.c-header p { font-size: 12px; color: #6b7280; margin: 0; }
+
+.c-body { padding: 18px 26px; height: 380px; overflow-y: auto; overflow-x: hidden; }
+
+.c-footer { background: #ffffff; border-top: 1px solid #dde1e6; padding: 12px 26px; text-align: right; height: 50px; }
+
+/* Buttons */
+.btn {
+  padding: 7px 20px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: Segoe UI, Tahoma, sans-serif;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.btn-primary { background: #1a3a6b; color: #fff; border-color: #1a3a6b; }
+.btn-secondary { background: #e5e7eb; color: #374151; border-color: #ccc; }
+.btn-success { background: #059669; color: #fff; border-color: #059669; }
+.btn-danger { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+/* Forms */
+.fg { margin-bottom: 14px; }
+.fg label { display: block; font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+.fg input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  font-family: Segoe UI, Tahoma, sans-serif;
+  background: #fff;
+  color: #1f2937;
+}
+.fg input:focus { outline: none; border-color: #2b5ea7; }
+.fg .hint { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+.form-row-table { width: 100%; border-collapse: collapse; }
+.form-row-table td { padding-right: 10px; vertical-align: top; }
+.form-row-table td:last-child { padding-right: 0; }
+
+/* Checklist */
+.cl-item {
+  padding: 9px 12px;
+  margin-bottom: 5px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #374151;
+}
+.cl-ico { display: inline-block; width: 24px; font-weight: 700; text-align: center; margin-right: 6px; }
+.cl-wait { color: #9ca3af; }
+.cl-ok { color: #059669; }
+.cl-err { color: #dc2626; }
+
+/* Log */
+.log-box {
+  background: #111827;
+  border: 1px solid #374151;
+  padding: 10px 12px;
+  font-family: Consolas, Courier New, monospace;
+  font-size: 11px;
+  color: #6ee7a0;
+  height: 110px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+.prog-track { width: 100%; height: 5px; background: #e5e7eb; margin: 10px 0; overflow: hidden; }
+.prog-fill { height: 100%; background: #1a3a6b; width: 0%; }
+
+/* Info boxes */
+.info-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-left: 3px solid #2b5ea7;
+  padding: 9px 12px;
+  font-size: 11px;
+  color: #1e40af;
+  margin-top: 10px;
+}
+.warn-box {
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  border-left: 3px solid #f59e0b;
+  padding: 9px 12px;
+  font-size: 11px;
+  color: #92400e;
+  margin-top: 10px;
+}
+
+/* Result */
+.result-icon { font-size: 48px; text-align: center; margin: 8px 0; color: #059669; }
+.result-title { font-size: 18px; font-weight: 700; text-align: center; color: #059669; margin-bottom: 6px; }
+.result-text { font-size: 12px; color: #4b5563; text-align: center; line-height: 1.6; margin-bottom: 12px; }
+.cred-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #166534;
+  margin-bottom: 12px;
+}
+
+.hidden { display: none; }
+</style>
+
+<script language="JavaScript">
+var curStep = 1;
+var fso, wshell;
+
+window.onload = function() {
+  fso = new ActiveXObject("Scripting.FileSystemObject");
+  wshell = new ActiveXObject("WScript.Shell");
+  window.resizeTo(760, 580);
+  centerWin();
+  showStep(1);
+};
+
+function centerWin() {
+  var sw = screen.availWidth;
+  var sh = screen.availHeight;
+  window.moveTo((sw - 760) / 2, (sh - 580) / 2);
+}
+
+function showStep(n) {
+  curStep = n;
+  for (var i = 1; i <= 4; i++) {
+    document.getElementById("page" + i).className = "hidden";
+    var nav = document.getElementById("nav" + i);
+    if (i < n) nav.className = "sb-item done";
+    else if (i === n) nav.className = "sb-item active";
+    else nav.className = "sb-item";
+  }
+  document.getElementById("page" + n).className = "";
+
+  var titles = ["", "Bienvenido", "Configuracion", "Instalacion en Progreso", "Instalacion Completada"];
+  var descs = ["", "Asistente de instalacion del sistema PremiumBus",
+    "Configure los parametros del servidor local",
+    "Copiando archivos y configurando el sistema",
+    "El sistema se instalo correctamente"];
+  document.getElementById("hTitle").innerText = titles[n];
+  document.getElementById("hDesc").innerText = descs[n];
+
+  var btnBack = document.getElementById("btnBack");
+  var btnNext = document.getElementById("btnNext");
+  var btnInst = document.getElementById("btnInst");
+  var btnOpen = document.getElementById("btnOpen");
+  var btnExit = document.getElementById("btnExit");
+
+  btnBack.style.display = "none";
+  btnNext.style.display = "none";
+  btnInst.style.display = "none";
+  btnOpen.style.display = "none";
+  btnExit.style.display = "none";
+
+  if (n === 1) { btnNext.style.display = "inline"; }
+  if (n === 2) { btnBack.style.display = "inline"; btnInst.style.display = "inline"; }
+  if (n === 4) { btnOpen.style.display = "inline"; btnExit.style.display = "inline"; }
+}
+
+function goNext() { if (curStep < 4) showStep(curStep + 1); }
+function goBack() { if (curStep > 1) showStep(curStep - 1); }
+
+function getMyDir() {
+  var p = document.location.pathname;
+  if (p.charAt(0) === "/") p = p.substring(1);
+  p = p.replace(/\//g, "\\");
+  p = decodeURIComponent(p);
+  return fso.GetParentFolderName(p);
+}
+
+function replCfg(content, key, val) {
+  var needle = "define('" + key + "', '";
+  var start = content.indexOf(needle);
+  if (start === -1) return content;
+  start += needle.length;
+  var end = content.indexOf("')", start);
+  if (end === -1) return content;
+  return content.substring(0, start) + val + content.substring(end);
+}
+
+function logMsg(msg) {
+  var el = document.getElementById("logBox");
+  el.innerText += msg + "\n";
+  el.scrollTop = el.scrollHeight;
+}
+
+function setIco(id, txt, ok) {
+  var el = document.getElementById(id);
+  el.innerText = txt;
+  el.className = ok ? "cl-ico cl-ok" : "cl-ico cl-err";
+}
+
+function startInstall() {
+  showStep(3);
+
+  var bar = document.getElementById("pBar");
+  document.getElementById("logBox").innerText = "";
+
+  var xPath = document.getElementById("txtXampp").value;
+  var mHost = document.getElementById("txtHost").value;
+  var mUser = document.getElementById("txtUser").value;
+  var mPass = document.getElementById("txtPass").value;
+  var instDir = document.getElementById("txtDir").value;
+
+  // 1
+  logMsg("[1/6] Verificando XAMPP en: " + xPath);
+  bar.style.width = "10%";
+
+  if (!fso.FolderExists(xPath)) {
+    logMsg("  [X] ERROR: XAMPP no encontrado en esa ruta.");
+    logMsg("  -> Descarge XAMPP de https://www.apachefriends.org/");
+    setIco("ico1", "X", false);
+    document.getElementById("btnRetry").style.display = "inline";
+    return;
+  }
+  logMsg("  [OK] XAMPP encontrado.");
+  setIco("ico1", "OK", true);
+  bar.style.width = "20%";
+
+  // 2
+  var htdocs = xPath + "\\htdocs";
+  logMsg("[2/6] Verificando directorio htdocs...");
+  if (!fso.FolderExists(htdocs)) {
+    logMsg("  [X] ERROR: htdocs no encontrado.");
+    setIco("ico2", "X", false);
+    document.getElementById("btnRetry").style.display = "inline";
+    return;
+  }
+  logMsg("  [OK] htdocs encontrado.");
+  setIco("ico2", "OK", true);
+  bar.style.width = "35%";
+
+  // 3
+  logMsg("[3/6] Copiando archivos de PremiumBus...");
+  var srcDir = getMyDir();
+  var destDir = htdocs + "\\" + instDir;
+
+  if (fso.FolderExists(destDir)) {
+    logMsg("  [!] Instalacion previa detectada. Actualizando...");
+  }
+
+  try {
+    wshell.Run('cmd /c xcopy "' + srcDir + '" "' + destDir + '" /E /I /Y /Q', 0, true);
+    logMsg("  [OK] Archivos copiados a: " + destDir);
+    setIco("ico3", "OK", true);
+  } catch(e) {
+    logMsg("  [X] Error al copiar: " + e.message);
+    setIco("ico3", "X", false);
+    document.getElementById("btnRetry").style.display = "inline";
+    return;
+  }
+  bar.style.width = "50%";
+
+  // 4
+  logMsg("[4/6] Configurando conexion a base de datos...");
+  var cfgFile = destDir + "\\api\\config.php";
+  if (fso.FileExists(cfgFile)) {
+    try {
+      var f1 = fso.OpenTextFile(cfgFile, 1);
+      var cfgContent = f1.ReadAll();
+      f1.Close();
+      cfgContent = replCfg(cfgContent, "DB_HOST", mHost);
+      cfgContent = replCfg(cfgContent, "DB_USER", mUser);
+      cfgContent = replCfg(cfgContent, "DB_PASS", mPass);
+      var f2 = fso.CreateTextFile(cfgFile, true);
+      f2.Write(cfgContent);
+      f2.Close();
+      logMsg("  [OK] config.php actualizado.");
+    } catch(e2) {
+      logMsg("  [!] No se pudo editar config.php: " + e2.message);
+    }
+  } else {
+    logMsg("  [!] config.php no encontrado. Usando config por defecto.");
+  }
+  setIco("ico4", "OK", true);
+  bar.style.width = "65%";
+
+  // 5 - Iniciar servicios XAMPP
+  logMsg("[5/6] Iniciando servicios de XAMPP...");
+  var apacheOk = fso.FileExists(xPath + "\\apache\\bin\\httpd.exe");
+  var mysqlOk = fso.FileExists(xPath + "\\mysql\\bin\\mysqld.exe");
+
+  if (apacheOk || mysqlOk) {
+    try {
+      // Intentar iniciar via xampp_start.exe o batch files
+      if (fso.FileExists(xPath + "\\xampp_start.exe")) {
+        logMsg("  Ejecutando xampp_start.exe...");
+        wshell.Run('"' + xPath + '\\xampp_start.exe"', 0, false);
+      } else {
+        // Iniciar Apache
+        if (fso.FileExists(xPath + "\\apache_start.bat")) {
+          logMsg("  Iniciando Apache...");
+          wshell.Run('"' + xPath + '\\apache_start.bat"', 0, false);
+        } else if (apacheOk) {
+          wshell.Run('"' + xPath + '\\apache\\bin\\httpd.exe"', 0, false);
+          logMsg("  Iniciando Apache (httpd.exe)...");
+        }
+        // Iniciar MySQL
+        if (fso.FileExists(xPath + "\\mysql_start.bat")) {
+          logMsg("  Iniciando MySQL...");
+          wshell.Run('"' + xPath + '\\mysql_start.bat"', 0, false);
+        } else if (mysqlOk) {
+          wshell.Run('"' + xPath + '\\mysql\\bin\\mysqld.exe"', 0, false);
+          logMsg("  Iniciando MySQL (mysqld.exe)...");
+        }
+      }
+      logMsg("  [OK] Servicios iniciados. Esperando 3 segundos...");
+      wshell.Run('cmd /c ping 127.0.0.1 -n 4 > nul', 0, true);
+      logMsg("  [OK] Servicios listos.");
+    } catch(e3) {
+      logMsg("  [!] No se pudieron iniciar automaticamente: " + e3.message);
+      logMsg("  -> Inicie XAMPP Control Panel manualmente.");
+    }
+  } else {
+    logMsg("  [!] Apache/MySQL no encontrados. Inicie XAMPP manualmente.");
+  }
+  setIco("ico5", "OK", true);
+  bar.style.width = "85%";
+
+  // 6
+  logMsg("[6/6] Finalizando...");
+  logMsg("");
+  logMsg("=========================================");
+  logMsg("  INSTALACION COMPLETADA EXITOSAMENTE");
+  logMsg("=========================================");
+  logMsg("");
+  logMsg("  URL de la aplicacion:");
+  logMsg("  http://localhost/" + instDir + "/");
+  logMsg("");
+  logMsg("  URL de configuracion de BD:");
+  logMsg("  http://localhost/" + instDir + "/setup_db.php");
+  setIco("ico6", "OK", true);
+  bar.style.width = "100%";
+
+  document.getElementById("btnDone").style.display = "inline";
+}
+
+function ensureXamppRunning() {
+  var xPath = document.getElementById("txtXampp").value;
+  try {
+    if (fso.FileExists(xPath + "\\xampp_start.exe")) {
+      wshell.Run('"' + xPath + '\\xampp_start.exe"', 0, false);
+    } else {
+      if (fso.FileExists(xPath + "\\apache_start.bat")) {
+        wshell.Run('"' + xPath + '\\apache_start.bat"', 0, false);
+      }
+      if (fso.FileExists(xPath + "\\mysql_start.bat")) {
+        wshell.Run('"' + xPath + '\\mysql_start.bat"', 0, false);
+      }
+    }
+    // Esperar 2 segundos para que los servicios arranquen
+    wshell.Run('cmd /c ping 127.0.0.1 -n 3 > nul', 0, true);
+  } catch(e) {}
+}
+
+function goDone() {
+  ensureXamppRunning();
+  var d = document.getElementById("txtDir").value;
+  try { wshell.Run("http://localhost/" + d + "/setup_db.php"); } catch(e) {}
+  showStep(4);
+}
+
+function openApp() {
+  ensureXamppRunning();
+  var d = document.getElementById("txtDir").value;
+  try { wshell.Run("http://localhost/" + d + "/"); } catch(e) {}
+}
+
+function openSetup() {
+  ensureXamppRunning();
+  var d = document.getElementById("txtDir").value;
+  try { wshell.Run("http://localhost/" + d + "/setup_db.php"); } catch(e) {}
+}
+
+function retryInstall() {
+  document.getElementById("btnRetry").style.display = "none";
+  showStep(2);
+}
+</script>
+</head>
+<body>
+<table class="layout-table" cellspacing="0" cellpadding="0">
+<tr>
+<!-- SIDEBAR -->
+<td class="sidebar-cell">
+  <div class="sidebar-inner">
+    <div class="sb-brand">PremiumBus</div>
+    <div class="sb-version">Instalador v5.0</div>
+
+    <div class="sb-item active" id="nav1">1. Bienvenida</div>
+    <div class="sb-item" id="nav2">2. Configuracion</div>
+    <div class="sb-item" id="nav3">3. Instalacion</div>
+    <div class="sb-item" id="nav4">4. Finalizar</div>
+
+    <div style="position:absolute; bottom:16px; left:16px;">
+      <span style="font-size:9px; color:#3d6a9e;">PremiumBus 2026</span><br>
+      <span style="font-size:9px; color:#3d6a9e;">San Luis Potosi, MX</span>
+    </div>
+  </div>
+</td>
+
+<!-- CONTENT -->
+<td class="content-cell">
+  <div class="content-inner">
+    <!-- Header -->
+    <div class="c-header">
+      <h2 id="hTitle">Bienvenido</h2>
+      <p id="hDesc">Asistente de instalacion del sistema PremiumBus</p>
+    </div>
+
+    <!-- Body -->
+    <div class="c-body">
+
+      <!-- PAGE 1 -->
+      <div id="page1">
+        <p style="line-height:1.7; margin-bottom:14px; color:#4b5563;">
+          Este asistente le guiara en la instalacion del sistema <b>PremiumBus v5.0</b>
+          en su computadora. Se copiaran los archivos necesarios al servidor web
+          local (XAMPP) y se configurara la conexion a la base de datos MySQL.
+        </p>
+        <p style="font-weight:600; color:#374151; margin-bottom:8px;">Novedades v5.0:</p>
+
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Admin principal puede eliminar usuarios y otros admins</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Exportacion Excel .xlsx real con 6 hojas de auditoria (SheetJS)</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> CRUD completo de conductores (agregar/eliminar/asignar rutas)</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Mapa GPS estilo Uber con tema oscuro y colores neon</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Buscador avanzado con algoritmo fuzzy scoring</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Filtros por rol (Todos/Usuarios/Admins) en panel admin</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Resaltado de texto coincidente en resultados de busqueda</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Marcadores con efecto glow neon en mapa oscuro</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Controles flotantes estilo rideshare sobre el mapa</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> 10 cuentas de administrador preconfiguradas</div>
+
+        <p style="font-weight:600; color:#374151; margin-bottom:8px; margin-top:14px;">Versiones anteriores incluidas:</p>
+
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Pago con tarjeta, perfil con foto, GPS en vivo, QR de boletos</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> Dashboard admin con analiticas, cambio de contrasena, eliminar cuenta</div>
+        <div class="cl-item"><span class="cl-ico cl-ok">+</span> PWA instalable en iOS/Android, modo offline con sincronizacion</div>
+
+        <p style="font-weight:600; color:#374151; margin-bottom:8px; margin-top:14px;">Requisitos previos:</p>
+
+        <div class="cl-item"><span class="cl-ico cl-wait">[ ]</span> XAMPP instalado (Apache + MySQL)</div>
+        <div class="cl-item"><span class="cl-ico cl-wait">[ ]</span> 50 MB de espacio libre en disco</div>
+        <div class="cl-item"><span class="cl-ico cl-wait">[ ]</span> Permisos de administrador en el equipo</div>
+
+        <div class="info-box">
+          <b>Nota:</b> Si no tiene XAMPP instalado, descargelo gratis desde
+          <b>https://www.apachefriends.org/</b>
+        </div>
+      </div>
+
+      <!-- PAGE 2 -->
+      <div id="page2" class="hidden">
+        <div class="fg">
+          <label>Ruta de instalacion de XAMPP</label>
+          <input type="text" id="txtXampp" value="C:\xampp" />
+          <div class="hint">Carpeta donde esta instalado XAMPP en su equipo</div>
+        </div>
+        <div class="fg">
+          <label>Nombre de carpeta del proyecto</label>
+          <input type="text" id="txtDir" value="PremiumBus" />
+          <div class="hint">Se creara dentro de la carpeta htdocs</div>
+        </div>
+        <table class="form-row-table"><tr>
+          <td style="width:50%;">
+            <div class="fg">
+              <label>Host de MySQL</label>
+              <input type="text" id="txtHost" value="localhost" />
+            </div>
+          </td>
+          <td style="width:50%;">
+            <div class="fg">
+              <label>Usuario de MySQL</label>
+              <input type="text" id="txtUser" value="root" />
+            </div>
+          </td>
+        </tr></table>
+        <div class="fg">
+          <label>Contrasena de MySQL</label>
+          <input type="password" id="txtPass" value="" />
+          <div class="hint">Si usa XAMPP con la configuracion por defecto, dejela vacia</div>
+        </div>
+        <div class="warn-box">
+          <b>Importante:</b> Asegurese de que los servicios Apache y MySQL de XAMPP
+          esten detenidos antes de iniciar la instalacion.
+        </div>
+      </div>
+
+      <!-- PAGE 3 -->
+      <div id="page3" class="hidden">
+        <div class="cl-item"><span class="cl-ico cl-wait" id="ico1">--</span> Verificar XAMPP</div>
+        <div class="cl-item"><span class="cl-ico cl-wait" id="ico2">--</span> Verificar directorio htdocs</div>
+        <div class="cl-item"><span class="cl-ico cl-wait" id="ico3">--</span> Copiar archivos del sistema</div>
+        <div class="cl-item"><span class="cl-ico cl-wait" id="ico4">--</span> Configurar base de datos</div>
+        <div class="cl-item"><span class="cl-ico cl-wait" id="ico5">--</span> Verificar servicios Apache y MySQL</div>
+        <div class="cl-item"><span class="cl-ico cl-wait" id="ico6">--</span> Finalizar instalacion</div>
+
+        <div class="prog-track"><div class="prog-fill" id="pBar"></div></div>
+        <div class="log-box" id="logBox">Esperando inicio de la instalacion...</div>
+        <div style="text-align:center; margin-top:8px;">
+          <button class="btn btn-success" id="btnDone" onclick="goDone()" style="display:none;">Continuar &gt;</button>
+          <button class="btn btn-danger" id="btnRetry" onclick="retryInstall()" style="display:none;">&lt; Volver a configurar</button>
+        </div>
+      </div>
+
+      <!-- PAGE 4 -->
+      <div id="page4" class="hidden">
+        <div class="result-icon">&#10004;</div>
+        <div class="result-title">Instalacion Completada</div>
+        <div class="result-text">
+          PremiumBus v5.0 ha sido instalado correctamente en su servidor local.<br>
+          Configure la base de datos y comience a usar la aplicacion.
+        </div>
+        <div class="cred-box">
+          <b>Credenciales de Administrador Principal:</b><br><br>
+          <b>Correo:</b> admin@premiumbus.com<br>
+          <b>Contrasena:</b> admin123<br><br>
+          <b>Administradores adicionales (2-10):</b><br>
+          <span style="font-size:11px;">admin2@premiumbus.com a admin10@premiumbus.com</span><br>
+          <span style="font-size:11px;">Contrasena: admin123</span><br><br>
+          <span style="font-size:10px; color:#047857;">* Cambie las contrasenas despues del primer inicio de sesion.</span>
+        </div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:9px 12px; font-size:11px; color:#1e40af; margin-bottom:12px;">
+          <b>Nuevas funcionalidades v5.0:</b><br>
+          - Panel Admin: pestana Conductores para agregar/eliminar conductores<br>
+          - Admin puede eliminar usuarios desde Perfil y Panel Admin<br>
+          - Exportar Excel .xlsx con 6 hojas (Compras, Historial, Usuarios, Rutas, Conductores, Resumen)<br>
+          - Mapa GPS con tema oscuro estilo Uber y rutas color cyan neon<br>
+          - Buscador avanzado con algoritmo fuzzy y filtros por rol
+        </div>
+        <table style="width:100%; border-collapse:collapse;"><tr>
+          <td style="width:50%; padding-right:5px;">
+            <button class="btn btn-primary" onclick="openApp()" style="width:100%; padding:9px;">Abrir PremiumBus</button>
+          </td>
+          <td style="width:50%; padding-left:5px;">
+            <button class="btn btn-secondary" onclick="openSetup()" style="width:100%; padding:9px;">Configurar BD</button>
+          </td>
+        </tr></table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="c-footer">
+      <button class="btn btn-secondary" id="btnBack" onclick="goBack()" style="display:none;">&lt; Atras</button>
+      <button class="btn btn-primary" id="btnNext" onclick="goNext()">Siguiente &gt;</button>
+      <button class="btn btn-primary" id="btnInst" onclick="startInstall()" style="display:none;">Instalar</button>
+      <button class="btn btn-success" id="btnOpen" onclick="openApp()" style="display:none;">Abrir App</button>
+      <button class="btn btn-secondary" id="btnExit" onclick="window.close();" style="display:none;">Cerrar</button>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+</body>
+</html>

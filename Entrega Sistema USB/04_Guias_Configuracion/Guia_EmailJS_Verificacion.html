@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía — Configuración de EmailJS para PremiumBus</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;padding:40px 20px;color:#333}
+.doc{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1);padding:48px}
+h1{color:#1a3a6b;font-size:28px;margin-bottom:8px;border-bottom:3px solid #3b82f6;padding-bottom:12px}
+h2{color:#2b5ea7;font-size:20px;margin:32px 0 12px;padding-left:12px;border-left:4px solid #3b82f6}
+h3{color:#1a3a6b;font-size:16px;margin:20px 0 8px}
+p{line-height:1.7;margin-bottom:12px}
+.subtitle{color:#666;font-size:16px;margin-bottom:24px}
+.step{background:#eff6ff;border-radius:12px;padding:20px;margin:16px 0;border-left:4px solid #3b82f6}
+.step-num{background:#2b5ea7;color:#fff;width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;margin-right:8px}
+.warn{background:#fef3c7;border-left:4px solid #f59e0b;border-radius:12px;padding:16px;margin:16px 0}
+.code{background:#1e1e2e;color:#ced4da;border-radius:10px;padding:16px;font-family:Consolas,monospace;font-size:13px;margin:12px 0;overflow-x:auto;line-height:1.6}
+.success{background:#d1fae5;border-left:4px solid #10b981;border-radius:12px;padding:16px;margin:16px 0}
+ul{margin:8px 0 16px 24px;line-height:1.8}
+.footer{margin-top:40px;padding-top:20px;border-top:2px solid #e5e5e5;color:#888;font-size:13px;text-align:center}
+@media print{body{padding:20px}.doc{box-shadow:none;padding:24px}h1{font-size:22px}h2{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>📧 Guía de Configuración — EmailJS</h1>
+<p class="subtitle">Verificación de correo para nuevas cuentas y recuperación de contraseñas en PremiumBus</p>
+
+<h2>¿Qué es EmailJS?</h2>
+<p>EmailJS es un servicio que permite enviar correos electrónicos directamente desde el navegador (frontend) sin necesidad de un servidor de correo propio. PremiumBus lo utiliza para:</p>
+<ul>
+<li><strong>Verificación de nuevas cuentas:</strong> Envía un código de 6 dígitos al correo del usuario al registrarse.</li>
+<li><strong>Recuperación de contraseña:</strong> Envía un código de verificación para restablecer la contraseña olvidada.</li>
+</ul>
+
+<div class="warn">
+<strong>⚠️ Modo Demo:</strong> Si EmailJS no está configurado, el sistema funciona en "modo demo": muestra el código de verificación directamente en pantalla (sin enviar email real). Esto es útil para pruebas.
+</div>
+
+<h2>Configuración Paso a Paso</h2>
+
+<div class="step">
+<p><span class="step-num">1</span><strong>Crear cuenta en EmailJS</strong></p>
+<p>Ir a <strong>https://www.emailjs.com/</strong> → Click en "Sign Up Free"<br>
+La cuenta gratuita permite 200 emails al mes, suficiente para uso normal.</p>
+</div>
+
+<div class="step">
+<p><span class="step-num">2</span><strong>Conectar un servicio de correo (Gmail)</strong></p>
+<p>En el dashboard de EmailJS:<br>
+<strong>Email Services → Add New Service → Gmail</strong><br>
+Autoriza tu cuenta de Gmail. Se generará un <strong>Service ID</strong> (ej: <code>service_2gestc9</code>).</p>
+</div>
+
+<div class="step">
+<p><span class="step-num">3</span><strong>Crear un template de email</strong></p>
+<p>En <strong>Email Templates → Create New Template</strong>, configura el email con estas variables:</p>
+<div class="code">
+Asunto: 🔐 PremiumBus — Código de Verificación: {{code}}
+
+Cuerpo:
+Hola {{to_name}},
+
+Tu código de verificación para PremiumBus es:
+
+🔑 {{code}}
+
+Este código expira en 10 minutos.
+
+Si no solicitaste este código, ignora este mensaje.
+
+— Equipo PremiumBus
+</div>
+<p>Se generará un <strong>Template ID</strong> (ej: <code>template_jjy8tk8</code>).</p>
+</div>
+
+<div class="step">
+<p><span class="step-num">4</span><strong>Obtener la Public Key</strong></p>
+<p>En <strong>Account → API Keys</strong>, copia tu <strong>Public Key</strong> (ej: <code>cMCbDTcQu6cFcHbvh</code>).</p>
+</div>
+
+<div class="step">
+<p><span class="step-num">5</span><strong>Configurar en el código de PremiumBus</strong></p>
+<p>Abrir el archivo: <strong>src/services/EmailService.js</strong></p>
+<p>Buscar las líneas 15-19 y reemplazar con tus datos:</p>
+<div class="code">
+const EMAILJS_CONFIG = {
+  publicKey: 'TU_PUBLIC_KEY',       // ← Pegar tu Public Key aquí
+  serviceId: 'TU_SERVICE_ID',      // ← Pegar tu Service ID aquí
+  templateId: 'TU_TEMPLATE_ID',    // ← Pegar tu Template ID aquí
+};
+</div>
+</div>
+
+<div class="success">
+<strong>✅ ¡Listo!</strong> Ahora al registrarse o recuperar contraseña, el sistema enviará el código de verificación al correo real del usuario.
+</div>
+
+<h2>Variables del Template</h2>
+<p>El sistema envía estas variables al template de EmailJS:</p>
+<ul>
+<li><code>{{to_email}}</code> — Correo del usuario destino</li>
+<li><code>{{to_name}}</code> — Nombre del usuario</li>
+<li><code>{{code}}</code> — Código de 6 dígitos generado</li>
+<li><code>{{app_name}}</code> — Siempre "PremiumBus"</li>
+</ul>
+
+<h2>Archivo que se modifica</h2>
+<div class="code">
+📂 PremiumBus/
+   └── src/
+       └── services/
+           └── EmailService.js   ← SOLO este archivo se modifica
+</div>
+
+<h2>Flujo de Verificación</h2>
+<p>1. Usuario se registra o solicita recuperar contraseña<br>
+2. El sistema genera un código aleatorio de 6 dígitos<br>
+3. Se almacena temporalmente (expira en 10 minutos)<br>
+4. Se envía por email via EmailJS (o se muestra en pantalla en modo demo)<br>
+5. El usuario ingresa el código en los 6 campos de verificación<br>
+6. El sistema valida el código y procede</p>
+
+<div class="footer">
+PremiumBus — Guía de Configuración EmailJS | Mayo 2026
+</div>
+</div>
+</body>
+</html>

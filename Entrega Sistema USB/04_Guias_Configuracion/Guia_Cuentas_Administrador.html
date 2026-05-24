@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía — Cuentas de Administrador PremiumBus</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;padding:40px 20px;color:#333}
+.doc{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1);padding:48px}
+h1{color:#1a3a6b;font-size:28px;margin-bottom:8px;border-bottom:3px solid #3b82f6;padding-bottom:12px}
+h2{color:#2b5ea7;font-size:20px;margin:32px 0 12px;padding-left:12px;border-left:4px solid #3b82f6}
+p{line-height:1.7;margin-bottom:12px}
+.subtitle{color:#666;font-size:16px;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th{background:#1a3a6b;color:#fff;padding:12px 16px;text-align:left}
+td{padding:10px 16px;border-bottom:1px solid #e5e5e5}
+tr:nth-child(even){background:#f9fafb}
+tr:first-child td{background:#fef3c7;font-weight:bold}
+.warn{background:#fef3c7;border-left:4px solid #f59e0b;border-radius:12px;padding:16px;margin:16px 0}
+.info{background:#eff6ff;border-left:4px solid #3b82f6;border-radius:12px;padding:16px;margin:16px 0}
+.danger{background:#fee2e2;border-left:4px solid #ef4444;border-radius:12px;padding:16px;margin:16px 0}
+.code{background:#1e1e2e;color:#ced4da;border-radius:10px;padding:16px;font-family:Consolas,monospace;font-size:13px;margin:12px 0;overflow-x:auto;line-height:1.6}
+ul{margin:8px 0 16px 24px;line-height:1.8}
+.footer{margin-top:40px;padding-top:20px;border-top:2px solid #e5e5e5;color:#888;font-size:13px;text-align:center}
+@media print{body{padding:20px}.doc{box-shadow:none;padding:24px}}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>👥 Guía — Cuentas de Administrador</h1>
+<p class="subtitle">Gestión de las 10 cuentas administrativas + Administrador Principal de PremiumBus</p>
+
+<h2>Listado de Cuentas de Administrador</h2>
+<p>El sistema viene con <strong>10 cuentas de administrador predefinidas</strong>. Todas comparten la contraseña inicial <code>admin123</code>.</p>
+
+<table>
+<tr><th>#</th><th>Nombre</th><th>Correo</th><th>Contraseña</th><th>Rol Especial</th></tr>
+<tr><td>1</td><td>⭐ Administrador Principal</td><td>admin@premiumbus.com</td><td>admin123</td><td>Super Admin</td></tr>
+<tr><td>2</td><td>Admin Operaciones</td><td>admin2@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+<tr><td>3</td><td>Admin Finanzas</td><td>admin3@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+<tr><td>4</td><td>Admin Soporte</td><td>admin4@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+<tr><td>5</td><td>Admin Rutas</td><td>admin5@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+<tr><td>6</td><td>Admin Recursos</td><td>admin6@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+<tr><td>7</td><td>Admin Marketing</td><td>admin7@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+<tr><td>8</td><td>Admin Seguridad</td><td>admin8@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+<tr><td>9</td><td>Admin Calidad</td><td>admin9@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+<tr><td>10</td><td>Admin Regional</td><td>admin10@premiumbus.com</td><td>admin123</td><td>—</td></tr>
+</table>
+
+<h2>⭐ Administrador Principal (ID: 1)</h2>
+<div class="warn">
+<strong>El Admin Principal tiene permisos exclusivos que los otros 9 admins NO tienen:</strong>
+<ul>
+<li>🗑️ <strong>Eliminar usuarios</strong> del sistema (borrar cuentas completas)</li>
+<li>🔒 Solo el usuario con ID = 1 puede ejecutar la función <code>deleteUserById()</code></li>
+<li>Al eliminar un usuario, se borran también sus compras, historial y foto de perfil</li>
+</ul>
+</div>
+
+<h2>Permisos de los 9 Admins Secundarios</h2>
+<div class="info">
+Los admins con ID 2-10 pueden:
+<ul>
+<li>📊 Ver estadísticas del dashboard (usuarios, ventas, ingresos, ocupación)</li>
+<li>🚌 Gestionar y visualizar rutas</li>
+<li>👥 Ver el listado de usuarios registrados</li>
+<li>🎫 Ver historial completo de compras</li>
+<li>📥 Exportar reportes a Excel</li>
+</ul>
+<strong>NO pueden:</strong> Eliminar usuarios ni eliminar otras cuentas admin.
+</div>
+
+<h2>¿Dónde se definen las cuentas?</h2>
+<p><strong>Modo localStorage (demo):</strong> Las cuentas se definen en:</p>
+<div class="code">
+📂 src/services/AuthService.js  →  método _initializeDefaultUsers()  (líneas 44-56)
+</div>
+<p><strong>Modo MySQL (producción):</strong> Las cuentas se insertan desde:</p>
+<div class="code">
+📂 api/setup.sql        →  INSERT INTO usuarios ...
+📂 setup_db.php         →  Se ejecuta al configurar la BD desde el navegador
+</div>
+
+<h2>Cambiar Contraseña de un Admin</h2>
+<p>Cada admin puede cambiar su contraseña desde: <strong>Perfil → Configuración de Cuenta → Cambiar Contraseña</strong></p>
+
+<div class="danger">
+<strong>🔴 Recomendación de Seguridad:</strong> Cambie la contraseña por defecto (<code>admin123</code>) de TODAS las cuentas admin inmediatamente después de la instalación.
+</div>
+
+<h2>Usuario de Prueba (No Admin)</h2>
+<table>
+<tr><th>Nombre</th><th>Correo</th><th>Contraseña</th><th>Rol</th></tr>
+<tr><td>Juan Pérez</td><td>juan@correo.com</td><td>usuario123</td><td>Usuario normal</td></tr>
+</table>
+
+<div class="footer">
+PremiumBus — Guía de Cuentas de Administrador | Mayo 2026
+</div>
+</div>
+</body>
+</html>

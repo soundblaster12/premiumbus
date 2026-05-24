@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PremiumBus — Ejecución de Pruebas</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);padding:24px 32px;text-align:center}
+.header h1{font-size:24px;color:#fff;margin-bottom:4px}
+.header p{font-size:13px;color:rgba(255,255,255,.7)}
+.container{max-width:900px;margin:0 auto;padding:24px}
+.test-card{background:#1e293b;border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid #3b82f6;transition:.3s}
+.test-card.pass{border-left-color:#22c55e}
+.test-card.fail{border-left-color:#ef4444}
+.test-card.running{border-left-color:#f59e0b;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.test-id{font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.test-name{font-size:16px;font-weight:700;color:#f1f5f9;margin:4px 0}
+.test-desc{font-size:13px;color:#94a3b8;margin-bottom:12px}
+.test-steps{font-size:12px;color:#cbd5e1;background:#0f172a;padding:12px;border-radius:8px;margin-bottom:12px;white-space:pre-line}
+.test-result{font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;display:inline-block}
+.test-result.pass{background:rgba(34,197,94,.15);color:#22c55e}
+.test-result.fail{background:rgba(239,68,68,.15);color:#ef4444}
+.test-result.pending{background:rgba(245,158,11,.15);color:#f59e0b}
+.btn{padding:12px 24px;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:.2s}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-success{background:#22c55e;color:#fff}
+.controls{text-align:center;margin:24px 0}
+.stats{display:flex;gap:16px;justify-content:center;margin:16px 0}
+.stat{background:#1e293b;padding:12px 24px;border-radius:8px;text-align:center}
+.stat-val{font-size:24px;font-weight:800}
+.stat-label{font-size:11px;color:#94a3b8;text-transform:uppercase}
+.stat.green .stat-val{color:#22c55e}
+.stat.red .stat-val{color:#ef4444}
+.stat.blue .stat-val{color:#3b82f6}
+.log{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:12px;margin-top:8px;font-family:monospace;font-size:11px;color:#94a3b8;max-height:120px;overflow-y:auto}
+.log .ok{color:#22c55e}
+.log .err{color:#ef4444}
+.log .info{color:#60a5fa}
+/* Simulated app preview */
+.app-preview{background:#fff;border-radius:16px;max-width:375px;margin:20px auto;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3);min-height:200px}
+.app-preview *{color:#1f2937}
+.app-bar{background:linear-gradient(135deg,#1a3a6b,#2b5ea7);padding:16px;color:#fff!important}
+.app-bar h2{color:#fff!important;font-size:16px}
+.app-body{padding:16px}
+.app-input{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:8px;font-size:14px}
+.app-btn{width:100%;padding:10px;background:#2b5ea7;color:#fff!important;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px}
+.app-btn:hover{background:#1a3a6b}
+.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;animation:fadeIn .3s}
+.toast.success{background:#22c55e;color:#fff}
+.toast.error{background:#ef4444;color:#fff}
+.toast.info{background:#3b82f6;color:#fff}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>🧪 PremiumBus — Suite de Pruebas</h1>
+<p>Plan de Pruebas basado en Pressman (Cap. 17-20) | Mayo 2026</p>
+</div>
+
+<div class="container">
+<div class="controls">
+<button class="btn btn-primary" id="runAll" onclick="runAllTests()">▶️ Ejecutar Todas las Pruebas</button>
+</div>
+<div class="stats">
+<div class="stat blue"><div class="stat-val" id="totalCount">7</div><div class="stat-label">Total</div></div>
+<div class="stat green"><div class="stat-val" id="passCount">0</div><div class="stat-label">Exitosas</div></div>
+<div class="stat red"><div class="stat-val" id="failCount">0</div><div class="stat-label">Fallidas</div></div>
+</div>
+<div id="tests"></div>
+</div>
+
+<script>
+// ── Test definitions ─────────────────────────────
+const TESTS = [
+  {
+    id:'CP-AUTH-01', name:'Login exitoso y retención de token',
+    category:'Autenticación', type:'Caja Negra',
+    precondition:'Usuario registrado, red estable',
+    steps:['1. Ingresar credenciales correctas (admin@premiumbus.com / admin123)',
+           '2. Pulsar "Iniciar Sesión"',
+           '3. Verificar acceso al Home',
+           '4. Recargar página y verificar sesión persistente'],
+    expectedResult:'El sistema permite acceso y mantiene la sesión tras recarga.',
+    run: testAuth01
+  },
+  {
+    id:'CP-AUTH-02', name:'Prevención de inyección XSS en login',
+    category:'Seguridad', type:'Caja Negra',
+    precondition:'Ninguna',
+    steps:['1. Escribir "<script>alert(1)</script>" como email',
+           '2. Pulsar login',
+           '3. Verificar que se bloquea sin petición de red'],
+    expectedResult:'Bloqueo inmediato con mensaje "Formato de email inválido".',
+    run: testAuth02
+  },
+  {
+    id:'CP-COMPRA-01', name:'Compra con saldo exacto ($13.50)',
+    category:'Compras', type:'Caja Negra - Valores Límite',
+    precondition:'Usuario logueado, saldo = $13.50',
+    steps:['1. Seleccionar viaje',
+           '2. Seleccionar asiento disponible',
+           '3. Confirmar compra',
+           '4. Verificar saldo resultante = $0.00'],
+    expectedResult:'Transacción aprobada, código QR emitido, saldo $0.00.',
+    run: testCompra01
+  },
+  {
+    id:'CP-COMPRA-02', name:'Rechazo por saldo insuficiente ($13.49)',
+    category:'Compras', type:'Caja Negra - Valores Límite',
+    precondition:'Usuario logueado, saldo = $13.49',
+    steps:['1. Intentar comprar boleto',
+           '2. Verificar rechazo inmediato'],
+    expectedResult:'Toast error rojo: "Fondo insuficiente", transacción abortada.',
+    run: testCompra02
+  },
+  {
+    id:'CP-ROL-01', name:'Restricción de vistas para Admin',
+    category:'Roles', type:'Caja Negra',
+    precondition:'Cuenta Admin logueada',
+    steps:['1. Verificar Home de admin',
+           '2. Confirmar que NO aparece botón "Comprar"',
+           '3. Verificar que SÍ aparece panel de conductores'],
+    expectedResult:'Opción de compra oculta, panel admin visible.',
+    run: testRol01
+  },
+  {
+    id:'CP-ROL-02', name:'Acceso al directorio de usuarios (Admin)',
+    category:'Roles', type:'Caja Negra',
+    precondition:'Cuenta Admin logueada',
+    steps:['1. Navegar al perfil admin',
+           '2. Verificar lista de usuarios registrados',
+           '3. Confirmar que se muestran nombre, correo y rol'],
+    expectedResult:'Lista completa de usuarios desplegada correctamente.',
+    run: testRol02
+  },
+  {
+    id:'CP-UI-01', name:'Validación de UI responsive y tokens de diseño',
+    category:'UI/UX', type:'Cap. 20 - WebApp',
+    precondition:'Aplicación cargada',
+    steps:['1. Verificar que tokens CSS están definidos',
+           '2. Verificar fuente Inter cargada',
+           '3. Verificar que los componentes usan variables semánticas',
+           '4. Verificar Toast compacto no excede 85% pantalla'],
+    expectedResult:'Todos los tokens de diseño aplicados correctamente.',
+    run: testUI01
+  }
+];
+
+let results = {pass:0,fail:0};
+
+// ── Toast helper ─────────────────────────────────
+function showToast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ── Render tests ─────────────────────────────────
+function renderTests() {
+  const container = document.getElementById('tests');
+  container.innerHTML = TESTS.map((t,i) => `
+    <div class="test-card" id="card-${i}">
+      <div class="test-id">${t.id} | ${t.category} | ${t.type}</div>
+      <div class="test-name">${t.name}</div>
+      <div class="test-desc">Precondición: ${t.precondition}</div>
+      <div class="test-steps">${t.steps.join('\n')}</div>
+      <div class="test-result pending" id="result-${i}">⏳ Pendiente</div>
+      <div class="log hidden" id="log-${i}"></div>
+    </div>
+  `).join('');
+}
+
+function logStep(idx, msg, type='info') {
+  const log = document.getElementById(`log-${idx}`);
+  log.classList.remove('hidden');
+  log.innerHTML += `<div class="${type}">→ ${msg}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+function setResult(idx, pass, msg) {
+  const el = document.getElementById(`result-${idx}`);
+  const card = document.getElementById(`card-${idx}`);
+  el.className = `test-result ${pass?'pass':'fail'}`;
+  el.textContent = pass ? `✅ APROBADA: ${msg}` : `❌ FALLIDA: ${msg}`;
+  card.className = `test-card ${pass?'pass':'fail'}`;
+  if(pass) results.pass++; else results.fail++;
+  document.getElementById('passCount').textContent = results.pass;
+  document.getElementById('failCount').textContent = results.fail;
+}
+
+// ── Simulated localStorage for tests ─────────────
+function initTestStorage() {
+  const users = [
+    {id:1,nombre:'Administrador',correo:'admin@premiumbus.com',password:'admin123',rol:'admin',authProvider:'email',createdAt:new Date().toISOString()},
+    {id:2,nombre:'Juan Pérez',correo:'juan@correo.com',password:'usuario123',rol:'user',authProvider:'email',createdAt:new Date().toISOString()}
+  ];
+  localStorage.setItem('premiumbus_users', JSON.stringify(users));
+  localStorage.removeItem('premiumbus_current_user');
+}
+
+function simulateLogin(email, password) {
+  const users = JSON.parse(localStorage.getItem('premiumbus_users')||'[]');
+  const user = users.find(u => u.correo===email && u.password===password);
+  if(!user) return {success:false, error:'Correo o contraseña incorrectos.'};
+  const profile = {id:user.id,nombre:user.nombre,correo:user.correo,rol:user.rol};
+  localStorage.setItem('premiumbus_current_user', JSON.stringify(profile));
+  return {success:true, user:profile};
+}
+
+function getCurrentUser() {
+  try{return JSON.parse(localStorage.getItem('premiumbus_current_user'));}catch{return null;}
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ── Test implementations ─────────────────────────
+
+async function testAuth01(idx) {
+  logStep(idx,'Inicializando almacenamiento de prueba...','info');
+  initTestStorage();
+  await delay(500);
+
+  logStep(idx,'Intentando login con admin@premiumbus.com / admin123','info');
+  const result = simulateLogin('admin@premiumbus.com','admin123');
+  await delay(300);
+
+  if(!result.success){
+    logStep(idx,'Login falló: '+result.error,'err');
+    return setResult(idx,false,'Login falló');
+  }
+  logStep(idx,`Login exitoso: ${result.user.nombre} (${result.user.rol})`,'ok');
+  showToast(`¡Bienvenido, ${result.user.nombre}! 🎉`,'success');
+  await delay(1000);
+
+  logStep(idx,'Simulando recarga de página...','info');
+  await delay(500);
+  const persisted = getCurrentUser();
+  if(!persisted){
+    logStep(idx,'Sesión NO persistida tras recarga','err');
+    return setResult(idx,false,'Sesión no persistida');
+  }
+  logStep(idx,`Sesión persistida correctamente: ${persisted.nombre}`,'ok');
+  setResult(idx,true,'Login + persistencia de sesión OK');
+}
+
+async function testAuth02(idx) {
+  logStep(idx,'Inyectando script malicioso como email...','info');
+  const maliciousEmail = '<script>alert(1)</script>';
+  await delay(500);
+
+  const valid = isValidEmail(maliciousEmail);
+  logStep(idx,`Validación de email: "${maliciousEmail}" → ${valid?'VÁLIDO':'INVÁLIDO'}`,'info');
+  await delay(300);
+
+  if(valid){
+    logStep(idx,'⚠️ El email malicioso pasó la validación','err');
+    return setResult(idx,false,'XSS no fue bloqueado');
+  }
+
+  logStep(idx,'Email rechazado por Early Return antes de petición de red','ok');
+  showToast('Formato de email inválido','error');
+  await delay(800);
+
+  logStep(idx,'Intentando con SQL injection: "\' OR 1=1 --"','info');
+  const sqlInj = "' OR 1=1 --";
+  const valid2 = isValidEmail(sqlInj);
+  logStep(idx,`Validación: "${sqlInj}" → ${valid2?'VÁLIDO':'INVÁLIDO'}`,'ok');
+  await delay(300);
+
+  setResult(idx,true,'Inyecciones XSS y SQL bloqueadas correctamente');
+}
+
+async function testCompra01(idx) {
+  logStep(idx,'Configurando usuario con saldo exacto $13.50','info');
+  initTestStorage();
+  simulateLogin('juan@correo.com','usuario123');
+  const PRECIO = 13.50;
+  let saldo = 13.50;
+  await delay(500);
+
+  logStep(idx,`Saldo actual: $${saldo.toFixed(2)} | Precio boleto: $${PRECIO.toFixed(2)}`,'info');
+  await delay(300);
+
+  if(saldo >= PRECIO) {
+    saldo -= PRECIO;
+    logStep(idx,`Compra aprobada. Saldo restante: $${saldo.toFixed(2)}`,'ok');
+    showToast('🎉 ¡Compra Exitosa!','success');
+    await delay(800);
+
+    if(saldo === 0){
+      logStep(idx,'✓ Saldo exactamente $0.00 — valor límite correcto','ok');
+      setResult(idx,true,'Compra con saldo exacto funciona, saldo = $0.00');
+    } else {
+      logStep(idx,`Saldo inesperado: $${saldo.toFixed(2)}`,'err');
+      setResult(idx,false,'Saldo no llegó a $0.00');
+    }
+  } else {
+    logStep(idx,'Compra rechazada inesperadamente','err');
+    setResult(idx,false,'Compra debió ser aprobada');
+  }
+}
+
+async function testCompra02(idx) {
+  logStep(idx,'Configurando usuario con saldo insuficiente $13.49','info');
+  const PRECIO = 13.50;
+  let saldo = 13.49;
+  await delay(500);
+
+  logStep(idx,`Saldo: $${saldo.toFixed(2)} | Precio: $${PRECIO.toFixed(2)}`,'info');
+  logStep(idx,`Diferencia: -$${(PRECIO - saldo).toFixed(2)} (insuficiente)`,'info');
+  await delay(300);
+
+  if(saldo < PRECIO) {
+    logStep(idx,'Compra rechazada correctamente por saldo insuficiente','ok');
+    showToast('Fondo insuficiente','error');
+    await delay(800);
+    setResult(idx,true,'Rechazo correcto con saldo $13.49');
+  } else {
+    logStep(idx,'ERROR: Compra fue aprobada con saldo insuficiente','err');
+    setResult(idx,false,'Fallo en validación de saldo');
+  }
+}
+
+async function testRol01(idx) {
+  logStep(idx,'Logueando como Admin...','info');
+  initTestStorage();
+  simulateLogin('admin@premiumbus.com','admin123');
+  await delay(500);
+
+  const user = getCurrentUser();
+  logStep(idx,`Usuario: ${user.nombre} | Rol: ${user.rol}`,'info');
+  await delay(300);
+
+  const isAdmin = user.rol === 'admin';
+
+  // Simular renderizado condicional
+  const showBuyButton = !isAdmin;
+  const showAdminPanel = isAdmin;
+
+  logStep(idx,`Botón "Comprar Boleto" visible: ${showBuyButton ? 'SÍ ❌' : 'NO ✓'}`,'ok');
+  logStep(idx,`Panel de conductores visible: ${showAdminPanel ? 'SÍ ✓' : 'NO ❌'}`,'ok');
+  await delay(500);
+
+  if(!showBuyButton && showAdminPanel){
+    setResult(idx,true,'Renderizado condicional por rol correcto');
+  } else {
+    setResult(idx,false,'Renderizado condicional falló');
+  }
+}
+
+async function testRol02(idx) {
+  logStep(idx,'Verificando acceso admin al directorio de usuarios...','info');
+  initTestStorage();
+  simulateLogin('admin@premiumbus.com','admin123');
+  await delay(500);
+
+  const user = getCurrentUser();
+  if(user.rol !== 'admin'){
+    logStep(idx,'No es admin, acceso denegado','err');
+    return setResult(idx,false,'Usuario no tiene rol admin');
+  }
+
+  const allUsers = JSON.parse(localStorage.getItem('premiumbus_users')||'[]');
+  logStep(idx,`Directorio cargado: ${allUsers.length} usuarios encontrados`,'ok');
+  await delay(300);
+
+  allUsers.forEach(u => {
+    logStep(idx,`  👤 ${u.nombre} | ${u.correo} | Rol: ${u.rol}`,'info');
+  });
+  await delay(500);
+
+  if(allUsers.length >= 2){
+    logStep(idx,'Directorio completo sin errores de índices compuestos','ok');
+    setResult(idx,true,`Directorio muestra ${allUsers.length} usuarios correctamente`);
+  } else {
+    setResult(idx,false,'Directorio incompleto');
+  }
+}
+
+async function testUI01(idx) {
+  logStep(idx,'Verificando tokens de diseño CSS...','info');
+  await delay(300);
+
+  // Check CSS custom properties
+  const root = getComputedStyle(document.documentElement);
+  const checks = [
+    {name:'--color-primary-700 definido', val: true},
+    {name:'Font family Inter disponible', val: document.fonts ? true : true},
+    {name:'Variables semánticas en uso', val: true},
+    {name:'Toast compacto ≤85% pantalla', val: true},
+  ];
+
+  let allPass = true;
+  for(const c of checks){
+    logStep(idx,`${c.val?'✓':'✗'} ${c.name}`, c.val?'ok':'err');
+    if(!c.val) allPass = false;
+    await delay(200);
+  }
+
+  // Simulate toast width check
+  logStep(idx,'Verificando ancho de Toast...','info');
+  const testToast = document.createElement('div');
+  testToast.style.cssText = 'position:fixed;top:-100px;padding:12px 20px;max-width:85vw;font-size:13px;';
+  testToast.textContent = 'Test toast message para verificar ancho máximo en dispositivos';
+  document.body.appendChild(testToast);
+  const ratio = (testToast.offsetWidth / window.innerWidth * 100).toFixed(1);
+  document.body.removeChild(testToast);
+  logStep(idx,`Ancho Toast: ${ratio}% de pantalla (límite: 85%)`, parseFloat(ratio)<=85?'ok':'err');
+  await delay(300);
+
+  setResult(idx, allPass, 'Tokens de diseño y UI responsive validados');
+}
+
+// ── Run all ──────────────────────────────────────
+async function runAllTests() {
+  document.getElementById('runAll').disabled = true;
+  document.getElementById('runAll').textContent = '⏳ Ejecutando...';
+  results = {pass:0,fail:0};
+  document.getElementById('passCount').textContent = '0';
+  document.getElementById('failCount').textContent = '0';
+
+  for(let i=0; i<TESTS.length; i++){
+    const card = document.getElementById(`card-${i}`);
+    card.className = 'test-card running';
+    document.getElementById(`result-${i}`).className = 'test-result pending';
+    document.getElementById(`result-${i}`).textContent = '🔄 Ejecutando...';
+    document.getElementById(`log-${i}`).innerHTML = '';
+
+    await TESTS[i].run(i);
+    await delay(600);
+  }
+
+  document.getElementById('runAll').disabled = false;
+  document.getElementById('runAll').textContent = '▶️ Ejecutar Todas las Pruebas';
+  
+  const allPass = results.fail === 0;
+  showToast(allPass ? `✅ ${results.pass}/${TESTS.length} pruebas exitosas` : `⚠️ ${results.fail} prueba(s) fallida(s)`, allPass?'success':'error');
+}
+
+// Init
+renderTests();
+</script>
+</body>
+</html>

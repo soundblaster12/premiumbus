@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía — Arquitectura y Algoritmo General de PremiumBus</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;padding:40px 20px;color:#333}
+.doc{max-width:950px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1);padding:48px}
+h1{color:#1a3a6b;font-size:28px;margin-bottom:8px;border-bottom:3px solid #3b82f6;padding-bottom:12px}
+h2{color:#2b5ea7;font-size:20px;margin:32px 0 12px;padding-left:12px;border-left:4px solid #3b82f6}
+h3{color:#1a3a6b;font-size:16px;margin:20px 0 8px}
+p{line-height:1.7;margin-bottom:12px}
+.subtitle{color:#666;font-size:16px;margin-bottom:24px}
+.info{background:#eff6ff;border-left:4px solid #3b82f6;border-radius:12px;padding:16px;margin:16px 0}
+.warn{background:#fef3c7;border-left:4px solid #f59e0b;border-radius:12px;padding:16px;margin:16px 0}
+.code{background:#1e1e2e;color:#ced4da;border-radius:10px;padding:16px;font-family:Consolas,monospace;font-size:12px;margin:12px 0;overflow-x:auto;line-height:1.5}
+ul,ol{margin:8px 0 16px 24px;line-height:1.8}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+th{background:#1a3a6b;color:#fff;padding:10px 12px;text-align:left}
+td{padding:8px 12px;border-bottom:1px solid #e5e5e5}
+tr:nth-child(even){background:#f9fafb}
+.arch{background:#f0f2f5;border-radius:12px;padding:20px;margin:16px 0;font-family:Consolas,monospace;font-size:13px;line-height:1.8;white-space:pre}
+.footer{margin-top:40px;padding-top:20px;border-top:2px solid #e5e5e5;color:#888;font-size:13px;text-align:center}
+@media print{body{padding:20px}.doc{box-shadow:none;padding:24px}}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>🏗️ Arquitectura y Algoritmo General del Sistema</h1>
+<p class="subtitle">Descripción técnica completa de la arquitectura, flujo de datos y algoritmos principales de PremiumBus</p>
+
+<h2>1. Arquitectura General</h2>
+<div class="arch">
+┌─────────────────────────────────────────────────────┐
+│                    CLIENTE (PWA)                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │  Pages/  │  │Components│  │    Services/     │  │
+│  │ Login    │  │ Navbar   │  │ AuthService.js   │  │
+│  │ Register │  │ Toast    │  │ DataService.js   │  │
+│  │ Home     │  │ Icons    │  │ MapService.js    │  │
+│  │ Trips    │  │          │  │ ExcelService.js  │  │
+│  │ Purchase │  │          │  │ EmailService.js  │  │
+│  │ Profile  │  │          │  │ Router.js        │  │
+│  │ Admin    │  │          │  │ ApiClient.js     │  │
+│  └──────────┘  └──────────┘  └────────┬─────────┘  │
+│                                       │             │
+│  ┌────────────────────────────────────┐│             │
+│  │ localStorage (Fallback/Demo Mode) ││             │
+│  └────────────────────────────────────┘│             │
+└────────────────────────────────────────┼─────────────┘
+                                         │ HTTP/HTTPS
+                                         ▼
+┌─────────────────────────────────────────────────────┐
+│                 SERVIDOR (XAMPP)                      │
+│  ┌──────────────────────────────────────────────┐   │
+│  │  api/index.php (API REST centralizada)        │   │
+│  │  ├── POST /login                              │   │
+│  │  ├── POST /register                           │   │
+│  │  ├── GET  /trips                              │   │
+│  │  ├── POST /purchase                           │   │
+│  │  ├── GET  /purchases?user_id=X                │   │
+│  │  └── GET  /all_users (admin only)             │   │
+│  └──────────────────────┬───────────────────────┘   │
+│                          │ PDO                       │
+│  ┌──────────────────────▼───────────────────────┐   │
+│  │  MySQL: premiumbus                            │   │
+│  │  ├── usuarios (id, nombre, correo, password)  │   │
+│  │  ├── viajes   (30 rutas con coordenadas GPS)  │   │
+│  │  └── compras  (boletos con FK a usuario/viaje)│   │
+│  └──────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘</div>
+
+<h2>2. Patrón de Diseño: Estrategia Dual (API/localStorage)</h2>
+<div class="info">
+<strong>Algoritmo central:</strong> Todos los servicios (Auth, Data) implementan el patrón de "Estrategia Dual". Antes de cada operación, verifican si la API PHP está disponible. Si lo está, usan MySQL; si no, usan localStorage como fallback.
+</div>
+<div class="code">
+// Pseudocódigo del patrón dual (aplicado en TODOS los servicios):
+async operación(datos) {
+    1. const apiDisponible = await verificarConexionAPI()
+    2. SI apiDisponible:
+         → Ejecutar operación vía HTTP POST/GET a api/index.php
+         → MySQL procesa con prepared statements (seguro)
+    3. SI NO:
+         → Ejecutar operación en localStorage del navegador
+         → Simula el mismo comportamiento sin servidor
+    4. Retornar resultado unificado { success, data, error }
+}
+</div>
+
+<h2>3. Flujo de Navegación (SPA Hash Router)</h2>
+<div class="code">
+// Algoritmo del Router:
+1. Usuario navega → se detecta cambio en window.location.hash
+2. Router extrae la ruta del hash (#/home → "home")
+3. Busca la ruta en el mapa de rutas registradas
+4. Ejecuta el Guard de autenticación:
+   a. ¿La ruta requiere auth? → ¿Hay sesión activa? → Si no, redirect a login
+   b. ¿La ruta requiere admin? → ¿Es admin el usuario? → Si no, redirect a home
+   c. ¿Es login/register y ya está autenticado? → Redirect a home
+5. Si el guard permite → renderiza la página correspondiente
+6. Actualiza el Navbar con la ruta activa
+</div>
+
+<h2>4. Algoritmo de Autenticación</h2>
+<h3>Registro de usuario:</h3>
+<div class="code">
+1. Validar datos (nombre, email válido, contraseña ≥ 6 chars)
+2. Verificar que el email no exista en el sistema
+3. Generar código de verificación de 6 dígitos aleatorio
+4. Enviar código por email (EmailJS) o mostrar en pantalla (demo)
+5. Almacenar código temporalmente (expira en 10 minutos)
+6. Usuario ingresa código → validar contra el almacenado
+7. Si es correcto → crear usuario en BD con contraseña hasheada (SHA-256)
+8. Auto-login y redirect a Home
+</div>
+
+<h3>Recuperación de contraseña:</h3>
+<div class="code">
+1. Usuario ingresa su correo → verificar existencia en BD
+2. Generar código de 6 dígitos → enviar por email
+3. Usuario ingresa código → validar
+4. Si es válido → mostrar formulario de nueva contraseña
+5. Validar nueva contraseña (≥ 6 chars, coincidencia)
+6. Actualizar contraseña en BD → redirect a login
+</div>
+
+<h2>5. Algoritmo de Compra de Boletos</h2>
+<div class="code">
+1. Usuario selecciona una ruta del dropdown
+2. Sistema carga los asientos de esa ruta (40 por defecto)
+3. Renderizar grid visual de asientos:
+   - Verde = disponible, Azul = seleccionado, Rojo = ocupado
+4. Usuario selecciona un asiento → actualizar UI
+5. Click "Comprar" → validar selección (ruta + asiento)
+6. Enviar compra al servidor:
+   a. Verificar que el asiento no esté ocupado (race condition check)
+   b. Registrar asiento como ocupado en la ruta
+   c. Crear registro de compra con folio único
+7. Mostrar modal de confirmación con folio
+</div>
+
+<h2>6. Estructura de Archivos</h2>
+<table>
+<tr><th>Archivo</th><th>Responsabilidad</th></tr>
+<tr><td>index.html</td><td>Punto de entrada, carga CSS y JS principal</td></tr>
+<tr><td>src/main.js</td><td>Registro de rutas, guard de auth, inicialización</td></tr>
+<tr><td>src/services/AuthService.js</td><td>Login, registro, verificación, reset password</td></tr>
+<tr><td>src/services/DataService.js</td><td>CRUD de viajes, compras, historial, conductores</td></tr>
+<tr><td>src/services/Router.js</td><td>SPA hash router con guards</td></tr>
+<tr><td>src/services/MapService.js</td><td>Mapas Leaflet, GPS, simulación de bus</td></tr>
+<tr><td>src/services/ExcelService.js</td><td>Exportación de auditoría a .xlsx</td></tr>
+<tr><td>src/services/EmailService.js</td><td>Envío de emails via EmailJS</td></tr>
+<tr><td>src/services/ApiClient.js</td><td>Wrapper HTTP para comunicación con API PHP</td></tr>
+<tr><td>src/components/Navbar.js</td><td>Barra de navegación inferior</td></tr>
+<tr><td>src/components/Toast.js</td><td>Sistema de notificaciones</td></tr>
+<tr><td>src/pages/*.js</td><td>7 páginas: Login, Register, Home, Trips, Purchase, Profile, Admin</td></tr>
+<tr><td>api/index.php</td><td>API REST centralizada (10 endpoints)</td></tr>
+<tr><td>api/config.php</td><td>Configuración de conexión a MySQL</td></tr>
+<tr><td>api/setup.sql</td><td>Script SQL para crear BD + 30 rutas</td></tr>
+<tr><td>setup_db.php</td><td>Configurador web de BD (formulario)</td></tr>
+<tr><td>sw.js</td><td>Service Worker para PWA offline</td></tr>
+<tr><td>manifest.json</td><td>Manifest PWA para instalación nativa</td></tr>
+</table>
+
+<h2>7. Seguridad</h2>
+<ul>
+<li><strong>Contraseñas:</strong> Hasheadas con SHA-256 en MySQL</li>
+<li><strong>SQL Injection:</strong> Prevenida con PDO prepared statements</li>
+<li><strong>XSS:</strong> Sanitización de inputs en frontend</li>
+<li><strong>CORS:</strong> Configurado en API para permitir mismo origen</li>
+<li><strong>Guards:</strong> Verificación de permisos en cada navegación</li>
+</ul>
+
+<div class="footer">
+PremiumBus — Arquitectura y Algoritmo General | Mayo 2026
+</div>
+</div>
+</body>
+</html>

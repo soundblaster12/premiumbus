@@ -1,0 +1,56 @@
+╔══════════════════════════════════════════════════════════════╗
+║           🚌  PremiumBus — Entrega del Sistema                                     ║
+║     Sistema de Gestión de Transporte Urbano — SLP                                   ║
+║                     Mayo 2026                                                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+¡Bienvenido! Esta USB contiene todo lo necesario para instalar,
+configurar y mantener el sistema PremiumBus.
+
+═══════════════════════════════════════════════════════════════
+📂 CONTENIDO DE ESTA USB
+═══════════════════════════════════════════════════════════════
+
+📁 01_Instalador/
+   └── Instalador_PremiumBus_v5.exe   → Instalador automático
+       (Instala XAMPP + configura la BD + despliega la app)
+
+📁 02_Codigo_Fuente/
+   └── Copia completa del proyecto para modificaciones futuras
+
+📁 03_Documentacion/
+   ├── Manual_Usuario_PremiumBus_v5.docx
+   ├── Documentacion_Sistema.docx
+   ├── SRS_PremiumBus.docx (Requisitos del sistema)
+   └── Programa_Capacitacion.docx
+
+📁 04_Guias_Configuracion/
+   ├── Guia_EmailJS_Verificacion.pdf     → Configurar emails
+   ├── Guia_Cuentas_Administrador.pdf    → Cuentas admin
+   ├── Guia_GPS_Mapas.pdf               → Funcionamiento GPS
+   ├── Guia_Exportador_Excel.pdf         → Generador de reportes
+   └── Guia_Algoritmo_General.pdf        → Arquitectura del sistema
+
+
+═══════════════════════════════════════════════════════════════
+🚀 PASOS PARA INSTALAR
+═══════════════════════════════════════════════════════════════
+
+1. Ejecutar "01_Instalador/Instalador_PremiumBus_v5.exe"
+2. Seguir las instrucciones del instalador
+3. Abrir el navegador en: http://localhost/PremiumBus/
+4. Iniciar sesión con: admin@premiumbus.com / admin123
+
+═══════════════════════════════════════════════════════════════
+🌐 DESCARGAR DESDE GITHUB (si pierde esta USB)
+═══════════════════════════════════════════════════════════════
+
+Repositorio: https://github.com/[tu-usuario]/PremiumBus
+
+Opción A: Botón verde "Code" → "Download ZIP"
+Opción B: git clone https://github.com/[tu-usuario]/PremiumBus.git
+
+
+Equipo de desarrollo: [PremiumBus]
+Instituto Tecnológico de San Luis Potosí
+Ingeniería de Software — Mayo 2026

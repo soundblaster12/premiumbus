@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>PremiumBus — Preparar USB de Entrega</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a3a6b,#2b5ea7);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:20px;padding:40px;max-width:700px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+h1{color:#1a3a6b;font-size:24px;margin-bottom:8px}
+p.sub{color:#666;margin-bottom:24px;font-size:14px}
+.checklist{list-style:none;padding:0}
+.checklist li{padding:12px 16px;border-radius:10px;margin:6px 0;font-size:14px;display:flex;align-items:center;gap:10px}
+.checklist li.folder{background:#eff6ff;color:#1a3a6b;font-weight:600}
+.checklist li.file{background:#f9fafb;color:#333;padding-left:40px}
+.tag{background:#2b5ea7;color:#fff;font-size:11px;padding:2px 8px;border-radius:6px;margin-left:auto;white-space:nowrap}
+.tag.manual{background:#f59e0b}
+.tag.auto{background:#10b981}
+.note{background:#fef3c7;border-radius:12px;padding:16px;margin:20px 0;font-size:13px;color:#92400e;line-height:1.6}
+h3{color:#1a3a6b;margin:24px 0 8px;font-size:16px}
+.cmd{background:#1e1e2e;color:#ced4da;border-radius:10px;padding:16px;font-family:Consolas,monospace;font-size:12px;margin:12px 0;line-height:1.6;overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>📦 Preparar USB de Entrega — PremiumBus</h1>
+<p class="sub">Archivos que debes copiar a la memoria USB</p>
+
+<ul class="checklist">
+<li class="folder">📁 01_Instalador/ <span class="tag auto">Listo</span></li>
+<li class="file">Instalador_PremiumBus_v5.exe <span class="tag manual">Copiar desde: dist/</span></li>
+
+<li class="folder">📁 02_Codigo_Fuente/ <span class="tag manual">Copiar manualmente</span></li>
+<li class="file">Copiar carpetas: src/, api/, + archivos raíz (index.html, sw.js, manifest.json, setup_db.php)</li>
+
+<li class="folder">📁 03_Documentacion/ <span class="tag manual">Copiar manualmente</span></li>
+<li class="file">Manual_Usuario_PremiumBus_v5.docx</li>
+<li class="file">Documentacion_Sistema_PremiumBus_v_*.docx</li>
+<li class="file">SRS_PremiumBus.docx</li>
+<li class="file">Programa de Capacitacion PremiumBus.docx</li>
+
+<li class="folder">📁 04_Guias_Configuracion/ <span class="tag auto">✅ Listo</span></li>
+<li class="file">Guia_EmailJS_Verificacion.html</li>
+<li class="file">Guia_Cuentas_Administrador.html</li>
+<li class="file">Guia_GPS_Mapas.html</li>
+<li class="file">Guia_Exportador_Excel.html</li>
+<li class="file">Guia_Algoritmo_General.html</li>
+
+<li class="folder">📁 05_Presentacion/ <span class="tag manual">Generar con generar_entrega.html</span></li>
+<li class="file">Entrega_Sistema_PremiumBus.pptx</li>
+</ul>
+
+<div class="note">
+<strong>📋 Instrucciones:</strong><br>
+1. Las guías de configuración (04_Guias_Configuracion/) ya están creadas ✅<br>
+2. El LEEME_PRIMERO.txt ya está creado ✅<br>
+3. Debes copiar manualmente el .exe, el código fuente y los .docx a sus carpetas<br>
+4. Abajo tienes los comandos de PowerShell para copiar todo automáticamente
+</div>
+
+<h3>🖥️ Comandos para copiar todo automáticamente:</h3>
+<div class="cmd">
+# Ejecutar en PowerShell desde la carpeta del proyecto:
+
+$base = "C:\Users\GAMER\OneDrive\Documentos\PremiumBus"
+$usb  = "$base\Entrega Sistema USB"
+
+# 01 - Instalador
+New-Item "$usb\01_Instalador" -ItemType Directory -Force
+Copy-Item "$base\dist\Instalador_PremiumBus_v5.exe" "$usb\01_Instalador\" -Force
+
+# 02 - Código Fuente
+New-Item "$usb\02_Codigo_Fuente" -ItemType Directory -Force
+Copy-Item "$base\src" "$usb\02_Codigo_Fuente\src" -Recurse -Force
+Copy-Item "$base\api" "$usb\02_Codigo_Fuente\api" -Recurse -Force
+Copy-Item "$base\index.html" "$usb\02_Codigo_Fuente\" -Force
+Copy-Item "$base\sw.js" "$usb\02_Codigo_Fuente\" -Force
+Copy-Item "$base\manifest.json" "$usb\02_Codigo_Fuente\" -Force
+Copy-Item "$base\setup_db.php" "$usb\02_Codigo_Fuente\" -Force
+
+# 03 - Documentación
+New-Item "$usb\03_Documentacion" -ItemType Directory -Force
+Copy-Item "$base\Manual_Usuario_PremiumBus_v5.docx" "$usb\03_Documentacion\" -Force
+Copy-Item "$base\Documentacion_Sistema_PremiumBus_v_*.docx" "$usb\03_Documentacion\" -Force
+Copy-Item "$base\SRS_PremiumBus.docx" "$usb\03_Documentacion\" -Force
+Copy-Item "$base\Programa de Capacitacion PremiumBus*" "$usb\03_Documentacion\" -Force
+
+# 05 - Presentación (si ya la generaste)
+New-Item "$usb\05_Presentacion" -ItemType Directory -Force
+# Copia la presentación desde tu carpeta de descargas:
+# Copy-Item "$env:USERPROFILE\Downloads\Entrega_Sistema_PremiumBus.pptx" "$usb\05_Presentacion\" -Force
+
+Write-Host "✅ ¡Carpeta USB lista!" -ForegroundColor Green
+</div>
+</div>
+</body>
+</html>

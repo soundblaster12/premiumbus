@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Generador — Entrega del Sistema PremiumBus</title>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/PptxGenJS@3.12.0/dist/pptxgen.bundle.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a3a6b,#2b5ea7);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#fff;border-radius:20px;padding:40px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+h1{color:#1a3a6b;font-size:28px;margin-bottom:8px}
+p{color:#666;margin-bottom:24px}
+button{width:100%;padding:16px;background:linear-gradient(135deg,#1a3a6b,#2b5ea7);color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+button:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(43,94,167,.4)}
+.status{margin-top:16px;padding:12px;border-radius:10px;font-size:14px;display:none}
+.ok{background:#d1fae5;color:#065f46;display:block}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🚌 PremiumBus</h1>
+<p>Generador de Presentación — Entrega del Sistema</p>
+<button onclick="generar()">⚡ Generar Presentación PPTX</button>
+<div class="status" id="st"></div>
+</div>
+<script>
+function generar(){
+const st=document.getElementById('st');
+st.className='status';st.style.display='block';st.style.background='#fef3c7';st.style.color='#92400e';
+st.textContent='⏳ Generando presentación...';
+
+const pptx=new PptxGenJS();
+pptx.defineLayout({name:'WIDE',width:13.333,height:7.5});
+pptx.layout='WIDE';
+
+const CD='1A3A6B',CM='2B5EA7',CL='3B82F6',GD='333333',GM='666666',GL='F0F2F5',GR='10B981';
+
+// ═══ SLIDE 1: PORTADA ═══
+let s=pptx.addSlide();
+s.background={color:CD};
+s.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:.06,fill:{color:CL}});
+s.addShape(pptx.ShapeType.rect,{x:0,y:7.44,w:13.333,h:.06,fill:{color:CL}});
+s.addShape(pptx.ShapeType.roundRect,{x:9.8,y:.8,w:3.3,h:6,fill:{color:CM}});
+s.addText('🚌',{x:10,y:2.2,w:3,h:2,fontSize:72,color:'FFFFFF',align:'center',fontFace:'Segoe UI'});
+s.addText('ENTREGA DEL SISTEMA',{x:.8,y:1.2,w:9,h:1,fontSize:46,color:'FFFFFF',bold:true,fontFace:'Segoe UI'});
+s.addText('PremiumBus',{x:.8,y:2.2,w:9,h:.8,fontSize:40,color:CL,bold:true,fontFace:'Segoe UI'});
+s.addText('Sistema de Gestión de Transporte Urbano — San Luis Potosí',{x:.8,y:3.2,w:9,h:.6,fontSize:20,color:'A0C4ED',fontFace:'Segoe UI'});
+s.addShape(pptx.ShapeType.rect,{x:.8,y:3.95,w:2.5,h:.04,fill:{color:CL}});
+s.addText('Materia: Ingeniería de Software',{x:.8,y:4.2,w:8,h:.4,fontSize:18,color:'D0E0F0',bold:true,fontFace:'Segoe UI'});
+s.addText('👤 Integrante 1 — [Nombre completo]\n👤 Integrante 2 — [Nombre completo]\n👤 Integrante 3 — [Nombre completo]\n👤 Integrante 4 — [Nombre completo]',{x:.8,y:4.8,w:8,h:1.6,fontSize:16,color:'B0CCE8',fontFace:'Segoe UI',lineSpacingMultiple:1.4});
+s.addText('Mayo 2026  •  Universidad Autónoma de San Luis Potosí',{x:.8,y:6.9,w:8,h:.4,fontSize:13,color:'80A0C0',fontFace:'Segoe UI'});
+
+// ═══ SLIDE 2: INTRODUCCIÓN ═══
+s=pptx.addSlide();
+s.background={color:'FFFFFF'};
+s.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:1.2,fill:{color:CD}});
+s.addText('📋 Introducción — Problema Abordado',{x:.8,y:.25,w:11,h:.8,fontSize:34,color:'FFFFFF',bold:true,fontFace:'Segoe UI'});
+s.addShape(pptx.ShapeType.rect,{x:0,y:7.3,w:13.333,h:.2,fill:{color:CL}});
+s.addShape(pptx.ShapeType.roundRect,{x:.6,y:1.5,w:5.8,h:5.5,fill:{color:'EFF6FF'}});
+s.addText('🎯 Problemática',{x:.9,y:1.65,w:5,h:.45,fontSize:22,color:CD,bold:true,fontFace:'Segoe UI'});
+s.addText('• En San Luis Potosí, los usuarios de transporte urbano carecen de un sistema digital accesible para consultar rutas, horarios y disponibilidad de asientos.\n\n• La compra de boletos se realiza de forma presencial, generando filas, pérdida de tiempo y una experiencia de usuario deficiente.\n\n• No existe una plataforma unificada que permita a los administradores gestionar rutas, usuarios y ventas de manera centralizada.',{x:.9,y:2.3,w:5.2,h:4.5,fontSize:13,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.15,valign:'top'});
+s.addShape(pptx.ShapeType.roundRect,{x:6.8,y:1.5,w:5.8,h:5.5,fill:{color:'F0FDF4'}});
+s.addText('✅ Solución: PremiumBus',{x:7.1,y:1.65,w:5,h:.45,fontSize:22,color:GR,bold:true,fontFace:'Segoe UI'});
+s.addText('• Aplicación web progresiva (PWA) que permite consultar las 30 rutas urbanas de SLP, visualizar recorridos en mapa interactivo y comprar boletos digitales.\n\n• Panel administrativo completo con estadísticas de ventas, gestión de usuarios y control de rutas.\n\n• Arquitectura dual: funciona con servidor MySQL (producción) y en modo offline con localStorage (demostración), garantizando disponibilidad total.',{x:7.1,y:2.3,w:5.2,h:4.5,fontSize:13,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.15,valign:'top'});
+
+// ═══ SLIDE 3: REQUISITOS ═══
+s=pptx.addSlide();
+s.background={color:'FFFFFF'};
+s.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:1.2,fill:{color:CD}});
+s.addText('📑 Requisitos del Sistema',{x:.8,y:.25,w:11,h:.8,fontSize:34,color:'FFFFFF',bold:true,fontFace:'Segoe UI'});
+s.addShape(pptx.ShapeType.rect,{x:0,y:7.3,w:13.333,h:.2,fill:{color:CL}});
+s.addShape(pptx.ShapeType.roundRect,{x:.5,y:1.5,w:6,h:5.5,fill:{color:'EFF6FF'}});
+s.addText('⚙️ Requisitos Funcionales',{x:.8,y:1.65,w:5.5,h:.45,fontSize:20,color:CD,bold:true,fontFace:'Segoe UI'});
+s.addText('RF1   Registro de usuario con nombre, correo y contraseña\nRF2   Inicio de sesión con validación de credenciales\nRF3   Verificación por código de 6 dígitos al registrarse\nRF4   Recuperación de contraseña en 3 pasos seguros\nRF5   Consulta de 30 rutas urbanas con mapa interactivo\nRF6   Compra de boletos con selección visual de asientos\nRF7   Historial de compras con estados activo/completado\nRF8   Panel admin: estadísticas, usuarios, rutas y ventas\nRF9   Login social (Google, Facebook, Instagram)\nRF10  Navegación SPA con protección de rutas (Guards)',{x:.8,y:2.3,w:5.5,h:4.5,fontSize:12,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.35,valign:'top'});
+s.addShape(pptx.ShapeType.roundRect,{x:6.8,y:1.5,w:6,h:5.5,fill:{color:'FEF3C7'}});
+s.addText('🛡️ Requisitos No Funcionales',{x:7.1,y:1.65,w:5.5,h:.45,fontSize:20,color:'B45D09',bold:true,fontFace:'Segoe UI'});
+s.addText('RNF1  Usabilidad: interfaz intuitiva sin experiencia técnica\nRNF2  Rendimiento: respuesta < 3 segundos en toda acción\nRNF3  Seguridad: hash SHA-256, HTTPS, anti-inyección SQL\nRNF4  Disponibilidad: modo offline con localStorage\nRNF5  Compatibilidad: PWA en Android, iOS y PC (Chrome)\nRNF6  Mantenibilidad: código modular y documentado\nRNF7  Escalabilidad: arquitectura API REST desacoplada\nRNF8  Instalable: se puede agregar a pantalla de inicio',{x:7.1,y:2.3,w:5.5,h:4.5,fontSize:12,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.35,valign:'top'});
+
+// ═══ SLIDE 4: HERRAMIENTAS ═══
+s=pptx.addSlide();
+s.background={color:'FFFFFF'};
+s.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:1.2,fill:{color:CD}});
+s.addText('🛠️ Herramientas de Desarrollo',{x:.8,y:.25,w:11,h:.8,fontSize:34,color:'FFFFFF',bold:true,fontFace:'Segoe UI'});
+s.addShape(pptx.ShapeType.rect,{x:0,y:7.3,w:13.333,h:.2,fill:{color:CL}});
+const tools=[
+  {t:'🌐 Frontend',items:'• HTML5 + CSS3 + JavaScript ES6+ (Vanilla)\n• PWA: Service Worker + Web App Manifest\n• Leaflet.js para mapas interactivos\n• Sistema de diseño con tokens CSS',x:.5,y:1.5,bg:'EFF6FF',tc:CD},
+  {t:'🖥️ Backend',items:'• PHP 7.4+ con API REST centralizada\n• MySQL 8.0 con PDO y prepared statements\n• XAMPP como servidor local de desarrollo\n• SHA-256 para encriptación de contraseñas',x:6.8,y:1.5,bg:'F0FDF4',tc:GR},
+  {t:'📦 Herramientas',items:'• Visual Studio Code — Editor de código\n• Git + GitHub — Control de versiones\n• Chrome DevTools — Depuración y testing\n• Gemini AI — Asistente de desarrollo',x:.5,y:4.2,bg:'FEF3C7',tc:'B45D09'},
+  {t:'📱 Despliegue',items:'• XAMPP para servidor local (Apache + MySQL)\n• Instalador .HTA automatizado para el cliente\n• PWA instalable en Android, iOS y escritorio\n• Documentación completa en Word (.docx)',x:6.8,y:4.2,bg:'FDF2F8',tc:'BE185D'},
+];
+tools.forEach(t=>{
+  s.addShape(pptx.ShapeType.roundRect,{x:t.x,y:t.y,w:6,h:2.5,fill:{color:t.bg}});
+  s.addText(t.t,{x:t.x+.3,y:t.y+.1,w:5.4,h:.45,fontSize:20,color:t.tc,bold:true,fontFace:'Segoe UI'});
+  s.addText(t.items,{x:t.x+.3,y:t.y+.65,w:5.4,h:1.7,fontSize:13,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.3,valign:'top'});
+});
+
+// ═══ SLIDE 5: AUTENTICACIÓN ═══
+s=pptx.addSlide();
+s.background={color:'FFFFFF'};
+s.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:1.2,fill:{color:CD}});
+s.addText('🔐 Autenticación, Mantenimiento y Código Fuente',{x:.8,y:.25,w:11,h:.8,fontSize:30,color:'FFFFFF',bold:true,fontFace:'Segoe UI'});
+s.addShape(pptx.ShapeType.rect,{x:0,y:7.3,w:13.333,h:.2,fill:{color:CL}});
+// Crear cuenta
+s.addShape(pptx.ShapeType.roundRect,{x:.4,y:1.4,w:4,h:2.7,fill:{color:'EFF6FF'}});
+s.addText('📝 Crear Cuenta',{x:.6,y:1.5,w:3.5,h:.4,fontSize:18,color:CD,bold:true,fontFace:'Segoe UI'});
+s.addText('1. Usuario ingresa nombre, correo y contraseña\n2. Sistema valida formato y unicidad del correo\n3. Se genera código de verificación de 6 dígitos\n4. Usuario ingresa el código recibido por email\n5. Si es válido, se crea la cuenta y auto-login',{x:.6,y:2.05,w:3.5,h:1.9,fontSize:11,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.3,valign:'top'});
+// Recuperar
+s.addShape(pptx.ShapeType.roundRect,{x:4.6,y:1.4,w:4,h:2.7,fill:{color:'FEF3C7'}});
+s.addText('🔑 Recuperar Contraseña',{x:4.8,y:1.5,w:3.5,h:.4,fontSize:18,color:'B45D09',bold:true,fontFace:'Segoe UI'});
+s.addText("1. Click en '¿Olvidaste tu contraseña?'\n2. Ingresa correo → sistema verifica existencia\n3. Se envía código de 6 dígitos al correo\n4. Usuario ingresa código de verificación\n5. Si es correcto, ingresa nueva contraseña\n6. Contraseña actualizada exitosamente",{x:4.8,y:2.05,w:3.5,h:1.9,fontSize:11,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.3,valign:'top'});
+// Modificar
+s.addShape(pptx.ShapeType.roundRect,{x:8.8,y:1.4,w:4.2,h:2.7,fill:{color:'F0FDF4'}});
+s.addText('💻 Modificar el Código',{x:9,y:1.5,w:3.8,h:.4,fontSize:18,color:GR,bold:true,fontFace:'Segoe UI'});
+s.addText('• Frontend: carpeta src/ (pages/, components/)\n• Backend API: carpeta api/ (index.php, config.php)\n• Estilos: src/styles/ (tokens CSS y layouts)\n• BD: api/setup.sql o setup_db.php\n• Editar con VS Code u otro editor de texto',{x:9,y:2.05,w:3.8,h:1.9,fontSize:11,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.3,valign:'top'});
+// GitHub
+s.addShape(pptx.ShapeType.roundRect,{x:.4,y:4.3,w:12.6,h:2.8,fill:{color:'1E1E2E'}});
+s.addText('📦 Descargar el Proyecto desde GitHub',{x:.7,y:4.45,w:8,h:.4,fontSize:20,color:'FFFFFF',bold:true,fontFace:'Segoe UI'});
+s.addText('🌐 Repositorio: https://github.com/[tu-usuario]/PremiumBus\n\n📥 Para descargar: ir al repositorio → botón verde "Code" → "Download ZIP"\n     O bien con Git:  git clone https://github.com/[tu-usuario]/PremiumBus.git\n\n📂 Estructura del proyecto:\n     PremiumBus/src/              → Código frontend (HTML, JS, CSS)\n     PremiumBus/api/              → Backend PHP + SQL de la base de datos\n     PremiumBus/setup_db.php  → Configurador automático de MySQL\n     PremiumBus/index.html     → Punto de entrada de la aplicación',{x:.7,y:5,w:12,h:2,fontSize:12,color:'CED4DA',fontFace:'Segoe UI',lineSpacingMultiple:1.15,valign:'top'});
+
+// ═══ SLIDE 6: CUENTAS ADMIN ═══
+s=pptx.addSlide();
+s.background={color:'FFFFFF'};
+s.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:1.2,fill:{color:CD}});
+s.addText('👥 Cuentas de Administrador',{x:.8,y:.25,w:11,h:.8,fontSize:34,color:'FFFFFF',bold:true,fontFace:'Segoe UI'});
+s.addShape(pptx.ShapeType.rect,{x:0,y:7.3,w:13.333,h:.2,fill:{color:CL}});
+s.addText('El sistema cuenta con 10 cuentas de administrador predefinidas + 1 administrador principal.',{x:.8,y:1.35,w:11,h:.4,fontSize:16,color:GM,fontFace:'Segoe UI'});
+// Principal
+s.addShape(pptx.ShapeType.roundRect,{x:.5,y:1.95,w:5.5,h:1.9,fill:{color:'FEF3C7'}});
+s.addText('⭐ Administrador Principal (Super Admin)',{x:.8,y:2.05,w:5,h:.4,fontSize:17,color:'B45D09',bold:true,fontFace:'Segoe UI'});
+s.addText('📧 Correo: admin@premiumbus.com\n🔑 Contraseña: admin123\n🛡️ Permisos: TOTAL — puede eliminar usuarios, gestionar todo el sistema y acceder a todas las funciones.',{x:.8,y:2.55,w:5,h:1.2,fontSize:12,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.3,valign:'top'});
+// Diferencia
+s.addShape(pptx.ShapeType.roundRect,{x:6.3,y:1.95,w:6.7,h:1.9,fill:{color:'EFF6FF'}});
+s.addText('ℹ️ Diferencia con los demás admins',{x:6.5,y:2.05,w:6,h:.4,fontSize:17,color:CD,bold:true,fontFace:'Segoe UI'});
+s.addText('• Solo el Admin Principal (ID: 1) puede eliminar usuarios\n• Los otros 9 admins pueden ver estadísticas, gestionar rutas y compras, pero NO pueden eliminar cuentas.\n• Todos comparten la contraseña inicial: admin123',{x:6.5,y:2.55,w:6.2,h:1.2,fontSize:12,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.3,valign:'top'});
+// Lista
+s.addShape(pptx.ShapeType.roundRect,{x:.5,y:4.05,w:12.5,h:3.1,fill:{color:GL}});
+s.addText('📋 Las 10 Cuentas de Administrador',{x:.8,y:4.15,w:10,h:.4,fontSize:18,color:CD,bold:true,fontFace:'Segoe UI'});
+s.addText('1.  Administrador Principal — admin@premiumbus.com\n2.  Admin Operaciones — admin2@premiumbus.com\n3.  Admin Finanzas — admin3@premiumbus.com\n4.  Admin Soporte — admin4@premiumbus.com\n5.  Admin Rutas — admin5@premiumbus.com',{x:.8,y:4.65,w:5.5,h:2,fontSize:13,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.35,valign:'top'});
+s.addText('6.   Admin Recursos — admin6@premiumbus.com\n7.   Admin Marketing — admin7@premiumbus.com\n8.   Admin Seguridad — admin8@premiumbus.com\n9.   Admin Calidad — admin9@premiumbus.com\n10. Admin Regional — admin10@premiumbus.com',{x:6.5,y:4.65,w:5.5,h:2,fontSize:13,color:GD,fontFace:'Segoe UI',lineSpacingMultiple:1.35,valign:'top'});
+s.addText('🔑 Contraseña de todas las cuentas: admin123',{x:3,y:6.85,w:7,h:.3,fontSize:14,color:CM,bold:true,fontFace:'Segoe UI',align:'center'});
+
+// ═══ SLIDE 7: DESPEDIDA ═══
+s=pptx.addSlide();
+s.background={color:CD};
+s.addShape(pptx.ShapeType.rect,{x:0,y:0,w:13.333,h:.06,fill:{color:CL}});
+s.addShape(pptx.ShapeType.rect,{x:0,y:7.44,w:13.333,h:.06,fill:{color:CL}});
+s.addShape(pptx.ShapeType.rect,{x:3.5,y:.8,w:6.3,h:.06,fill:{color:CL}});
+s.addText('🚌',{x:5,y:1.2,w:3,h:1.5,fontSize:80,color:'FFFFFF',align:'center',fontFace:'Segoe UI'});
+s.addText('¡Gracias por su atención!',{x:1.5,y:2.8,w:10,h:1,fontSize:44,color:'FFFFFF',bold:true,align:'center',fontFace:'Segoe UI'});
+s.addText('PremiumBus — Sistema de Gestión de Transporte Urbano',{x:2,y:3.8,w:9,h:.6,fontSize:20,color:'A0C4ED',align:'center',fontFace:'Segoe UI'});
+s.addShape(pptx.ShapeType.rect,{x:5.5,y:4.6,w:2.3,h:.04,fill:{color:CL}});
+s.addText('📧 Contacto: [correo del equipo]\n🌐 GitHub: github.com/[tu-usuario]/PremiumBus\n📱 Sistema disponible como PWA instalable',{x:3.5,y:5,w:6.3,h:1.5,fontSize:16,color:'B0CCE8',fontFace:'Segoe UI',lineSpacingMultiple:1.5,align:'center'});
+s.addText('Ingeniería de Software — Mayo 2026',{x:2,y:6.8,w:9,h:.4,fontSize:14,color:'7090B0',align:'center',fontFace:'Segoe UI'});
+
+// Generar
+pptx.writeFile({fileName:'Entrega_Sistema_PremiumBus.pptx'}).then(()=>{
+  st.className='status ok';
+  st.textContent='✅ ¡Presentación generada! Revisa tu carpeta de descargas.';
+});
+}
+</script>
+</body>
+</html>

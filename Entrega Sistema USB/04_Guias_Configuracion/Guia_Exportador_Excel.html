@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía — Exportador de Reportes Excel en PremiumBus</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;padding:40px 20px;color:#333}
+.doc{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1);padding:48px}
+h1{color:#1a3a6b;font-size:28px;margin-bottom:8px;border-bottom:3px solid #3b82f6;padding-bottom:12px}
+h2{color:#2b5ea7;font-size:20px;margin:32px 0 12px;padding-left:12px;border-left:4px solid #3b82f6}
+p{line-height:1.7;margin-bottom:12px}
+.subtitle{color:#666;font-size:16px;margin-bottom:24px}
+.info{background:#eff6ff;border-left:4px solid #3b82f6;border-radius:12px;padding:16px;margin:16px 0}
+.success{background:#d1fae5;border-left:4px solid #10b981;border-radius:12px;padding:16px;margin:16px 0}
+.code{background:#1e1e2e;color:#ced4da;border-radius:10px;padding:16px;font-family:Consolas,monospace;font-size:13px;margin:12px 0;overflow-x:auto;line-height:1.6}
+ul{margin:8px 0 16px 24px;line-height:1.8}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th{background:#1a3a6b;color:#fff;padding:10px 14px;text-align:left}
+td{padding:8px 14px;border-bottom:1px solid #e5e5e5}
+tr:nth-child(even){background:#f9fafb}
+.footer{margin-top:40px;padding-top:20px;border-top:2px solid #e5e5e5;color:#888;font-size:13px;text-align:center}
+@media print{body{padding:20px}.doc{box-shadow:none;padding:24px}}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>📊 Guía — Exportador de Reportes Excel</h1>
+<p class="subtitle">Generación de reportes de auditoría en formato .xlsx desde el panel de administración</p>
+
+<h2>¿Qué es el Exportador Excel?</h2>
+<p>PremiumBus incluye un generador de reportes que crea archivos <strong>.xlsx reales</strong> (compatibles con Microsoft Excel, Google Sheets y LibreOffice) directamente desde el navegador, sin necesidad de servidor.</p>
+
+<div class="info">
+<strong>Tecnología:</strong> Utiliza <strong>SheetJS (xlsx)</strong>, cargado dinámicamente desde CDN. No requiere instalación ni configuración.
+</div>
+
+<h2>¿Cómo generar un reporte?</h2>
+<ol>
+<li>Iniciar sesión con una cuenta de <strong>administrador</strong></li>
+<li>Ir al <strong>Panel de Administración</strong> (⚙️ Admin)</li>
+<li>Click en el botón <strong>"📥 Exportar Excel"</strong></li>
+<li>Se descargará automáticamente: <code>PremiumBus_Auditoria_YYYY-MM-DD.xlsx</code></li>
+</ol>
+
+<h2>Contenido del Reporte (6 Hojas)</h2>
+<table>
+<tr><th>Hoja</th><th>Contenido</th><th>Columnas</th></tr>
+<tr><td>📋 Compras Activas</td><td>Boletos vigentes</td><td>Folio, Ruta, Origen, Destino, Asiento, Precio, Fecha, Estado</td></tr>
+<tr><td>📜 Historial</td><td>Viajes completados</td><td>Folio, Ruta, Origen, Destino, Asiento, Precio, Fecha Compra, Fecha Fin</td></tr>
+<tr><td>👥 Usuarios</td><td>Todos los registrados</td><td>ID, Nombre, Correo, Rol, Proveedor Auth, Fecha Registro</td></tr>
+<tr><td>🚌 Rutas</td><td>Las 30 rutas del sistema</td><td>ID, Nombre, Origen, Destino, Precio, Asientos, Conductor, Km, Tiempo</td></tr>
+<tr><td>🧑‍✈️ Conductores</td><td>Conductores registrados</td><td>ID, Nombre, Teléfono, Licencia, Ruta Asignada, Estado</td></tr>
+<tr><td>📊 Resumen Ejecutivo</td><td>Métricas globales</td><td>Ingresos totales, boletos vendidos, usuarios, rutas, precio promedio</td></tr>
+</table>
+
+<h2>Características Técnicas</h2>
+<ul>
+<li><strong>Auto-ajuste de columnas:</strong> El ancho se calcula automáticamente según el contenido</li>
+<li><strong>Formato de fechas:</strong> Las fechas se muestran en formato local (dd/mm/aaaa hh:mm)</li>
+<li><strong>Precios en MXN:</strong> Todos los montos con 2 decimales</li>
+<li><strong>Carga lazy:</strong> SheetJS se descarga solo cuando el admin hace click en exportar (no consume recursos antes)</li>
+</ul>
+
+<h2>Archivo del Código</h2>
+<div class="code">
+📂 src/services/ExcelService.js   ← Toda la lógica de exportación
+   ├── exportAuditReport(data)    → Método principal
+   ├── _loadSheetJS()             → Carga dinámica de la librería
+   ├── _autoFitColumns()          → Auto-ajuste de columnas
+   └── _formatDate()              → Formateo de fechas
+</div>
+
+<div class="success">
+<strong>✅ No requiere configuración.</strong> Funciona directamente desde el navegador. Solo necesita conexión a internet la primera vez (para cargar SheetJS desde CDN).
+</div>
+
+<div class="footer">
+PremiumBus — Guía del Exportador Excel | Mayo 2026
+</div>
+</div>
+</body>
+</html>
