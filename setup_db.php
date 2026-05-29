@@ -83,7 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 4. Usuarios
         $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, correo, password, rol) VALUES (?, ?, SHA2(?, 256), ?)");
-        $stmt->execute(['Administrador', 'admin@premiumbus.com', 'admin123', 'admin']);
+        $stmt->execute(['Super Administrador', 'admin@premiumbus.com', 'admin123', 'admin']);
+        for ($i = 2; $i <= 10; $i++) {
+            $stmt->execute(["Administrador $i", "admin$i@premiumbus.com", 'admin123', 'admin']);
+        }
         $stmt->execute(['Juan Pérez', 'juan@correo.com', 'usuario123', 'user']);
 
         // 5. 30 Rutas de Transporte Urbano de SLP

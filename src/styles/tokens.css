@@ -115,6 +115,6 @@
   --z-install: 9999;
 
   /* ── App Layout ────────────────────────────────── */
-  --app-max-width: 480px;
+  --app-max-width: 100%;
   --navbar-height: 72px;
 }
